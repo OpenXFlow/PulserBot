@@ -1,0 +1,12 @@
+<b>🎨 Today's Artwork:</b>
+<i>{art_title}</i> by <i>{art_artist}</i> ({art_year})
+Medium: {art_medium}
+
+🏛️ Owner: {art_owner}
+ℹ️ Provenance: {art_credit_line}
+🔗 <a href="{art_object_url}">More about the artwork at The MET</a>
+
+---
+
+<b>🇩🇪 Today's German Lesson:</b>
+<a href="{lang_link}">{lang_name}</a>

@@ -1,0 +1,46 @@
+# --- Sensitive Information ---
+# NEVER commit credentials, API keys, or secret files to version control.
+# This is the most important rule for security.
+credentials.json
+*.env
+.env
+
+# --- Python Virtual Environments ---
+# The virtual environment contains installed libraries and is specific to your machine.
+# It should be recreated from requirements.txt, not stored in Git.
+.venv/
+venv/
+env/
+
+# --- Python Cache & Compiled Files ---
+# These files are generated automatically by Python and can be safely ignored.
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Python Build & Distribution Artifacts ---
+# These are generated when creating a distributable package.
+build/
+dist/
+*.egg-info/
+*.egg
+
+# --- IDE / Editor Configuration ---
+# Ignoring editor-specific files keeps the repository clean for all contributors.
+# JetBrains (PyCharm, IntelliJ, etc.)
+.idea/
+# Visual Studio Code
+.vscode/
+
+# --- Operating System Files ---
+# Ignore system-specific files that have no relevance to the project.
+# macOS
+.DS_Store
+# Windows
+Thumbs.db
+
+# --- Log Files ---
+# Logs are generated during runtime and should not be versioned.
+*.log
+logs/

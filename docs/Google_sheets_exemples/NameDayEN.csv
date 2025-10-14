@@ -1,0 +1,367 @@
+day,month,name,international_day
+1,1,"New Year's Day","World Day of Peace"
+2,1,"Alexandra, Karina",
+3,1,Daniela,
+4,1,Drahoslav,"World Braille Day"
+5,1,Andrea,
+6,1,Antonia,"World Day for War Orphans, Epiphany"
+7,1,Bohuslava,
+8,1,Severin,
+9,1,Alexej,
+10,1,Dasa,
+11,1,Malvina,
+12,1,Ernest,
+13,1,Rastislav,
+14,1,Radovan,
+15,1,Dobroslav,"World Army Day"
+16,1,Kristina,
+17,1,Natasa,
+18,1,Bohdana,
+19,1,"Drahomira, Mario, Sara",
+20,1,Dalibor,
+21,1,Vincent,
+22,1,Zora,
+23,1,Milos,"Patriotism Day"
+24,1,"Timothy","Feast of St. Francis de Sales, Compliment Day"
+25,1,Gejza,"Feast of the Conversion of Paul"
+26,1,Tamara,"International Customs Day, World Leprosy Day"
+27,1,Bohus,"International Holocaust Remembrance Day"
+28,1,Alfonz,"Data Protection Day, International Day of Mobilization against Nuclear War"
+29,1,Gaspar,
+30,1,Ema,
+31,1,Emil,
+1,2,Tatiana,
+2,2,"Erik, Erika","World Day for Consecrated Life, World Wetlands Day"
+3,2,Blazej,
+4,2,Veronika,"World Cancer Day"
+5,2,Agata,
+6,2,Dorota,"World Day Without Mobile Phones"
+7,2,Vanda,
+8,2,Zoja,"Safer Internet Day"
+9,2,Zdenko,"World Marriage Day"
+10,2,Gabriela,
+11,2,Dezider,"World Day of the Sick"
+12,2,Perla,
+13,2,Arpad,
+14,2,Valentin,"Valentine's Day"
+15,2,Pravoslav,"European Day of Perioperative Nursing Care, Singles Day"
+16,2,"Ida, Liana",
+17,2,Miloslava,
+18,2,Jaromir,
+19,2,Vlasta,
+20,2,Livia,"World Day of Social Justice"
+21,2,Eleonora,"International Tourist Guide Day, International Mother Language Day (UNESCO)"
+22,2,Etela,"World Thinking Day, European Day for Victims of Crime"
+23,2,"Roman, Romana",
+24,2,Matej,
+25,2,"Frederik, Frederika",
+26,2,Viktor,
+27,2,Alexander,
+28,2,Zlatica,
+29,2,Radomir,
+1,3,Albin,
+2,3,Anezka,
+3,3,"Bohumil, Bohumila",
+4,3,Kazimir,
+5,3,Fridrich,
+6,3,"Radoslav, Radoslava",
+7,3,Tomas,"World Day of Prayer"
+8,3,"Alan, Alanan","International Women's Day"
+9,3,Frantiska,"Day of Panic, International Day of Planetariums"
+10,3,"Branislav, Bruno",
+11,3,"Angela, Angelika","European Day on Remembrance of the Victims of Terrorism"
+12,3,Gregor,
+13,3,Vlastimil,"World Kidney Day"
+14,3,Matilda,"International Day of Action for Rivers, Water and Life"
+15,3,Svetlana,"World Consumer Rights Day, European Consumers' Day"
+16,3,Boleslava,
+17,3,Lubica,
+18,3,Eduard,"World Social Work Day"
+19,3,Jozef,"Feast of St. Joseph"
+20,3,Vitazoslav,"World Day of Theatre for Children and Young People, International Day of Happiness"
+21,3,Blahoslav,"International Day for the Elimination of Racial Discrimination, World Down Syndrome Day, International Day of Forests, World Puppetry Day, World Day of the Disabled, World Sleep Day, World Poetry Day"
+22,3,Benadik,"International Day of the Seal, World Water Day"
+23,3,Adrian,"World Meteorological Day (WMO)"
+24,3,Gabriel,"World Tuberculosis Day (WHO)"
+25,3,Marian,"Day of the Struggle for Human Rights, International Day of Remembrance of the Victims of Slavery and the Transatlantic Slave Trade"
+26,3,Emanuel,"World Epilepsy Day"
+27,3,Alena,"World Theatre Day"
+28,3,Sona,"Teachers' Day"
+29,3,Miroslav,
+30,3,Vieroslava,
+31,3,Benjamin,
+1,4,Hugo,"International Bird Day, International Fun at Work Day"
+2,4,Zita,"International Children's Book Day, European Action Day for the Rights of Migrants, World Autism Awareness Day"
+3,4,Richard,
+4,4,Izidor,"International Day of Non-Violence, International Day for Mine Awareness and Assistance in Mine Action"
+5,4,Miroslava,
+6,4,Irena,
+7,4,Zoltan,"World Health Day (WHO)"
+8,4,Albert,"International Romani Day"
+9,4,Milena,
+10,4,Igor,
+11,4,Julius,"World Parkinson's Day, International Day of Solidarity with Liberated Political Prisoners and Fighters against Fascism"
+12,4,Estera,"World Aviation and Cosmonautics Day"
+13,4,Ales,
+14,4,Justina,
+15,4,Fedor,"World Art Day"
+16,4,"Dana, Danica","World Voice Day"
+17,4,Rudolf,"World Hemophilia Day, International Noise Awareness Day, Maundy Thursday"
+18,4,Valer,"International Juggling Day, European Patients' Rights Day, World Heritage Day, World Amateur Radio Day, Daffodil Day - public collection"
+19,4,Jela,"Holy Saturday"
+20,4,Marcel,"Easter Sunday"
+21,4,Ervin,
+22,4,Slavomir,"Earth Day"
+23,4,Vojtech,"World Book and Copyright Day"
+24,4,Juraj,"World Day for Laboratory Animals (UNESCO), Feast of St. George, patron saint of soldiers, knights, archers and scouts, Scout Day, World Week for Animals in Laboratories"
+25,4,Marek,"World Penguin Day, World Malaria Day"
+26,4,Jaroslava,"World Pinhole Photography Day, World Intellectual Property Day"
+27,4,Jaroslav,"World Graphics Day"
+28,4,Jarmila,"World Day for Safety and Health at Work"
+29,4,Lea,"European Day of Solidarity between Generations, International Dance Day"
+30,4,Anastazia,"World Veterinary Day, World Guide Dog Day"
+1,5,"Labor Day","Labor Day, Feast of St. Joseph the Worker, patron of all workers"
+2,5,Zigmund,
+3,5,"Galina, Timea","Sun Day, World Press Freedom Day (UNESCO)"
+4,5,Florian,"Anniversary of the death of M. R. Štefánik, International Firefighters' Day, Feast of St. Florian – patron of firefighters"
+5,5,Lesana,"International Midwives' Day, World Hand Hygiene Day"
+6,5,Hermina,"International No Diet Day, World Asthma Day"
+7,5,Monika,
+8,5,Ingrida,"World Red Cross Day"
+9,5,Roland,"Europe Day, European Opera Day"
+10,5,Viktoria,"World Day – Move for Health, World Fair Trade Day, International Migratory Bird Day"
+11,5,Blazena,"Mother's Day, World Day of Prayer for Vocations"
+12,5,Pankrac,"European Minerals Day, World Nurses Day"
+13,5,Servac,"Tulip Day"
+14,5,Bonifac,
+15,5,Zofia,"International Conscientious Objectors' Day, World Athletics Day, World Family Day"
+16,5,Svetozar,
+17,5,Gizela,"World Hypertension Day, World Telecommunication Day"
+18,5,Viola,"International Museum Day"
+19,5,Gertruda,"World Hepatitis Day"
+20,5,Bernard,"International Clinical Trials Day, International Tap Dance Day, World Mass Media Day, International Milk Day"
+21,5,Zina,"World Day for Cultural Diversity for Dialogue and Development"
+22,5,"Julia, Juliana","International Day for Biological Diversity"
+23,5,Zelmira,"World Turtle Day"
+24,5,Ela,"European Day of Parks"
+25,5,Urban,"Feast of St. Urban – patron of winegrowers, International Missing Children's Day, Africa Day"
+26,5,Dusan,
+27,5,Iveta,"International Challenge Day, European Neighbours' Day"
+28,5,Viliam,"Amnesty International Day, International Day of Action for Women's Health, International Jazz Day, World MS Day"
+29,5,Vilma,"International Day of UN Peacekeepers"
+30,5,Ferdinand,
+31,5,Petrana,"Day of Opening Wells, World No Tobacco Day (WHO)"
+1,6,Zaneta,"International Children's Day, Day for the Right Decision"
+2,6,"Oxana, Xenia",
+3,6,Karolina,
+4,6,Lenka,"International Day of Innocent Children Victims of Aggression"
+5,6,Laura,"World Environment Day (UNEP)"
+6,6,Norbert,
+7,6,Robert,"Anniversary of the Memorandum of the Slovak Nation"
+8,6,Medard,"Best Friends Day, World Oceans Day"
+9,6,Stanislava,
+10,6,Margareta,
+11,6,Dobroslava,
+12,6,Zlatko,"World Day Against Child Labour"
+13,6,Anton,
+14,6,Vasil,"World Blood Donor Day"
+15,6,Vit,"Father's Day"
+16,6,"Bianka, Blanka","International Day of the African Child"
+17,6,Adolf,"World Day to Combat Desertification and Drought"
+18,6,Vratislav,"International Picnic Day"
+19,6,Alfred,"World Juggling Day"
+20,6,Valeria,"World Refugee Day"
+21,6,Alojz,"Day of Flowers, World Music Day, International Skateboarding Day"
+22,6,Paulina,
+23,6,Sidonia,"UN Public Service Day, World Handball Day, International SOS Children's Villages Day"
+24,6,Jan,
+25,6,"Tadeas, Olivia",
+26,6,Adriana,"International Day Against Drug Abuse and Illicit Trafficking, UN International Day in Support of Victims of Torture"
+27,6,"Ladislav, Ladislava","World Fisheries Day"
+28,6,Beata,
+29,6,"Peter, Pavol, Petra","International Danube Day"
+30,6,Melania,
+1,7,Diana,"International Joke Day"
+2,7,Berta,"World UFO Day"
+3,7,Miloslav,
+4,7,Prokop,"International Day Against Dolphin Captivity"
+5,7,"Cyril, Metod","Feast of St. Cyril and St. Methodius, Workaholics Day, International Day of Cooperatives"
+6,7,"Patrik, Patricia","International Kissing Day"
+7,7,Oliver,"Chocolate Day"
+8,7,Ivan,"World Allergy Day, Video Games Day"
+9,7,Lujza,"International Day for the Destruction of Small and Light Weapons"
+10,7,Amalia,
+11,7,Milota,"World Population Day (UNFPA)"
+12,7,Nina,
+13,7,Margita,"International Puzzle Day"
+14,7,Kamil,
+15,7,Henrich,
+16,7,Drahomir,
+17,7,Bohuslav,
+18,7,Kamila,
+19,7,Dusana,
+20,7,"Elias, Ilja",
+21,7,Daniel,
+22,7,Magdalena,
+23,7,Olga,
+24,7,Vladimir,
+25,7,Jakub,
+26,7,"Anna, Hana",
+27,7,Bozena,"Parents' Day"
+28,7,Kristof,
+29,7,Marta,
+30,7,Libusa,"International Day of Friendship"
+31,7,Ignac,"Feast of St. Ignatius of Loyola"
+1,8,Bozidara,
+2,8,Gustav,
+3,8,Jergus,
+4,8,"Dominik, Dominika",
+5,8,Hortenzia,
+6,8,Jozefina,"World Day for the Prohibition of Nuclear Weapons"
+7,8,Stefania,
+8,8,Oskar,
+9,8,Lubomira,"International Day of Solidarity with the Struggle of Women in South Africa and Namibia, Nagasaki Day, International Day of the World's Indigenous People"
+10,8,Vavrinec,"Lazy Day"
+11,8,Zuzana,
+12,8,Darina,"International Youth Day"
+13,8,Lubomir,"International Lefthanders Day"
+14,8,Mojmir,
+15,8,Marcela,
+16,8,Leonard,
+17,8,Milica,
+18,8,"Elena, Helena",
+19,8,Lydia,"World Humanitarian Day"
+20,8,Anabela,
+21,8,Jana,
+22,8,Tichomir,
+23,8,Filip,"European Day of Remembrance for Victims of Stalinism and Nazism, International Day for the Remembrance of the Slave Trade and its Abolition (UNESCO)"
+24,8,Bartolomej,
+25,8,Ludovit,
+26,8,Samuel,
+27,8,Silvia,
+28,8,Augustin,
+29,8,Nikola,
+30,8,Ruzena,
+31,8,Nora,
+1,9,Drahoslava,
+2,9,Linda,
+3,9,Belo,
+4,9,Rozalia,
+5,9,Regina,
+6,9,Alica,
+7,9,Marianna,"European Day of Jewish Culture and Heritage"
+8,9,Miriama,"World Physical Therapy Day, International Literacy Day (UNESCO)"
+9,9,Martina,
+10,9,Oleg,"World Suicide Prevention Day"
+11,9,Bystrik,
+12,9,Maria,
+13,9,Ctibor,"Positive Thinking Day, International Chocolate Day, World First Aid Day, International Programmers' Day"
+14,9,Ludomil,"European Heritage Days"
+15,9,Jolana,"International Day of Democracy"
+16,9,Ludmila,"International Day for the Preservation of the Ozone Layer"
+17,9,Olympia,
+18,9,Eugenia,
+19,9,Konstantin,
+20,9,"Luboslav, Luboslava","Software Freedom Day"
+21,9,Matus,"World Alzheimer's Day, World Gratitude Day, International Day of Peace"
+22,9,Moric,"European / World Car Free Day"
+23,9,Zdenka,"International Day against Sexual Exploitation and Trafficking of Women and Children"
+24,9,Lubor,"European Agrobiodiversity Day, World School Milk Day"
+25,9,Vladislav,
+26,9,Edita,"European Day of Languages"
+27,9,Cyprian,"World Tourism Day, Railway Workers' Day"
+28,9,Vaclav,"World Rabies Day, World Right to Know Day, International Maritime Day (IMO), World Heart Day, International Day of the Deaf"
+29,9,"Michal, Michaela","Feast of St. Michael, patron saint of the sick"
+30,9,Jarolim,"International Translation Day"
+1,10,Arnold,"World Vegetarian Day, International Music Day, International Day of Older Persons"
+2,10,Levoslav,"International Day of Non-Violence, World Farm Animals Day"
+3,10,Stela,"24-Hour Comics Day, World Smile Day"
+4,10,Frantisek,"World Animal Day, Feast of St. Francis of Assisi, patron saint of conservationists, animals and birds"
+5,10,Viera,"World Teachers' Day (UNESCO)"
+6,10,Natalia,"World Habitat Day, World Architecture Day, International Tenants' Day"
+7,10,Eliska,
+8,10,Brigita,"International Day for Natural Disaster Reduction"
+9,10,Dionyz,"World Post Day"
+10,10,Slavomira,"European Depression Day, World Day Against the Death Penalty, World Mental Health Day, World Egg Day"
+11,10,Valentina,"Day of Solidarity with Political Prisoners in South Africa, World Day Against Pain, World Hospice and Palliative Care Day"
+12,10,Maximilian,"World Arthritis Day, International Choral Singing Day, Grandparents' Day"
+13,10,Koloman,
+14,10,Boris,"World Standards Day"
+15,10,Terezia,"White Cane Safety Day, World Rural Women's Day, World Handwashing Day"
+16,10,Vladimira,"World Food Day (FAO), World Spine Day"
+17,10,Hedviga,"International Day for the Eradication of Poverty"
+18,10,Lukas,"World Menopause Day, Feast of St. Luke, patron saint of artists, painters, doctors and surgeons, World Water Monitoring Day"
+19,10,Kristian,"World Mission Day"
+20,10,Vendelin,"World Osteoporosis Day, International Day of Trees"
+21,10,Ursula,"Apple Day"
+22,10,Sergej,"International Stuttering Awareness Day"
+23,10,Alojzia,
+24,10,Kvetoslava,"International School Library Day, UN Day, World Development Information Day"
+25,10,Aurel,"European Day of Civil Justice, World Pasta Day"
+26,10,Demeter,
+27,10,Sabina,"World Day for Audiovisual Heritage"
+28,10,Dobromila,"World Judo Day"
+29,10,Klara,"World Psoriasis Day"
+30,10,"Simon, Simona",
+31,10,Aurelia,"World Savings Day"
+1,11,"Denis, Denisa","World Vegan Day"
+2,11,"All Souls' Day",
+3,11,Hubert,"Feast of St. Hubert, patron saint of hunters"
+4,11,Karol,
+5,11,Imrich,"World Running Day"
+6,11,Renata,"International Day for Preventing the Exploitation of the Environment in War and Armed Conflict"
+7,11,Rene,
+8,11,Bohumir,"World Urbanism Day, World Radiology Day"
+9,11,Teodor,"World Freedom Day, International Day Against Fascism and Antisemitism"
+10,11,Tibor,"World Science Day for Peace and Development (UNESCO)"
+11,11,"Maros, Martin","Veterans Day, World Usability Day"
+12,11,Svatopluk,
+13,11,Stanislav,"Guinness World Records Day, International Day of the Blind, World Kindness Day"
+14,11,Irma,"World Diabetes Day"
+15,11,Leopold,"Feast of St. Albert the Great, patron saint of scientists, Day of the Imprisoned Writer"
+16,11,Agnesa,"International Day for Tolerance (UNESCO), World Day of Remembrance for Road Traffic Victims"
+17,11,Klaudia,"Feast of St. Elizabeth of Bratislava, patroness of charity, International Students' Day, World Chronic Obstructive Pulmonary Disease Day"
+18,11,Eugen,
+19,11,Alzbeta,"World Day for Prevention of Child Abuse, World Toilet Day, International GIS Day"
+20,11,Felix,"International No Smoking Day, World Absurdity Day, International Day of Prayer for the Persecuted Church, Africa Industrialization Day, World Children's Day - UNICEF"
+21,11,Elvira,"World Philosophy Day (UNESCO), World Hello Day, World Television Day"
+22,11,Cecilia,"Feast of St. Cecilia, patroness of music, musicians and singers"
+23,11,Klement,
+24,11,Emilia,
+25,11,Katarina,"International Meat Day and Animal Rights Day, World Day for the Elimination of Violence against Women"
+26,11,Kornel,
+27,11,Milan,
+28,11,Henrieta,"International Buy Nothing Day"
+29,11,Vratko,"International Day of Solidarity with the Palestinian People"
+30,11,"Andrej, Ondrej","Computer Security Day"
+1,12,Edmund,"World AIDS Day (WHO)"
+2,12,Bibiana,"International Day for the Abolition of Slavery"
+3,12,Oldrich,"Feast of St. Francis Xavier, patron of the work of spreading the faith (missionaries), International Day of Persons with Disabilities (UN)"
+4,12,Barbora,"Feast of St. Barbara, patroness of miners and artillerymen"
+5,12,Oto,"World Soil Day, International Volunteer Day for Economic and Social Development"
+6,12,Mikulas,"Feast of St. Nicholas, patron saint of children"
+7,12,Ambroz,"International Civil Aviation Day (ICAO)"
+8,12,Marina,
+9,12,Izabela,"International Anti-Corruption Day"
+10,12,Raduz,"Human Rights Day"
+11,12,Hilda,"International Children's Day of Broadcasting, International Mountain Day"
+12,12,Otilia,
+13,12,Lucia,
+14,12,"Branislava, Bronislava",
+15,12,Ivica,
+16,12,Albina,
+17,12,Kornelia,
+18,12,Slava,"International Postage Stamp and Philately Day, International Migrants' Day"
+19,12,Judita,"UN Day for South-South Cooperation"
+20,12,"Dagmara, Dagmar","International Human Solidarity Day"
+21,12,Bohdan,
+22,12,Adela,
+23,12,Nadezda,
+24,12,"Adam, Eva",
+25,12,"Christmas Day",
+26,12,Stefan,
+27,12,Filomena,
+28,12,"Ivana, Ivona",
+29,12,Milada,
+30,12,David,
+31,12,Silvester,

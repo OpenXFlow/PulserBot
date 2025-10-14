@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulserBot - Developer Documentation</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --sidebar-bg: #1a1a1a;
+            --sidebar-text: #e0e0e0;
+            --sidebar-hover: #333333;
+            --text-color: #333333;
+            --header-color: #000000;
+            --accent-color: #4a90e2;
+            --code-bg: #f4f4f4;
+            --border-color: #dddddd;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .sidebar h2 {
+            margin-top: 0;
+            color: #ffffff;
+            font-size: 1.5em;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        .sidebar ul li a {
+            color: var(--sidebar-text);
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        .sidebar ul li a:hover {
+            background-color: var(--sidebar-hover);
+        }
+        .sidebar .sub-menu { padding-left: 20px; }
+        .content {
+            margin-left: 300px;
+            padding: 40px;
+            width: calc(100% - 300px);
+        }
+        section {
+            margin-bottom: 60px;
+            padding-top: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        section:last-of-type { border-bottom: none; }
+        h1, h2, h3, h4 {
+            color: var(--header-color);
+            scroll-margin-top: 20px;
+        }
+        h1 { border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; }
+        h2 { border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        code {
+            background-color: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "Consolas", "Monaco", monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+        }
+        pre code { padding: 0; background-color: transparent; border: none; }
+        .warning { background-color: #fffbe6; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
+        .note { background-color: #e7f3fe; border-left: 4px solid var(--accent-color); padding: 15px; margin: 20px 0; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid var(--border-color); padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .header-image { max-width: 400px; height: auto; border-radius: 8px; margin: 20px 0 40px 0; display: block; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color); color: #777; }
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { position: static; width: 100%; height: auto; }
+            .content { margin-left: 0; width: 100%; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>PulserBot</h2>
+        <p>Developer Documentation</p>
+        <ul>
+            <li><a href="#overview">Overview & Architecture</a></li>
+            <li><a href="#setup-reqs">Required Setup</a></li>
+            <li><a href="#telegram-bot-setup">Telegram Bot Setup</a></li>
+            <li><a href="#local-setup">Local Environment</a></li>
+            <li><a href="#config-project">Project Configuration</a></li>
+            <li><a href="#deployment">Deployment</a></li>
+            <li><a href="#management">Management & Testing</a></li>
+            <li><a href="#user-onboarding">User Onboarding</a></li>
+            <li><a href="#extending">Extending the Bot</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <header>
+            <h1>Developer Documentation</h1>
+            <img src="assets/PulserBot.png" alt="PulserBot Project Visual" class="header-image">
+        </header>
+
+        <section id="overview">
+            <h2>Overview & Architecture</h2>
+            <p><strong>PulserBot</strong> is an open-source platform for building automated bots that deliver personalized, multi-theme content. The application is designed for maximum flexibility, where nearly all behavior is driven by external configuration files rather than hard-coded logic.</p>
+            <h3>Core Principles</h3>
+            <ul>
+                <li><strong>Strategy Pattern:</strong> The core logic is decoupled into "strategy" modules (`src/prompt_type/`). Adding a new content type is as simple as creating a new strategy file and updating the config.</li>
+                <li><strong>Config is King:</strong> All operational parameters (schedules, users, themes) are defined in <code>config.json</code>.</li>
+                <li><strong>Content as Data:</strong> All static content (quotes, verses, lessons) is stored in an external database (Google Sheets).</li>
+                <li><strong>Generate-Once, Distribute-Many:</strong> Content is generated only once per unique (theme, language) combination and then distributed to all relevant users, minimizing API calls.</li>
+            </ul>
+        </section>
+        
+        <section id="setup-reqs">
+            <h2>Required Setup</h2>
+            <h3 id="api-keys">1. Get API Keys</h3>
+            <p>Before running the bot, you must obtain API keys from the following services:</p>
+            <ul>
+                <li><strong>Telegram:</strong> Create a bot with <code>@BotFather</code> to get your Bot Token.</li>
+                <li><strong>Groq:</strong> Register at <a href="https://console.groq.com/" target="_blank">Groq Console</a> for an LLM API key.</li>
+                <li><strong>Sentry:</strong> Create a project at <a href="https://sentry.io/" target="_blank">Sentry.io</a> to get a DSN for monitoring.</li>
+                <li><strong>Unsplash (Optional):</strong> Register at <a href="https://unsplash.com/developers" target="_blank">Unsplash Developers</a> for dynamic images.</li>
+                <li><strong>Cloudinary (Optional):</strong> Register at <a href="https://cloudinary.com/" target="_blank">Cloudinary</a> for hosting personal photos.</li>
+                <li><strong>OpenWeatherMap (Optional):</strong> Get an API key from <a href="https://openweathermap.org/" target="_blank">OpenWeatherMap</a> for weather forecasts.</li>
+            </ul>
+            
+            <h3 id="google-sheets">2. Set Up Google Sheets as a Database</h3>
+            <p>The bot uses a single Google Sheet document as its primary database, with different worksheets for different types of content.</p>
+            <ol>
+              <li>Create a new Google Sheet document.</li>
+              <li>Inside, create worksheets for your content (e.g., `BibleEN`, `PhilosophyEN`, `Jobs`). See the example configuration for required column headers.</li>
+              <li>Create a Google Cloud Service Account, enable the **Google Drive API** and **Google Sheets API**, and download the `credentials.json` key file.</li>
+              <li>Share your Google Sheet document with the `client_email` from your `credentials.json` file, giving it **Editor** permissions.</li>
+            </ol>
+        </section>
+        
+        <section id="telegram-bot-setup">
+            <h2>Creating a Telegram Bot</h2>
+            <p>To use this project, you need to create your own bot on the Telegram platform. This process is managed by a special bot called <strong>BotFather</strong>.</p>
+            <ol>
+                <li><strong>Find BotFather:</strong> Open your Telegram app and search for the user <code>@BotFather</code> (it has a blue checkmark).</li>
+                <li><strong>Start the Conversation:</strong> Start a chat with BotFather and send the command:
+                    <pre><code>/newbot</code></pre>
+                </li>
+                <li><strong>Choose a Name:</strong> BotFather will ask you for a "friendly" name for your bot. This is the name users will see in their contact list. You can choose anything, for example:
+                    <pre><code>My Daily Content Bot</code></pre>
+                </li>
+                <li><strong>Choose a Username:</strong> Next, you must choose a unique username for your bot. This username must end in "bot". For example:
+                    <pre><code>MyDailyContent123Bot</code></pre>
+                </li>
+                <li><strong>Receive Your Token:</strong> If the username is available, BotFather will congratulate you and provide you with a unique **API Token**. This token is your bot's password.
+                    <div class="warning">
+                        <strong>IMPORTANT:</strong> Treat this token like a password. Anyone who has it can control your bot. Do not share it publicly or commit it to your Git repository.
+                    </div>
+                </li>
+                <li><strong>Save the Token:</strong> Copy this token and paste it into your <code>.env</code> file as the value for <code>TELEGRAM_BOT_TOKEN</code>.</li>
+            </ol>
+        </section>
+
+        <section id="local-setup">
+            <h2>Local Environment Setup</h2>
+            <p>Follow these steps to run the project on your local machine for development and testing.</p>
+            <ol>
+                <li><strong>Clone the repository:</strong>
+                    <pre><code>git clone [URL_OF_YOUR_FORK]
+cd PulserBot</code></pre>
+                </li>
+                <li><strong>Create a virtual environment and install dependencies:</strong>
+                    <pre><code>python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt</code></pre>
+                </li>
+                <li><strong>Create your <code>.env</code> file:</strong> Rename <code>.env.example</code> to <code>.env</code> and fill in all your API keys. Also, set the `GOOGLE_APPLICATION_CREDENTIALS` variable:
+<pre><code># In your .env file
+GOOGLE_APPLICATION_CREDENTIALS="credentials.json"
+GROQ_API_KEY="gsk_xxxxxxxx"
+# ... and all other keys
+</code></pre>
+                </li>
+                <li><strong>Place your <code>credentials.json</code> file</strong> in the root directory of the project.</li>
+                <li><strong>Run a test job:</strong> Use the <code>run_once.py</code> script to test a specific time slot from your config.
+                    <pre><code>python run_once.py time1</code></pre>
+                </li>
+            </ol>
+        </section>
+        
+        <section id="config-project">
+            <h2>Project Configuration</h2>
+            <p>The <code>config.json</code> file is the brain of the application. It's recommended to start by renaming <code>config.json.example</code> to <code>config.json</code> and customizing it.</p>
+
+            <h3>Theme Types Overview</h3>
+            <p>These tables illustrate which themes belong to which processing type, what prompt files they use, and which data sources (Google Sheets) they are connected to.</p>
+
+            <h4>Type: <code>llm_static</code></h4>
+            <p>These themes combine <strong>static content</strong> from a single row in a Google Sheet with a <strong>dynamic image</strong> from Unsplash. The final text is creatively generated by an <strong>LLM</strong>.</p>
+            <table>
+                <thead><tr><th>Theme Name</th><th>Google Sheet Used</th><th>Prompt File</th></tr></thead>
+                <tbody>
+                    <tr><td><code>old_testament_study_en</code></td><td><code>OldTestamentEng</code></td><td><code>prompt_bible_study_en.txt</code></td></tr>
+                    <tr><td><code>new_testament_study_en</code></td><td><code>NewTestamentEng</code></td><td><code>prompt_bible_study_en.txt</code></td></tr>
+                    <tr><td><code>bible_reflection_en</code></td><td><code>BibleEng</code></td><td><code>prompt_bible_reflection_en.txt</code></td></tr>
+                    <tr><td><code>philosophy_reflection_en</code></td><td><code>PhilosophyEng</code></td><td><code>prompt_philosophy_en.txt</code></td></tr>
+                </tbody>
+            </table>
+
+            <h4>Type: <code>llm_dynamic</code></h4>
+            <p>These themes gather <strong>data from multiple dynamic and rotating sources</strong> in real-time (e.g., weather, name days). The collected data is then sent to an <strong>LLM</strong>, which composes it into a coherent text.</p>
+            <table>
+                <thead><tr><th>Theme Name</th><th>Google Sheets Used</th><th>Prompt File</th></tr></thead>
+                <tbody>
+                    <tr><td><code>morning_briefing_en</code></td><td><code>NameDayEng, DailyGreetingsEng, ContentRotation, HistoricalEventsEng, FunFactsEng, QuotesEng, ReflectionsEng, ChallengesEng, PerspectivesEng, WordOfTheDayEng</code></td><td><code>prompt_morning_briefing_en.txt</code></td></tr>
+                </tbody>
+            </table>
+
+            <h4>Type: <code>hybrid_dual_static</code></h4>
+            <p>These themes create content by combining data from <strong>two separate static Google Sheets</strong> at once. They do not use an LLM and simply assemble the data using a text template.</p>
+            <table>
+                <thead><tr><th>Theme Name</th><th>Google Sheets Used</th><th>Prompt File</th></tr></thead>
+                <tbody>
+                    <tr><td><code>art_and_language_de</code></td><td><code>EuArtEng, SlowGerman</code></td><td><code>prompt_art_lang_en.txt</code></td></tr>
+                </tbody>
+            </table>
+            
+            <h4>Type: <code>simple_static</code></h4>
+            <p>These themes load a <strong>single row from a single static Google Sheet</strong> and format it using a simple text template. They do not use an LLM. This type is typically used for private content.</p>
+            <table>
+                <thead><tr><th>Theme Name</th><th>Google Sheet Used</th><th>Prompt File</th></tr></thead>
+                <tbody>
+                    <tr><td><code>family_photo_en</code></td><td><code>FamilyPhotos</code></td><td><code>prompt_family_photo_en.txt</code></td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="deployment">
+            <h2>Deployment via GitHub Actions</h2>
+            <p>The project is designed to be deployed as a serverless, scheduled job using GitHub Actions, which is reliable and fits within free-tier limits.</p>
+            <ol>
+                <li><strong>Fork the repository</strong> to your own GitHub account.</li>
+                <li><strong>Configure GitHub Secrets:</strong> In your forked repository, go to `Settings` > `Secrets and variables` > `Actions`. Create a new repository secret for each variable listed in the `.env.example` file. For `GCP_SA_KEY`, paste the entire content of your `credentials.json` file.</li>
+                <li><strong>Enable Workflows:</strong> Go to the `Actions` tab in your repository and enable the `PulserBot Job Scheduler` workflow.</li>
+                <li><strong>Customize the Schedule:</strong> The workflow is configured to run every 30 minutes by default in <code>.github/workflows/scheduler.yml</code>. You can adjust the `cron` schedule to your needs.</li>
+            </ol>
+        </section>
+
+        <section id="management">
+            <h2>Management & Testing</h2>
+            <p>The project includes powerful command-line tools for manual testing and data management.</p>
+            <h3>Manual Job Triggering (<code>run_once.py</code>)</h3>
+            <pre><code># Run the 'time1' job for all subscribed users
+python run_once.py time1
+
+# Run the 'time1' job for a specific user only
+python run_once.py time1 users "user_1"
+</code></pre>
+            <h3>Data Management Tools (<code>tools.py</code>)</h3>
+            <pre><code># Download all sheets from config.json to a local directory
+python tools.py download_sheets ./my-backups
+
+# Generate a CSV of personal photos from a Cloudinary folder
+python tools.py generate_photo_db my_family_photos family_photos.csv
+
+# Fetch artwork data from The MET API
+python tools.py fetch_art_data 11 met_art.csv met_art_ids.csv 100
+</code></pre>
+        </section>
+        
+        <section id="user-onboarding">
+            <h2>User Onboarding</h2>
+            <p>This section describes the process for adding new users to receive content from the bot.</p>
+
+            <h4>Instructions for the Administrator</h4>
+            <p>To add a new user, you need their unique Telegram Chat ID. The user must first initiate contact with the bot to allow it to send messages.</p>
+            <ol>
+                <li><strong>Ask the user to find and start your bot:</strong> Provide them with the direct link to your bot (e.g., <code>https://t.me/YourBotUsername</code>). They must click the "START" button.</li>
+                <li><strong>Ask the user to find their Chat ID:</strong> Instruct them to search for the bot <code>@userinfobot</code> in Telegram, start it, and send you the "Id" number it provides.</li>
+                <li><strong>Add the user to <code>config.json</code>:</strong> Open your <code>config.json</code> file and add a new user object to the <code>"users"</code> list.
+<pre><code>"users": [
+  {
+    "description": "new_user_name",
+    "active": true,
+    "language": "english",
+    "channels": [{ "platform": "telegram", "identifier": "THEIR_CHAT_ID" }],
+    "subscriptions": {
+      "time1": ["morning_briefing_en"],
+      "time2": ["philosophy_reflection_en"]
+    }
+  },
+  // ... other users
+]</code></pre>
+                </li>
+                <li><strong>Deploy the changes:</strong> Commit and push the updated <code>config.json</code> to your main branch on GitHub. The changes will be live after the next scheduled run.</li>
+            </ol>
+
+            <h4>Instructions for the New User</h4>
+            <p>You can copy and send these simple steps to a new user:</p>
+            <div class="note">
+                <p>To start receiving daily content, please follow these two simple steps:</p>
+                <ol>
+                    <li><strong>Start the Bot:</strong> Click this link to open a chat with our bot and press the "START" button at the bottom: <strong>[INSERT YOUR BOT'S DIRECT LINK HERE, e.g., https://t.me/YourBotUsername]</strong></li>
+                    <li><strong>Get Your Chat ID:</strong> Click this link to chat with a helper bot: <a href="https://t.me/userinfobot" target="_blank">@userinfobot</a>. Press "START" and send me the number it gives you for "Id".</li>
+                </ol>
+            </div>
+        </section>
+
+        <section id="extending">
+            <h2>Extending the Bot</h2>
+            <p>Thanks to the Strategy Pattern, extending the bot with new content types is straightforward and does not require modifying core files.</p>
+            <h3>Adding a New Theme Type</h3>
+            <ol>
+                <li>Create a new Python file in the <code>src/prompt_type/</code> directory (e.g., <code>my_new_type.py</code>).</li>
+                <li>In this file, implement a <code>process(theme_config, lang)</code> function that contains your custom logic.</li>
+                <li>In <code>config.json</code>, create a new theme and set its <code>"type"</code> to <code>"my_new_type"</code>.</li>
+            </ol>
+            <p>The core dispatcher will automatically find and use your new strategy module. No changes to <code>core.py</code> are needed.</p>
+        </section>
+
+    </div>
+    <footer>
+        Documentation v. 1.1
+    </footer>
+
+</body>
+</html>

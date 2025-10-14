@@ -1,0 +1,27 @@
+# The MIT License (MIT)
+# Copyright (c) 2025 Jozef Darida  (LinkedIn/Xing)
+# For full license text, see the LICENSE file in the project root.
+
+# --- Core Application Libraries ---
+# Used for scheduling, web server, API calls, and timezone handling.
+groq>=0.9.0
+apscheduler>=3.10.4
+Flask>=3.0.0
+httpx>=0.23.0
+tzdata>=2024.1
+
+# --- Local Development Utilities ---
+# For loading .env files during local testing. Not strictly needed in production.
+python-dotenv>=1.0.0
+
+# --- Monitoring & Diagnostics ---
+psutil>=5.9.0
+sentry-sdk>=2.35.0
+
+# --- External API Client Libraries ---
+# Specific versions are pinned or set to a minimum for stability.
+gspread==5.12.4
+google-auth-oauthlib==1.2.0
+google-auth-httplib2==0.2.0
+google-api-python-client>=2.88.0
+cloudinary>=1.30.0
