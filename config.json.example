@@ -1,0 +1,93 @@
+{
+  "default_language": "english",
+  "logging_spreadsheet": {
+    "spreadsheet_url": "YOUR_SPREADSHEET_URL_HERE",
+    "jobs_worksheet_name": "Jobs"
+  },
+  "schedule": {
+    "time1": "08:00",
+    "time2": "12:00",
+    "time3": "18:00"
+  },
+  "users": [
+    {
+      "description": "example_user",
+      "active": true,
+      "language": "english",
+      "channels": [{ "platform": "telegram", "identifier": "YOUR_TELEGRAM_CHAT_ID" }],
+      "subscriptions": {
+        "time1": ["morning_briefing_en", "art_and_language_de"],
+        "time2": ["philosophy_reflection_en"],
+        "time3": ["new_testament_study_en", "family_photo_en"]
+      }
+    }
+  ],
+  "themes": {
+    "old_testament_study_en": {
+      "type": "llm_static",
+      "spreadsheet_url": "YOUR_SPREADSHEET_URL_HERE",
+      "worksheet_name": "OldTestamentEng",
+      "testament_name": "Old Testament",
+      "dynamic_image": { "provider": "unsplash", "query": "ancient,scroll,history,manuscript,stone,israel" },
+      "prompts": { "english": "prompts/prompt_bible_study_en.txt" }
+    },
+    "new_testament_study_en": {
+      "type": "llm_static",
+      "spreadsheet_url": "YOUR_SPREADSHEET_URL_HERE",
+      "worksheet_name": "NewTestamentEng",
+      "testament_name": "New Testament",
+      "dynamic_image": { "provider": "unsplash", "query": "hope,light,scroll,ancient,history,spiritual" },
+      "prompts": { "english": "prompts/prompt_bible_study_en.txt" }
+    },
+    "bible_reflection_en": {
+      "type": "llm_static",
+      "spreadsheet_url": "YOUR_SPREADSHEET_URL_HERE",
+      "worksheet_name": "BibleEng",
+      "dynamic_image": { "provider": "unsplash", "query": "nature,light,hope,spiritual,calm,faith" },
+      "prompts": { "english": "prompts/prompt_bible_reflection_en.txt" }
+    },
+    "philosophy_reflection_en": {
+      "type": "llm_static",
+      "spreadsheet_url": "YOUR_SPREADSHEET_URL_HERE",
+      "worksheet_name": "PhilosophyEng",
+      "dynamic_image": { "provider": "unsplash", "query": "minimalist,black and white,architecture,shadow,thinking" },
+      "prompts": { "english": "prompts/prompt_philosophy_reflection_en.txt" }
+    },
+    "morning_briefing_en": {
+      "type": "llm_dynamic",
+      "dynamic_image": { "provider": "unsplash", "query": "morning,calm,minimalist,landscape" },
+      "content_rotation_source": "content_rotation_en",
+      "components": { "name_day": true, "weather": { "location": "London,UK" }, "daily_greeting": true },
+      "prompts": { "english": "prompts/prompt_morning_briefing_en.txt" }
+    },
+    "art_and_language_de": {
+      "type": "hybrid_dual_static",
+      "art_source": "european_art_en",
+      "language_source": "german_lessons",
+      "prompts": { "english": "prompts/prompt_art_lang_en.txt" }
+    },
+    "family_photo_en": {
+      "type": "simple_static",
+      "data_source": "family_photos_en",
+      "allowed_users": ["example_user"],
+      "prompts": {
+        "english": "prompts/prompt_family_photo_en.txt"
+      }
+    }
+  },
+  "data_sources": {
+    "name_days_en": { "spreadsheet_url": "YOUR_SPREADSHEET_URL_HERE", "worksheet_name": "NameDayEng" },
+    "daily_greetings_en": { "spreadsheet_url": "YOUR_SPREADSHEET_URL_HERE", "worksheet_name": "DailyGreetingsEng" },
+    "content_rotation_en": { "spreadsheet_url": "YOUR_SPREADSHEET_URL_HERE", "worksheet_name": "ContentRotation" },
+    "historical_events_en": { "worksheet_name": "HistoricalEventsEng", "header_text": "<b>🏛️ On This Day in History:</b>" },
+    "fun_facts_en": { "worksheet_name": "FunFactsEng", "header_text": "<b>💡 Fun Fact:</b>" },
+    "quotes_en": { "worksheet_name": "QuotesEng", "header_text": "<b>✒️ Quote of the Day:</b>" },
+    "reflections_en": { "worksheet_name": "ReflectionsEng", "header_text": "<b>🤔 Food for Thought:</b>" },
+    "challenges_en": { "worksheet_name": "ChallengesEng", "header_text": "<b>🎯 Today's Micro-Challenge:</b>" },
+    "perspectives_en": { "worksheet_name": "PerspectivesEng", "header_text": "<b>✨ Daily Perspective:</b>" },
+    "word_of_the_day_en": { "worksheet_name": "WordOfTheDayEng", "header_text": "<b>📖 Word of the Day:</b>" },
+    "european_art_en": { "spreadsheet_url": "YOUR_SPREADSHEET_URL_HERE", "worksheet_name": "EuArtEng" },
+    "german_lessons": { "spreadsheet_url": "YOUR_SPREADSHEET_URL_HERE", "worksheet_name": "SlowGerman" },
+    "family_photos_en": {"spreadsheet_url": "YOUR_PRIVATE_SPREADSHEET_URL_HERE","worksheet_name": "FamilyPhotos"}
+  }
+}

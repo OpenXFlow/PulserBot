@@ -1,0 +1,4 @@
+{caption}
+
+<b>❤️ A thought about family for today:</b>
+{family_quote}
