@@ -1,20 +1,33 @@
 # PulserBot: A Modular Content Delivery Bot for Telegram
 
 <p align="center">
-  <img src="docs/assets/PulserBotLogo.gif" alt="PulserBot Logo" width="300">
+  <a href="https://openxflow.github.io/PulserBot/">
+    <img src="docs/assets/PulserBotLogo.gif" alt="PulserBot Logo" width="300">
+  </a>
 </p>
 
-**PulserBot** is a open-source platform for creating personalized, multi-theme, and multi-language content bots. It is designed for maximum flexibility, scalability, and easy content management.
 
-This repository serves as a template. You can use it to build your own bot that delivers curated daily content—from philosophical quotes and art history to language lessons and tech news etc. — directly to users on Telegram.
+<p align="left">
+  <strong>Build your own Telegram bot to deliver personalized, multi-theme, and multi-language content on a schedule.</strong>
+  <br>
+  PulserBot is a flexible, open-source platform designed for easy content management and powerful automation.
+  <br>
+  PulserBot is Your Personal Content Delivery Engine.
+</p>
 
-### Key Features:
--   **Modular OOP Architecture:** Built on a clean Strategy design pattern, making it easy to add new content types without modifying the core logic.
--   **Multi-Language Support:** Each user can choose their preferred language for the content they receive.
--   **Data-Driven Configuration:** Everything from schedules to users and content sources is managed in external files (`config.json`, Google Sheets), not in the code.
--   **Fully Automated:** Uses GitHub Actions for reliable, scheduled job execution, eliminating the need for a continuously running server.
--   **Monitoring:** Integrated with Sentry.io for real-time error, performance, and log tracking.
--   **Extensible:** Easily connect to any API (e.g., Unsplash, MET Museum, NewsAPI) or use Google Sheets as a database.
+This repository is a ready-to-use template. Clone it to create a bot that delivers anything you can imagine—from daily philosophical quotes and art history to language lessons and tech news—directly to your friends, family, or community on Telegram. You control the content, the schedule, and the audience.
+
+### Key Features
+
+-   ✨ **Highly Customizable:** Define your own content themes, from LLM-powered spiritual reflections to data-driven language lessons.
+-   ✨ **Modular Architecture:** Built on a clean Handler (Strategy) pattern, allowing you to add new content types without touching the core logic.
+-   ✨ **Multi-Language Support:** Deliver content in each user's preferred language.
+-   ✨ **Data-Driven:** Manage everything—schedules, users, themes, and content—in external `config.json` and Google Sheets, not hard-coded.
+-   ✨ **Serverless Automation:** Runs entirely on **GitHub Actions** for reliable, scheduled execution. No server costs, no maintenance.
+-   ✨ **Real-Time Monitoring:** Integrated with **Sentry.io** out-of-the-box for powerful error tracking, performance monitoring, and logging.
+-   ✨ **Extensible by Design:** Easily connect to any API (e.g., Unsplash for images, NewsAPI for articles) or use Google Sheets as a simple, effective database.
+
+
 ### PulserBot delivery :
 -   **A moment for yourself, every day.**  PulserBot delivers a daily, thought-provoking message combining art, philosophy, and knowledge to inspire a mindful pause in your routine.
 - The content of the message is automated but is fully under your control.
@@ -56,12 +69,9 @@ All detailed technical information, step-by-step setup guides, and architectural
 | I'm looking for... | Link to Documentation |
 | :--- | :--- |
 | **A detailed setup guide** | [→ Local Environment Setup](https://openxflow.github.io/PulserBot/#local-setup) |
-| **How to get API keys** | [→ Required Setup](https://openxflow.github.io/PulserBot/#setup-reqs) |
-| **An explanation of `config.json`** | [→ Project Configuration](https://openxflow.github.io/PulserBot/#config-project) |
-| **How to deploy the bot** | [→ Deployment Guide](https://openxflow.github.io/PulserBot/#deployment) |
-| **The project's architecture** | [→ Architecture Overview](https://openxflow.github.io/PulserBot/#overview) |
 | **Architecture Diagrams** | [→ Diagrams and Data Flow](docs/assets/bot_flow.md) |
-| **How to for users** | [→ Create your own Bot](docs/how_to/Guide_to_Creating_and_Operating_Your_Own_Bot.md) |
+| **How to for users** | [→ Create your own Bot, promt types ](docs/how_to/for_users/) |
+| **How to for dev** | [→ Flows, Congig, etc.](docs/how_to/for_programmers/) |
 
 
 ## Contributing

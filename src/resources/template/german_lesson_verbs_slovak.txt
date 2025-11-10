@@ -1,0 +1,33 @@
+<b>{lesson_title}</b>
+
+DE: {infinitive_de}
+ENG: {infinitive_en}
+SK: {infinitive_sk}
+
+<b>Prítomný čas (Präsens):</b> {present_3rd_person}
+{sentence_present_de}
+<i>{sentence_present_en}</i>
+
+<b>Minulý čas (Präteritum):</b> {preterite}
+{sentence_preterite_de}
+<i>{sentence_preterite_en}</i>
+
+<b>Perfektum (Perfekt):</b> {perfect}
+{sentence_perfect_de}
+<i>{sentence_perfect_en}</i>
+
+<b>Pluskvamperfektum (Plusquamperfekt):</b> {plusquamperfekt}
+{sentence_plusquamperfekt_de}
+<i>{sentence_plusquamperfekt_en}</i>
+
+<b>Budúci čas (Futur I):</b> {futur1}
+{sentence_futur1_de}
+<i>{sentence_futur1_en}</i>
+
+<b>Budúci čas dokonavý (Futur II):</b> {futur2}
+{sentence_futur2_de}
+<i>{sentence_futur2_en}</i>
+
+<b>Ďalšie zdroje:</b>
+{dynamic_link_html}
+{static_grammar_link_html}

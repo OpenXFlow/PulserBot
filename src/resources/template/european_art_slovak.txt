@@ -1,0 +1,10 @@
+<b>🎨 Dnešné európske dielo:</b>
+<i>{art_title}</i> od umelca <i>{art_artist}</i> ({art_year})
+
+<b>Technika:</b> {art_medium}
+<b>Rozmery:</b> {art_dimensions}
+
+<b>Majiteľ:</b> {art_owner}
+<i>{art_credit_line}</i>
+
+🔗 <a href="{art_object_url}">Viac o diele online</a>

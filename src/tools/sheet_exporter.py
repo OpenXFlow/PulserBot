@@ -5,32 +5,30 @@
 # src/tools/sheet_exporter.py
 """
 A utility tool to download all Google Sheets specified in the config.json
-file and save them as local CSV files, using an OOP approach.
+file and save them as local CSV files, preserving the logical structure
+within a timestamped backup directory.
 """
 
 import csv
 import json
 import logging
 import os
-from typing import Any, Dict, List, Set, Tuple
+import time
+from datetime import datetime
+from typing import Any, Dict, List
 
-# This script is run via tools.py which appends 'src' to the path
 from src.services import sheets_service
 
-# Configure logging for this module
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 
 class SheetExporter:
     """
-    Encapsulates all logic for exporting Google Sheets data to local CSV files.
-
-    This class reads the application configuration, identifies all unique
-    Google Sheets used in the project, connects to the Google API, and
-    downloads the content of each sheet into a specified directory.
+    Encapsulates logic for exporting Google Sheets data to a structured, timestamped directory.
 
     Attributes:
-        output_dir (str): The directory where the CSV files will be saved.
+        output_dir (str): The root path where the timestamped directory will be created.
+        app_config (Dict[str, Any]): The loaded application configuration.
     """
 
     def __init__(self, output_dir: str):
@@ -38,119 +36,143 @@ class SheetExporter:
         Initializes the SheetExporter.
 
         Args:
-            output_dir (str): The path to the directory where CSV files will be saved.
+            output_dir (str): The root path where the timestamped backup directory
+                will be created.
         """
         self.output_dir = output_dir
+        self.app_config: Dict[str, Any] = {}
 
-    def _prepare_output_directory(self) -> bool:
+    def _prepare_output_directory(self, full_path: str) -> bool:
         """
-        Ensures the output directory exists.
+        Ensures the specified full directory path exists.
+
+        Args:
+            full_path (str): The absolute path of the directory to create.
 
         Returns:
-            bool: True if the directory exists or was created successfully, False otherwise.
+            bool: True if the directory exists or was created, False otherwise.
         """
-        if not os.path.exists(self.output_dir):
+        if not os.path.exists(full_path):
             try:
-                os.makedirs(self.output_dir)
-                logging.info(f"Created output directory: {self.output_dir}")
-            except OSError as e:
-                logging.error(
-                    f"Failed to create output directory '{self.output_dir}': {e}"
-                )
+                os.makedirs(full_path)
+                logging.info(f"Created output directory: {full_path}")
+            except OSError:
+                logging.exception(f"Failed to create directory '{full_path}'")
                 return False
         return True
 
-    def _collect_unique_sheets(self) -> Set[Tuple[str, str]]:
+    def _collect_structured_sheets(self) -> Dict[str, Dict[str, Any]]:
         """
-        Reads the config.json and collects all unique spreadsheet URL and worksheet name pairs.
+        Reads the config and collects all sheets, structured by their data source key.
 
         Returns:
-            Set[Tuple[str, str]]: A set of tuples, where each tuple is
-            (spreadsheet_url, worksheet_name). Returns an empty set on failure.
+            Dict[str, Dict[str, Any]]: A dictionary mapping data source names to their
+            URL and list of worksheets.
         """
-        try:
-            with open("config.json", "r", encoding="utf-8") as f:
-                app_config = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError) as e:
-            logging.error(f"Could not load or parse config.json: {e}")
-            return set()
+        sheets_to_download: Dict[str, Dict[str, Any]] = {}
+        data_sources = self.app_config.get("data_sources", {})
 
-        sheets_to_download: Set[Tuple[str, str]] = set()
+        for source_key, source_config in data_sources.items():
+            if not isinstance(source_config, dict):
+                continue
+            url = source_config.get("spreadsheet_url")
+            worksheets = source_config.get("worksheets", {})
+            if not url or not worksheets:
+                continue
 
-        sources_to_check: List[Dict[str, Any]] = [
-            app_config.get("themes", {}),
-            app_config.get("data_sources", {}),
-            {"logging": app_config.get("logging_spreadsheet", {})},
-        ]
+            worksheet_names: List[str] = []
+            for ws_info in worksheets.values():
+                name = ws_info.get("name") if isinstance(ws_info, dict) else ws_info
+                if isinstance(name, str) and name:
+                    worksheet_names.append(name)
 
-        for source_dict in sources_to_check:
-            for item_config in source_dict.values():
-                if isinstance(item_config, dict):
-                    url = item_config.get("spreadsheet_url")
-                    name = item_config.get("worksheet_name") or item_config.get(
-                        "jobs_worksheet_name"
-                    )
-                    if url and name:
-                        sheets_to_download.add((url, name))
+            if worksheet_names:
+                sheets_to_download[source_key] = {"url": url, "sheets": worksheet_names}
 
-        logging.info(f"Found {len(sheets_to_download)} unique sheets to download.")
+        logging.info(
+            f"Found {len(sheets_to_download)} structured data sources to download."
+        )
         return sheets_to_download
 
-    def _download_and_save_sheet(self, url: str, name: str) -> bool:
+    def _download_and_save_sheet(
+        self, spreadsheet_url: str, worksheet_name: str, target_dir: str
+    ) -> bool:
         """
         Downloads a single worksheet and saves it as a CSV file.
 
         Args:
-            url (str): The URL of the Google Sheet document.
-            name (str): The name of the worksheet to download.
+            spreadsheet_url (str): The URL of the Google Sheet document.
+            worksheet_name (str): The name of the worksheet to download.
+            target_dir (str): The directory where the CSV file will be saved.
 
         Returns:
             bool: True on success, False on failure.
         """
-        logging.info(f"Downloading '{name}'...")
+        logging.info(f"  -> Downloading '{worksheet_name}'...")
         try:
-            worksheet = sheets_service.get_worksheet(url, name)
-            if not worksheet:
-                logging.warning(f"Skipping '{name}' as it could not be accessed.")
+            gspread_client = sheets_service._sheets_service_instance._get_client()
+            if not gspread_client:
+                logging.error("Could not get gspread client.")
                 return False
 
-            all_values = worksheet.get_all_values()
+            spreadsheet = gspread_client.open_by_url(spreadsheet_url)
+            worksheet = spreadsheet.worksheet(worksheet_name)
 
-            csv_filename = os.path.join(self.output_dir, f"{name}.csv")
+            all_values = worksheet.get_all_values()
+            csv_filename = os.path.join(target_dir, f"{worksheet_name}.csv")
             with open(csv_filename, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerows(all_values)
-
-            logging.info(f" -> Successfully saved to '{csv_filename}'")
+            logging.info(f"     Successfully saved to '{csv_filename}'")
             return True
-
-        except Exception as e:
-            logging.error(f" -> Failed to download or save '{name}': {e}")
+        except Exception:
+            logging.exception(f"     Failed to download or save '{worksheet_name}'")
             return False
 
     def execute(self) -> None:
         """
-        Orchestrates the entire export process.
-
-        This is the main public method that runs the entire workflow.
+        Orchestrates the entire structured and timestamped export process.
         """
-        if not self._prepare_output_directory():
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_root_dir = os.path.join(self.output_dir, f"backup_{timestamp}")
+
+        if not self._prepare_output_directory(backup_root_dir):
             return
 
-        unique_sheets = self._collect_unique_sheets()
-        if not unique_sheets:
-            logging.warning("No sheets found in config.json to download.")
+        try:
+            with open("config.json", "r", encoding="utf-8") as f:
+                self.app_config = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            logging.error(f"Could not load or parse config.json: {e}")
             return
 
+        sheets_service.initialize_sheets_service(self.app_config)
+
+        structured_sheets = self._collect_structured_sheets()
+        if not structured_sheets:
+            logging.warning("No data sources found in config.json to download.")
+            return
+
+        total_sheets = sum(len(data["sheets"]) for data in structured_sheets.values())
         success_count = 0
-        for url, name in unique_sheets:
-            if self._download_and_save_sheet(url, name):
-                success_count += 1
 
-        logging.info("-" * 30)
+        for source_key, data in structured_sheets.items():
+            logging.info(f"\nProcessing data source: '{source_key}'")
+            target_dir = os.path.join(backup_root_dir, source_key)
+            if not self._prepare_output_directory(target_dir):
+                continue
+
+            url = data["url"]
+            for sheet_name in data["sheets"]:
+                if self._download_and_save_sheet(url, sheet_name, target_dir):
+                    success_count += 1
+                time.sleep(1.5)
+
+        logging.info("-" * 40)
         logging.info(
-            f"Export complete. Successfully downloaded {success_count}/{len(unique_sheets)} sheets."
+            f"Export complete. Successfully downloaded {success_count}/{total_sheets} sheets."
         )
+        logging.info(f"Backup saved to: {backup_root_dir}")
 
 
 def run_exporter(output_dir: str) -> None:
@@ -158,10 +180,11 @@ def run_exporter(output_dir: str) -> None:
     Public-facing function that acts as the entry point for this tool.
 
     Args:
-        output_dir (str): The directory where the CSV files will be saved.
+        output_dir (str): The root directory where the new timestamped backup
+            folder will be created.
     """
     exporter = SheetExporter(output_dir)
     exporter.execute()
 
 
-# End of src/tools/sheet_exporter.py (v. 0003)
+# End of src/tools/sheet_exporter.py (v. 0011)

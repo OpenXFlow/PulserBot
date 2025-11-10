@@ -1,0 +1,4 @@
+{caption}
+
+<b>❤️ Myšlienka o rodine na dnes:</b>
+{family_quote}

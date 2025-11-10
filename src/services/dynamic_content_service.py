@@ -4,259 +4,346 @@
 
 # src/services/dynamic_content_service.py
 """
-Service for fetching real-time and rotating dynamic content for 'llm_dynamic' themes.
-
-This module is responsible for gathering all data components required for dynamic
-themes. It handles fixed components (like weather), the two-tiered content
-rotation, and fetching dynamic images from external providers.
+Service for fetching and composing dynamic content for 'llm_dynamic' themes.
 """
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional
 from zoneinfo import ZoneInfo
 
-import httpx
-
-from .. import config
 from . import sheets_service
 
 
-def _get_daily_info_from_sheet(
-    app_config: Dict[str, Any], now: datetime
-) -> Tuple[str, str]:
+class DynamicContentService:
     """
-    Fetches name day and international day for a specific date from a Google Sheet.
+    Encapsulates all logic for fetching and assembling dynamic content.
 
-    Args:
+    Attributes:
         app_config (Dict[str, Any]): The global application configuration.
-        now (datetime): The current datetime object, timezone-aware.
-
-    Returns:
-        Tuple[str, str]: A tuple containing the name day and the international day.
-                         Returns ("N/A", "—") on failure.
+        theme_config (Dict[str, Any]): The configuration for the specific theme.
+        tz (ZoneInfo): The active timezone for the application.
     """
-    logging.info("Fetching daily info (name day, international day)...")
-    try:
-        source_config = app_config.get("data_sources", {}).get("name_days_sk")
-        if not source_config:
-            logging.error("Data source 'name_days_sk' not found in config.")
-            return "N/A", "—"
 
-        worksheet = sheets_service.get_worksheet(
-            source_config["spreadsheet_url"], source_config["worksheet_name"]
-        )
-        if not worksheet:
-            return "N/A", "—"
+    def __init__(
+        self, app_config: Dict[str, Any], theme_config: Dict[str, Any], tz: ZoneInfo
+    ) -> None:
+        """
+        Initializes the service.
 
-        all_values = worksheet.get_all_values()
-        if len(all_values) < 2:
-            logging.warning("Worksheet for name days is empty.")
-            return "N/A", "—"
+        Args:
+            app_config (Dict[str, Any]): The global application configuration.
+            theme_config (Dict[str, Any]): The configuration for the theme.
+            tz (ZoneInfo): The timezone for date/time-sensitive operations.
+        """
+        self.app_config = app_config
+        self.theme_config = theme_config
+        self.tz = tz
 
-        header, *records_values = all_values
-        all_records = [dict(zip(header, row)) for row in records_values]
+    def _get_daily_info_from_sheet(self, now: datetime) -> Dict[str, str]:
+        """
+        Fetches name day and international day for a specific date.
 
-        for row in all_records:
-            if (
-                int(row.get("day", 0)) == now.day
-                and int(row.get("month", 0)) == now.month
-            ):
-                name = str(row.get("name", "N/A"))
-                international_day = str(row.get("international_day", "")).strip()
-                return name, international_day if international_day else "—"
-        logging.warning(f"No name day entry found for date {now.day}.{now.month}.")
-        return "dnes nikto neoslavuje", "—"
-    except Exception as e:
-        logging.exception(f"Failed to get daily info from Google Sheet: {e}")
-        return "N/A", "—"
+        Args:
+            now (datetime): The current timezone-aware datetime object.
 
-
-def _get_weather_forecast(location: str) -> str:
-    """
-    Fetches and formats the weather forecast from OpenWeatherMap.
-
-    Args:
-        location (str): The location string (e.g., "Bratislava,SK").
-
-    Returns:
-        str: A formatted string with the weather forecast, or a fallback message.
-    """
-    logging.info(f"Fetching weather forecast for '{location}'...")
-    forecast = {"morning": "N/A", "noon": "N/A", "evening": "N/A"}
-    try:
-        base_url = "https://api.openweathermap.org/data/2.5/forecast"
-        params = {
-            "q": location,
-            "appid": config.OPENWEATHER_API_KEY,
-            "units": "metric",
-            "lang": "sk",
+        Returns:
+            Dict[str, str]: A dictionary containing 'NAME_DAY' and 'INTERNATIONAL_DAY'.
+        """
+        data = {"NAME_DAY": "N/A", "INTERNATIONAL_DAY": "—"}
+        ref = {
+            "spreadsheet_key": "YDP_LLM_Dynamic_MorningBriefing",
+            "worksheet_key": "meniny_sk",
         }
-        with httpx.Client(timeout=10.0) as client:
-            res = client.get(base_url, params=params)
-            res.raise_for_status()
-            data = res.json()
-        for period in data.get("list", []):
-            hour = int(period.get("dt_txt", " ").split(" ")[1].split(":")[0])
-            temp = period.get("main", {}).get("temp")
-            desc = period.get("weather", [{}])[0].get("description", "")
-            if temp is None:
-                continue
-            forecast_str = f"{round(temp)}°C, {desc}"
-            if 5 <= hour <= 9 and forecast["morning"] == "N/A":
-                forecast["morning"] = forecast_str
-            if 11 <= hour <= 14 and forecast["noon"] == "N/A":
-                forecast["noon"] = forecast_str
-            if 17 <= hour <= 20 and forecast["evening"] == "N/A":
-                forecast["evening"] = forecast_str
-        return f"Ráno: {forecast['morning']}, Na obed: {forecast['noon']}, Večer: {forecast['evening']}"
-    except Exception as e:
-        logging.error(f"Failed to get weather forecast: {e}")
-        return "Predpoveď počasia nie je momentálne dostupná."
+        ws = sheets_service.get_worksheet(ref)
+        if not ws:
+            return data
+        try:
+            for row in ws.get_all_records():
+                if row.get("day") == now.day and row.get("month") == now.month:
+                    data["NAME_DAY"] = row.get("name", "N/A")
+                    day = str(row.get("international_day", "")).strip()
+                    data["INTERNATIONAL_DAY"] = day if day else "—"
+                    return data
+            data["NAME_DAY"] = "dnes nikto neoslavuje"
+            return data
+        except Exception:
+            logging.exception("Failed to get daily info from Google Sheet.")
+            return data
 
+    def _get_rotating_content(
+        self, rotation_ref: Dict[str, str]
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Performs a two-tiered fetch for rotating content.
 
-def _get_rotating_content(
-    app_config: Dict[str, Any], rotation_source_key: str
-) -> Tuple[str, str]:
-    """
-    Performs a two-tiered fetch to get a unique, rotating piece of content.
+        Args:
+            rotation_ref (Dict[str, str]): The data source reference for the rotation sheet.
 
-    Args:
-        app_config (Dict[str, Any]): The global application configuration.
-        rotation_source_key (str): The key for the rotation control sheet in data_sources.
+        Returns:
+            Optional[Dict[str, Any]]: A dict with header and body, or None on failure.
+        """
+        rot_ws = sheets_service.get_worksheet(rotation_ref)
+        if not rot_ws:
+            return None
+        rot_idx, rot_data = sheets_service.get_unused_item(rot_ws, language=None)
+        if (
+            not rot_data
+            or rot_idx is None
+            or not (content_key := rot_data.get("content"))
+        ):
+            return None
+        sheets_service.mark_item_as_used(rot_ws, rot_idx)
 
-    Returns:
-        Tuple[str, str]: A tuple containing the header text and the content body.
-    """
-    rotation_config = app_config.get("data_sources", {}).get(rotation_source_key)
-    if not rotation_config:
-        logging.error(
-            f"Rotation source '{rotation_source_key}' not found in data_sources."
+        spreadsheet_key = rotation_ref["spreadsheet_key"]
+        content_ref = {"spreadsheet_key": spreadsheet_key, "worksheet_key": content_key}
+        content_ws = sheets_service.get_worksheet(content_ref)
+        if not content_ws:
+            return {"header": "Chyba", "body": "Zdroj obsahu nebol nájdený."}
+
+        content_idx, content_data = sheets_service.get_unused_item(
+            content_ws, language=None
         )
-        return "", ""
-    rotation_ws = sheets_service.get_worksheet(
-        rotation_config["spreadsheet_url"], rotation_config["worksheet_name"]
-    )
-    if not rotation_ws:
-        return "", ""
-    rot_idx, rot_data = sheets_service.get_unused_item(rotation_ws, language=None)
-    if not rot_data or rot_idx is None:
-        logging.error("Could not get a content type from the rotation sheet.")
-        return "Chyba", "Nepodarilo sa načítať typ obsahu."
-    content_type_key = rot_data.get("content")
-    if not content_type_key:
-        logging.error("Rotation sheet is missing 'content' column.")
-        return "", ""
-    sheets_service.mark_item_as_used(rotation_ws, rot_idx)
+        if not content_data or content_idx is None:
+            return {
+                "header": "",
+                "body": "Všetok obsah pre túto kategóriu sa vyčerpal.",
+            }
 
-    content_config = app_config.get("data_sources", {}).get(content_type_key)
-    if not content_config:
-        logging.error(f"Data source for '{content_type_key}' not found.")
-        return "", ""
+        header_text = ""
+        try:
+            ws_config = self.app_config["data_sources"][spreadsheet_key]["worksheets"][
+                content_key
+            ]
+            if isinstance(ws_config, dict):
+                header_text = ws_config.get("header", "")
+        except KeyError:
+            logging.warning(
+                f"Could not find config for '{content_key}' to extract header."
+            )
 
-    header_text = content_config.get("header_text", "")
-    content_ws = sheets_service.get_worksheet(
-        content_config["spreadsheet_url"], content_config["worksheet_name"]
-    )
-    if not content_ws:
-        return header_text, "Obsah pre túto tému nie je dostupný."
+        sheets_service.mark_item_as_used(content_ws, content_idx)
+        return {"header": header_text, "body": content_data.get("content", "")}
 
-    content_idx, content_data = sheets_service.get_unused_item(
-        content_ws, language=None
-    )
-    if not content_data or content_idx is None:
-        return header_text, "Všetok obsah pre túto kategóriu sa vyčerpal."
+    def _get_daily_greeting(self) -> Dict[str, str]:
+        """
+        Fetches a single, unused daily greeting.
 
-    content_body = content_data.get("content", "")
-    sheets_service.mark_item_as_used(content_ws, content_idx)
-    return header_text, content_body
+        Returns:
+            Dict[str, str]: A dictionary with greeting data.
+        """
+        data = {
+            "DAILY_GREETING_FOREIGN": "",
+            "GREETING_LANGUAGE_ORIGIN": "",
+            "DAILY_GREETING_TRANSLATION": "",
+        }
+        ref = {
+            "spreadsheet_key": "YDP_LLM_Dynamic_MorningBriefing",
+            "worksheet_key": "daily_greetings",
+        }
+        ws = sheets_service.get_worksheet(ref)
+        if not ws:
+            return data
+        idx, item_data = sheets_service.get_unused_item(ws, language=None)
+        if not item_data or idx is None:
+            return data
+        sheets_service.mark_item_as_used(ws, idx)
+        data["DAILY_GREETING_FOREIGN"] = item_data.get("greeting_foreign", "")
+        data["GREETING_LANGUAGE_ORIGIN"] = item_data.get("language_origin", "")
+        data["DAILY_GREETING_TRANSLATION"] = item_data.get("translation_sk", "")
+        return data
 
+    def _clean_string(self, text: Any) -> str:
+        """A helper to clean strings from sheet cells."""
+        return str(text or "").replace("\n", " ").strip()
 
-def _get_daily_greeting(app_config: Dict[str, Any]) -> Tuple[str, str, str]:
-    """
-    Fetches a single, unused daily greeting from the designated Google Sheet.
+    def _create_title_from_key(self, key: str) -> str:
+        """Creates a trilingual lesson title based on the worksheet key."""
+        title_map = {
+            "verbs_irregular": "NEPRAVIDELNÉ SLOVESÁ / IRREGULAR VERBS / UNREGELMÄSSIGE VERBEN",
+            "verbs_regular": "PRAVIDELNÉ SLOVESÁ / REGULAR VERBS / REGELMÄSSIGE VERBEN",
+            "pronouns": "ZÁMENÁ / PRONOUNS / PRONOMEN",
+            "adjectives": "PRÍDAVNÉ MENÁ / ADJECTIVES / ADJEKTIVE",
+            "adverbs": "PRÍSLOVKY / ADVERBS / ADVERBIEN",
+            "prepositions": "PREDLOŽKY / PREPOSITIONS / PRÄPOSITIONEN",
+            "nouns": "PODSTATNÉ MENÁ / NOUNS / SUBSTANTIVE",
+        }
+        parts = key.split("_")
+        for part in parts:
+            if part in title_map:
+                return f"LEKCIA: {title_map[part]}"
+        return "LEKCIA NEMČINY"
 
-    Args:
-        app_config (Dict[str, Any]): The global application configuration.
+    def _build_lesson_payload(
+        self, content_key: str, lesson_data: Dict[str, Any]
+    ) -> str:
+        """Builds a structured markdown string from the lesson data."""
+        title = self._create_title_from_key(content_key)
 
-    Returns:
-        Tuple[str, str, str]: A tuple containing the foreign greeting, its language
-                              of origin, and its Slovak translation.
-    """
-    greeting_config = app_config.get("data_sources", {}).get("daily_greetings")
-    if not greeting_config:
-        logging.warning("Data source 'daily_greetings' not configured.")
-        return "", "", ""
-    worksheet = sheets_service.get_worksheet(
-        greeting_config["spreadsheet_url"], greeting_config["worksheet_name"]
-    )
-    if not worksheet:
-        return "", "", ""
-    row_idx, item_data = sheets_service.get_unused_item(worksheet, language=None)
-    if not item_data or row_idx is None:
-        logging.warning("No unused greetings found.")
-        return "", "", ""
-    sheets_service.mark_item_as_used(worksheet, row_idx)
-    return (
-        item_data.get("greeting_foreign", ""),
-        item_data.get("language_origin", ""),
-        item_data.get("translation_sk", ""),
-    )
+        if "verbs" in content_key:
+            return f"""# {title}
+DE: {self._clean_string(lesson_data.get("infinitive_de", "N/A"))}
+ENG: {self._clean_string(lesson_data.get("infinitive_en", "N/A"))}
+SK: {self._clean_string(lesson_data.get("infinitive_sk", "N/A"))}
+
+### Prítomný čas: {self._clean_string(lesson_data.get("present_3rd_person", ""))}
+DE: {self._clean_string(lesson_data.get("sentence_present_de", ""))}
+ENG: {self._clean_string(lesson_data.get("sentence_present_en", ""))}
+
+### Préteritum: {self._clean_string(lesson_data.get("preterite", ""))}
+DE: {self._clean_string(lesson_data.get("sentence_preterite_de", ""))}
+ENG: {self._clean_string(lesson_data.get("sentence_preterite_en", ""))}
+
+### Perfekt: {self._clean_string(lesson_data.get("perfect", ""))}
+DE: {self._clean_string(lesson_data.get("sentence_perfect_de", ""))}
+ENG: {self._clean_string(lesson_data.get("sentence_perfect_en", ""))}"""
+        else:
+            payload = f"""# {title}
+DE: {self._clean_string(lesson_data.get("term_de", "N/A"))}
+ENG: {self._clean_string(lesson_data.get("term_en", "N/A"))}
+SK: {self._clean_string(lesson_data.get("term_sk", "N/A"))}"""
+            if term_plural := self._clean_string(lesson_data.get("term_plural")):
+                payload += f"\nPlurál: {term_plural}"
+
+            payload += "\n\n### Príkladové vety:"
+            for i in range(1, 9):
+                if de_sent := self._clean_string(lesson_data.get(f"sentence{i}_de")):
+                    en_sent = self._clean_string(lesson_data.get(f"sentence{i}_en", ""))
+                    payload += f"\n{i}.  DE: {de_sent}\n    ENG: {en_sent}"
+            return payload
+
+    def _compose_morning_briefing(self) -> Dict[str, Any]:
+        """
+        Composes all data components for the 'morning_briefing_sk' theme.
+
+        Returns:
+            Dict[str, Any]: A dictionary of all data points for the prompt.
+        """
+        now = datetime.now(self.tz)
+        data = {
+            "DATE": now.strftime("%d.%m.%Y"),
+            "NAME_DAY": "N/A",
+            "INTERNATIONAL_DAY": "—",
+            "WEATHER_LOCATION": "{USER_WEATHER_LOCATION}",
+            "WEATHER_INFO": "{USER_WEATHER_FORECAST}",
+            "ROTATING_CONTENT_HEADER": "",
+            "ROTATING_CONTENT_BODY": "",
+            "DAILY_GREETING_FOREIGN": "",
+            "GREETING_LANGUAGE_ORIGIN": "",
+            "DAILY_GREETING_TRANSLATION": "",
+        }
+        components = self.theme_config.get("components", {})
+
+        if components.get("name_day"):
+            data.update(self._get_daily_info_from_sheet(now))
+
+        if rotation_ref := self.theme_config.get("content_rotation_source"):
+            if rotating_content := self._get_rotating_content(rotation_ref):
+                data["ROTATING_CONTENT_HEADER"] = rotating_content["header"]
+                data["ROTATING_CONTENT_BODY"] = rotating_content["body"]
+
+        if components.get("daily_greeting"):
+            data.update(self._get_daily_greeting())
+
+        return data
+
+    def _compose_german_lesson(self) -> Dict[str, Any]:
+        """
+        Composes the data payload for the 'german_lesson' theme.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing the 'lesson_payload'.
+        """
+        rotation_ref = self.theme_config.get("content_rotation_source")
+        if not rotation_ref:
+            return {"lesson_payload": "Chyba: Chýba konfigurácia rotácie."}
+
+        slow_german_link_payload = "Dnešná audio lekcia nemčiny:\n"
+        sg_ref = {
+            "spreadsheet_key": "YDP_LLM_Dynamic_GermanLesson",
+            "worksheet_key": "slow_german_links",
+        }
+        sg_ws = sheets_service.get_worksheet(sg_ref)
+        if sg_ws:
+            sg_idx, sg_data = sheets_service.get_unused_item(sg_ws, language=None)
+            if sg_data is not None and sg_idx is not None:
+                title, link = (
+                    self._clean_string(sg_data.get("name", "")),
+                    self._clean_string(sg_data.get("link", "")),
+                )
+                slow_german_link_payload += f'<a href="{link}">{title}</a>'
+                sheets_service.mark_item_as_used(sg_ws, sg_idx)
+
+        rot_ws = sheets_service.get_worksheet(rotation_ref)
+        if not rot_ws:
+            return {
+                "lesson_payload": f"{slow_german_link_payload}\n\nChyba: Nepodarilo sa načítať hárok rotácie."
+            }
+        rot_idx, rot_data = sheets_service.get_unused_item(rot_ws, language=None)
+        if (
+            not rot_data
+            or rot_idx is None
+            or not (content_key := rot_data.get("content"))
+        ):
+            return {
+                "lesson_payload": f"{slow_german_link_payload}\n\nChyba: Nepodarilo sa získať typ lekcie."
+            }
+        sheets_service.mark_item_as_used(rot_ws, rot_idx)
+
+        lesson_ref = {
+            "spreadsheet_key": rotation_ref["spreadsheet_key"],
+            "worksheet_key": content_key,
+        }
+        lesson_ws = sheets_service.get_worksheet(lesson_ref)
+        if not lesson_ws:
+            return {
+                "lesson_payload": f"{slow_german_link_payload}\n\nChyba: Nepodarilo sa načítať hárok s lekciou."
+            }
+        lesson_idx, lesson_data = sheets_service.get_unused_item(
+            lesson_ws, language=None
+        )
+        if not lesson_data or lesson_idx is None:
+            return {
+                "lesson_payload": f"{slow_german_link_payload}\n\nChyba: Žiadny nepoužitý obsah pre túto lekciu."
+            }
+        sheets_service.mark_item_as_used(lesson_ws, lesson_idx)
+
+        lesson_body = self._build_lesson_payload(content_key, lesson_data)
+        final_payload = f'{lesson_body}\n\n<b>Ďalšie zdroje:</b>\n{slow_german_link_payload}\nPreskúmajte gramatiku na:\n<a href="https://deutsch.info/grammar">Deutsch.info</a>'
+        return {"lesson_payload": final_payload.strip()}
+
+    def get_data(self) -> Dict[str, Any]:
+        """
+        Main entry point that dispatches to the correct composer method.
+
+        Returns:
+            Dict[str, Any]: The final dictionary of data for the prompt.
+        """
+        theme_name = self.theme_config.get("theme_name", "")
+        if theme_name == "morning_briefing_sk":
+            return self._compose_morning_briefing()
+        if theme_name == "german_lesson":
+            return self._compose_german_lesson()
+        logging.warning(f"No dynamic content composer found for theme: '{theme_name}'")
+        return {}
 
 
 def get_all_dynamic_data(
     app_config: Dict[str, Any], theme_config: Dict[str, Any], tz: ZoneInfo
 ) -> Dict[str, Any]:
     """
-    Collects all necessary data for a dynamic theme.
+    Public-facing function to collect all necessary data for a dynamic theme.
 
     Args:
         app_config (Dict[str, Any]): The global application configuration.
-        theme_config (Dict[str, Any]): The configuration for the specific theme being processed.
+        theme_config (Dict[str, Any]): The configuration for the specific theme.
         tz (ZoneInfo): The timezone for date/time-sensitive operations.
 
     Returns:
-        Dict[str, Any]: A dictionary containing all fetched data points, ready
-                        to be injected into a prompt.
+        Dict[str, Any]: A dictionary containing all fetched data points.
     """
-    now = datetime.now(tz)
-    dynamic_data = {
-        "DATE": now.strftime("%d.%m.%Y"),
-        "NAME_DAY": "N/A",
-        "INTERNATIONAL_DAY": "—",
-        "WEATHER_LOCATION": "N/A",
-        "WEATHER_INFO": "N/A",
-        "ROTATING_CONTENT_HEADER": "",
-        "ROTATING_CONTENT_BODY": "",
-        "DAILY_GREETING_FOREIGN": "",
-        "GREETING_LANGUAGE_ORIGIN": "",
-        "DAILY_GREETING_TRANSLATION": "",
-    }
-
-    components = theme_config.get("components", {})
-    if components.get("name_day"):
-        name_day, international_day = _get_daily_info_from_sheet(app_config, now)
-        dynamic_data["NAME_DAY"] = name_day
-        dynamic_data["INTERNATIONAL_DAY"] = international_day
-
-    if components.get("weather"):
-        location = components["weather"].get("location")
-        if location:
-            dynamic_data["WEATHER_LOCATION"] = location.split(",")[0]
-            dynamic_data["WEATHER_INFO"] = _get_weather_forecast(location)
-
-    if rotation_source_key := theme_config.get("content_rotation_source"):
-        header, body = _get_rotating_content(app_config, rotation_source_key)
-        dynamic_data["ROTATING_CONTENT_HEADER"] = header
-        dynamic_data["ROTATING_CONTENT_BODY"] = body
-
-    if components.get("daily_greeting"):
-        greeting, origin, translation = _get_daily_greeting(app_config)
-        dynamic_data["DAILY_GREETING_FOREIGN"] = greeting
-        dynamic_data["GREETING_LANGUAGE_ORIGIN"] = origin
-        dynamic_data["DAILY_GREETING_TRANSLATION"] = translation
-
-    return dynamic_data
+    service = DynamicContentService(app_config, theme_config, tz)
+    return service.get_data()
 
 
-# End of src/services/dynamic_content_service.py (v. 0020)
+# End of src/services/dynamic_content_service.py (v. 0049)
