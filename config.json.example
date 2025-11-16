@@ -9,7 +9,12 @@
   "users": [
     {
     "description": "Jozef_D", "active": true, "language": "slovak", 
-	"weather": { "location": "Bratislava,SK" },      
+	"weather": {
+        "locations": [
+          { "location": "Bratislava,SK" },
+          { "location": "Garfield,NJ,US" }
+        ]
+      },
 	"channels": [{ "platform": "telegram", "identifier": "TELEGRAM_CHAT_ID" }],
       "subscriptions": {
         "time1": ["morning_briefing_sk", ],
@@ -85,6 +90,7 @@
     },
     "morning_briefing_sk": {
       "handler_class": "LLMDynamicHandler",
+	  "processing_strategy": "per_user",
       "content_rotation_source": { "spreadsheet_key": "YDP_LLM_Dynamic_MorningBriefing", "worksheet_key": "rotation" },
       "dynamic_image": { "provider": "unsplash", "query": "nature,wallpaper,calm,minimalist,landscape" },
       "components": { "name_day": true, "daily_greeting": true },

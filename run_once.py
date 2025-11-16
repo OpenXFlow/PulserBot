@@ -4,23 +4,20 @@
 
 # run_once.py
 """
-The main entry point for single, one-shot executions of the YourDailyPulse bot
-and related utility tools.
+The main entry point for single, one-shot executions of the YourDailyPulse bot.
 
-This script acts as a command-line interface for various purposes:
-1.  Running a scheduled job for a specific time key (e.g., 'time1').
-2.  Generating photo links from a Cloudinary folder.
-3.  Downloading all Google Sheets data as local CSV files.
+This script is responsible for running a scheduled job for a specific time key
+(e.g., 'time1') and an optional user filter.
+
+All other maintenance and utility tasks (e.g., data export, photo import)
+must be executed via the dedicated 'tools.py' script.
 
 Usage:
-    - To run a scheduled job:
-      python run_once.py <time_key> [users <user_desc_1> <user_desc_2> ...]
+    - To run a scheduled job for all subscribed users:
+      python run_once.py <time_key>
 
-    - To generate a photo database from a Cloudinary folder:
-      python run_once.py generate_photo_db <folder_name> <output_file.csv>
-
-    - To download all Google Sheets as CSVs:
-      python run_once.py download_sheets <output_directory>
+    - To run a job for specific users only:
+      python run_once.py <time_key> users <user_desc_1> <user_desc_2> ...
 """
 
 from dotenv import load_dotenv
@@ -38,13 +35,10 @@ import sentry_sdk  # noqa: E402
 from src.config import setup_logging  # noqa: E402
 from src.core import generate_and_send  # noqa: E402
 
-# The tools module is imported dynamically when needed to keep job runs clean.
-
 
 def main() -> None:
     """
-    The main entry point for the script. Parses arguments and dispatches
-    to the correct function (either a job or a tool).
+    The main entry point for the script. Parses arguments and runs a job.
     """
     SENTRY_DSN = os.environ.get("SENTRY_DSN")
     if SENTRY_DSN:
@@ -65,78 +59,57 @@ def main() -> None:
     logging.info(f"SENTRY_DSN found: {SENTRY_DSN is not None}")
 
     try:
-        if len(sys.argv) < 2:
-            logging.error(
-                "Execution failed: A command is required.\n"
-                "Usage for jobs: python run_once.py <time_key> [users ...]\n"
-                "Usage for tools: python run_once.py generate_photo_db <folder_name> <output.csv>\n"
-                "Usage for export: python run_once.py download_sheets <output_directory>"
-            )
-            sys.exit(1)
+        # Initialize variables before the match block
+        time_key: Optional[str] = None
+        user_filter: Optional[List[str]] = None
 
-        command = sys.argv[1]
-
-        # --- COMMAND 1: Generate Photo DB ---
-        if command == "generate_photo_db":
-            if len(sys.argv) != 4:
+        # Use structural pattern matching to parse command-line arguments
+        match sys.argv:
+            # Case 1: No arguments provided (only script name)
+            case [_]:
                 logging.error(
-                    "Usage: python run_once.py generate_photo_db <folder_name> <output_file.csv>"
+                    "Execution failed: A time_key is required.\n"
+                    "Usage: python run_once.py <time_key> [users ...]\n"
+                    "For utility tools, please use 'python tools.py'."
                 )
                 sys.exit(1)
 
-            from src.tools import photo_importer  # noqa: E402
+            # Case 2: Only a time_key is provided
+            case [_, tk]:
+                time_key = tk
+                user_filter = None
 
-            folder_name = sys.argv[2]
-            output_file = sys.argv[3]
-            logging.info(f"Starting photo DB generation for folder: {folder_name}")
-            photo_importer.run_importer(folder_name, output_file)
-            logging.info("Photo DB generation complete.")
+            # Case 3: A time_key and 'users' keyword with at least one user
+            case [_, tk, "users", *users] if users:
+                time_key = tk
+                user_filter = users
 
-        # --- COMMAND 2: Download Sheets ---
-        elif command == "download_sheets":
-            if len(sys.argv) != 3:
+            # Case 4: A time_key and 'users' keyword but no users listed
+            case [_, _, "users"]:
                 logging.error(
-                    "Usage: python run_once.py download_sheets <output_directory>"
+                    "The 'users' keyword requires at least one user description."
                 )
                 sys.exit(1)
 
-            from src.tools import sheet_exporter  # noqa: E402
+            # Default case for any other invalid argument structure
+            case _:
+                logging.error(
+                    f"Invalid arguments: {' '.join(sys.argv[1:])}\n"
+                    "Did you mean to use 'tools.py'?"
+                )
+                sys.exit(1)
 
-            output_dir = sys.argv[2]
-            logging.info(f"Starting download of all sheets to directory: {output_dir}")
-            sheet_exporter.run_exporter(output_dir)
-            logging.info("Sheet download complete.")
+        # The rest of the logic remains the same
+        with sentry_sdk.start_transaction(op="task", name=f"run_once:{time_key}"):
+            if user_filter is not None:
+                logging.info(
+                    f"Starting job for '{time_key}' with filter: {user_filter}"
+                )
+            else:
+                logging.info(f"Starting job for '{time_key}' for all users.")
 
-        # --- COMMAND 3: Run Scheduled Job ---
-        else:
-            time_key: str = command
-            user_filter: Optional[List[str]] = None
-
-            if len(sys.argv) > 2:
-                if sys.argv[2].lower() == "users":
-                    if len(sys.argv) > 3:
-                        user_filter = sys.argv[3:]
-                    else:
-                        logging.error(
-                            "The 'users' keyword requires at least one user description."
-                        )
-                        sys.exit(1)
-                else:
-                    logging.error(
-                        f"Invalid argument '{sys.argv[2]}'. Expected 'users' or nothing."
-                    )
-                    sys.exit(1)
-
-            with sentry_sdk.start_transaction(op="task", name=f"run_once:{time_key}"):
-                if user_filter is not None:
-                    logging.info(
-                        f"Starting job for '{time_key}' with filter: {user_filter}"
-                    )
-                else:
-                    logging.info(f"Starting job for '{time_key}' for all users.")
-
-                generate_and_send(time_key, user_filter=user_filter)
-                logging.info(f"Job for '{time_key}' completed successfully.")
+            generate_and_send(time_key, user_filter=user_filter)
+            logging.info(f"Job for '{time_key}' completed successfully.")
 
     except Exception as e:
         logging.exception("A critical error occurred during the script run: %s", e)
@@ -151,4 +124,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# End of run_once.py (v. 0016)
+# End of run_once.py (v. 0018)

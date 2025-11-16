@@ -1,6 +1,6 @@
 <b>{lesson_title}</b>
 
-DE: {term_de} {term_plural_line}
+<blockquote>DE: {term_de} {term_plural_line}</blockquote>
 ENG: {term_en}
 SK: {term_sk}
 
@@ -30,6 +30,8 @@ SK: {term_sk}
 8. {sentence8_de}
    <i>{sentence8_en}</i>
 
-<b>Ďalšie zdroje:</b>
+<blockquote><b>Ďalšie zdroje:</b></blockquote>
 {dynamic_link_html}
 {static_grammar_link_html}
+
+<blockquote>{AI_LINKS_FOOTER}</blockquote>

@@ -4,21 +4,20 @@
 
 # tools.py
 """
-A collection of command-line utility tools for project maintenance.
+The single, authoritative entry point for all project maintenance utilities.
 
-This script is intended for manual use by the developer and provides tools for:
-1. Generating photo links from a Cloudinary folder.
-2. Downloading all Google Sheets data as local CSV files.
-3. Fetching artwork data from The MET API.
+This script acts as a command-line dispatcher for various developer tools.
+It is the ONLY correct way to run maintenance tasks. Using 'run_once.py'
+for these tasks is deprecated and no longer supported.
 
 Usage:
     - To generate a photo database from a Cloudinary folder:
       python tools.py generate_photo_db <folder_name> <output_file.csv>
 
-    - To download all Google Sheets as CSVs:
+    - To download all Google Sheets as a timestamped CSV backup:
       python tools.py download_sheets <output_directory>
 
-    - To fetch artwork data from The MET API:
+    - To fetch new artwork data from The MET API:
       python tools.py fetch_art_data <dept_id> <data_output.csv> <id_cache.csv> [max_items]
 """
 
@@ -117,16 +116,17 @@ class ToolDispatcher:
 
         command = self.args[1]
 
-        if command == "generate_photo_db":
-            self._handle_generate_photo_db()
-        elif command == "download_sheets":
-            self._handle_download_sheets()
-        elif command == "fetch_art_data":
-            self._handle_fetch_art_data()
-        else:
-            logging.error(f"Unknown command: '{command}'")
-            self._show_usage()
-            sys.exit(1)
+        match command:
+            case "generate_photo_db":
+                self._handle_generate_photo_db()
+            case "download_sheets":
+                self._handle_download_sheets()
+            case "fetch_art_data":
+                self._handle_fetch_art_data()
+            case _:  # Default case for unknown commands
+                logging.error(f"Unknown command: '{command}'")
+                self._show_usage()
+                sys.exit(1)
 
 
 def main() -> None:
@@ -141,4 +141,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# End of tools.py (v. 0010)
+# End of tools.py (v. 0012)```

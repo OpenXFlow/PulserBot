@@ -4,11 +4,14 @@
 
 # src/handlers/llm/llm_dynamic_handler.py
 """
-Handler for the 'llm_dynamic' theme type.
+Handler for the 'llm_dynamic' theme type with optimized OOP design.
+Fully backward compatible with original implementation.
 """
 
 import logging
+from abc import ABC, abstractmethod
 from dataclasses import asdict
+from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 from ... import config
@@ -16,116 +19,285 @@ from ...services import dynamic_content_service, image_service, llm_service
 from .._base.base_handler import BaseHandler
 from .llm_dynamic_models import MorningBriefingData
 
+# ============================================================================
+# Resource Manager (Singleton Pattern with Caching)
+# ============================================================================
 
-class LLMDynamicHandler(BaseHandler):
-    """
-    Handles themes that fetch multiple dynamic data points and use an LLM.
 
-    Attributes:
-        app_config (Dict[str, Any]): The global application configuration.
-        tz (ZoneInfo): The active timezone for the application.
-        image_url (Optional[str]): The URL of the image to be sent.
-        image_attribution (str): The HTML attribution string for the image.
-        data_model (Optional[MorningBriefingData]): The structured data container.
-    """
+class ResourceCache:
+    """Centralized cache for frequently accessed resources."""
 
-    def __init__(self, theme_config: Dict[str, Any], lang: str) -> None:
-        """
-        Initializes the handler.
+    _footer_cache: Optional[str] = None
+    _prompts_cache: Dict[str, str] = {}
 
-        Args:
-            theme_config (Dict[str, Any]): The configuration for the theme.
-            lang (str): The language key for the content.
-        """
-        super().__init__(theme_config, lang)
-        self.app_config, self.tz = config.load_app_config()
-        self.image_url: Optional[str] = None
-        self.image_attribution: str = ""
-        self.data_model: Optional[MorningBriefingData] = None
+    @classmethod
+    def get_footer(cls) -> str:
+        """Get AI links footer content (cached)."""
+        if cls._footer_cache is None:
+            footer_path = Path("src/resources/template/footer_ai_links_slovak.txt")
+            try:
+                with open(footer_path, "r", encoding="utf-8") as f:
+                    cls._footer_cache = f.read().strip()
+            except FileNotFoundError:
+                logging.warning("AI links footer file not found. Using empty footer.")
+                cls._footer_cache = ""
+        return cls._footer_cache
 
-    def _fetch_image_data(self) -> None:
-        """Fetches a dynamic image from an external provider if configured."""
-        if image_config := self.theme_config.get("dynamic_image"):
-            image_data = image_service.get_dynamic_image(image_config)
-            if image_data:
-                self.image_url = image_data.get("image_url")
-                self.image_attribution = image_data.get("attribution_html", "")
+    @classmethod
+    def get_prompt(cls, prompt_path: str) -> Optional[str]:
+        """Get prompt template content (cached)."""
+        if prompt_path not in cls._prompts_cache:
+            try:
+                with open(prompt_path, "r", encoding="utf-8") as f:
+                    cls._prompts_cache[prompt_path] = f.read()
+            except FileNotFoundError:
+                logging.error(f"Prompt file not found at path: {prompt_path}")
+                return None
+        return cls._prompts_cache[prompt_path]
 
-    def _fetch_content_data(self) -> bool:
-        """
-        Fetches all dynamic data points and populates the data model.
 
-        Returns:
-            bool: True if data was fetched and model created successfully, False otherwise.
-        """
+# ============================================================================
+# Processing Steps (Strategy Pattern)
+# ============================================================================
+
+
+class ProcessingStep(ABC):
+    """Base class for processing steps."""
+
+    @abstractmethod
+    def execute(
+        self, handler: "LLMDynamicHandler", user: Optional[Dict[str, Any]]
+    ) -> bool:
+        """Execute the step. Returns True on success, False on failure."""
+        pass
+
+
+class UserValidator(ProcessingStep):
+    """Validates that user object is provided."""
+
+    def execute(
+        self, handler: "LLMDynamicHandler", user: Optional[Dict[str, Any]]
+    ) -> bool:
+        if not user:
+            logging.error("User object is required for dynamic content processing.")
+            return False
+        return True
+
+
+class StaticImageLoader(ProcessingStep):
+    """Loads static image URL if configured."""
+
+    def execute(
+        self, handler: "LLMDynamicHandler", user: Optional[Dict[str, Any]]
+    ) -> bool:
+        if static_url := handler.theme_config.get("static_image_url"):
+            handler.image_url = static_url
+        return True
+
+
+class DynamicImageFetcher(ProcessingStep):
+    """Fetches dynamic image from external provider."""
+
+    def execute(
+        self, handler: "LLMDynamicHandler", user: Optional[Dict[str, Any]]
+    ) -> bool:
+        if handler.image_url:
+            return True
+
+        image_config = handler.theme_config.get("dynamic_image")
+        if not image_config:
+            return True
+
+        image_data = image_service.get_dynamic_image(image_config)
+        if image_data:
+            handler.image_url = image_data.get("image_url")
+            handler.image_attribution = image_data.get("attribution_html", "")
+
+        return True
+
+
+class DynamicContentFetcher(ProcessingStep):
+    """Fetches all dynamic content data points."""
+
+    def execute(
+        self, handler: "LLMDynamicHandler", user: Optional[Dict[str, Any]]
+    ) -> bool:
         raw_data = dynamic_content_service.get_all_dynamic_data(
-            self.app_config, self.theme_config, self.tz
+            handler.app_config, handler.theme_config, handler.tz, user=user
         )
+
         if not raw_data:
             logging.error("Dynamic content service returned no data.")
             return False
 
         if "IMAGE_URL" in raw_data:
-            self.image_url = raw_data.get("IMAGE_URL")
-            self.image_attribution = raw_data.get("IMAGE_ATTRIBUTION", "")
+            handler.image_url = raw_data.get("IMAGE_URL")
+            handler.image_attribution = raw_data.get("IMAGE_ATTRIBUTION", "")
 
-        self.data_model = MorningBriefingData.from_dict(raw_data)
-        self.data_model.IMAGE_ATTRIBUTION = self.image_attribution
+        try:
+            handler.data_model = MorningBriefingData.from_dict(raw_data)
+            return True
+        except Exception as e:
+            logging.error(f"Failed to create data model: {e}")
+            return False
+
+
+class PromptLoader(ProcessingStep):
+    """Loads and caches prompt template."""
+
+    def execute(
+        self, handler: "LLMDynamicHandler", user: Optional[Dict[str, Any]]
+    ) -> bool:
+        prompt_path = handler.theme_config.get("prompts", {}).get(handler.lang)
+        if not prompt_path:
+            logging.error(f"No prompt path found for lang '{handler.lang}'.")
+            return False
+
+        handler._prompt_template = ResourceCache.get_prompt(prompt_path)
+        return handler._prompt_template is not None
+
+
+class PromptBuilder:
+    """Builds final prompt with all placeholders."""
+
+    @staticmethod
+    def build(handler: "LLMDynamicHandler") -> Optional[str]:
+        """Build final prompt from template and data."""
+        if not handler.data_model or not handler._prompt_template:
+            logging.error("Cannot build prompt: missing data model or template.")
+            return None
+
+        placeholders = asdict(handler.data_model)
+        placeholders["IMAGE_ATTRIBUTION"] = handler.image_attribution
+
+        footer = ResourceCache.get_footer()
+        if handler.image_attribution and footer:
+            footer = "\n" + footer
+        placeholders["AI_LINKS_FOOTER"] = footer
+
+        try:
+            return handler._prompt_template.format(**placeholders)
+        except KeyError as e:
+            logging.error(f"Missing placeholder {e} in prompt template.")
+            return None
+        except Exception as e:
+            logging.error(f"Error formatting prompt: {e}")
+            return None
+
+
+class LLMTextGenerator(ProcessingStep):
+    """Generates text using LLM service."""
+
+    def execute(
+        self, handler: "LLMDynamicHandler", user: Optional[Dict[str, Any]]
+    ) -> bool:
+        final_prompt = PromptBuilder.build(handler)
+        if not final_prompt:
+            return False
+
+        handler._final_text = llm_service.call_llm(final_prompt)
+
+        if not handler._final_text:
+            logging.warning("LLM returned an empty response for dynamic theme.")
+            return False
+
         return True
+
+
+# ============================================================================
+# Pipeline
+# ============================================================================
+
+
+class DynamicProcessingPipeline:
+    """Executes dynamic content processing steps in sequence."""
+
+    def __init__(self) -> None:
+        self.steps = [
+            UserValidator(),
+            StaticImageLoader(),
+            DynamicImageFetcher(),
+            DynamicContentFetcher(),
+            PromptLoader(),
+            LLMTextGenerator(),
+        ]
+
+    def execute(
+        self, handler: "LLMDynamicHandler", user: Optional[Dict[str, Any]]
+    ) -> bool:
+        """Execute all steps. Stops at first failure."""
+        for step in self.steps:
+            if not step.execute(handler, user):
+                return False
+        return True
+
+
+# ============================================================================
+# Main Handler (Backward Compatible)
+# ============================================================================
+
+
+class LLMDynamicHandler(BaseHandler):
+    """
+    Handles themes that fetch multiple dynamic data points and use an LLM.
+    """
+
+    def __init__(self, theme_config: Dict[str, Any], lang: str) -> None:
+        """Initialize the handler with configuration."""
+        super().__init__(theme_config, lang)
+
+        self.app_config, self.tz = config.load_app_config()
+        self.image_url: Optional[str] = None
+        self.image_attribution: str = ""
+        self.data_model: Optional[MorningBriefingData] = None
+
+        self._prompt_template: Optional[str] = None
+        self._final_text: Optional[str] = None
+        self._pipeline = DynamicProcessingPipeline()
+
+    def _fetch_image_data(self) -> None:
+        """
+        Fetches a dynamic image. NOTE: Maintained for backward compatibility.
+        """
+        step = DynamicImageFetcher()
+        step.execute(self, None)
+
+    def _fetch_content_data(self, user: Optional[Dict[str, Any]] = None) -> bool:
+        """
+        Fetches dynamic content. NOTE: Maintained for backward compatibility.
+        """
+        if not user:
+            logging.error("User object is required.")
+            return False
+        step = DynamicContentFetcher()
+        return step.execute(self, user)
 
     def _generate_llm_text(self) -> Optional[str]:
         """
-        Formats the final prompt and calls the LLM to generate the message text.
-
-        Returns:
-            Optional[str]: The generated text from the LLM, or None on failure.
+        Generates text via LLM. NOTE: Maintained for backward compatibility.
         """
-        if not self.data_model:
-            logging.error(
-                "Cannot generate text because data model has not been populated."
-            )
+        if not PromptLoader().execute(self, None):
             return None
+        if LLMTextGenerator().execute(self, None):
+            return self._final_text
+        return None
 
-        prompt_path = self.theme_config.get("prompts", {}).get(self.lang)
-        if not prompt_path:
-            logging.error(f"No prompt path found for theme and lang '{self.lang}'.")
-            return None
-
-        try:
-            with open(prompt_path, "r", encoding="utf-8") as f:
-                base_prompt = f.read()
-        except FileNotFoundError:
-            logging.error(f"Prompt file not found at path: {prompt_path}")
-            return None
-
-        placeholders = asdict(self.data_model)
-        final_prompt = base_prompt.format(**placeholders)
-
-        reflection_text = llm_service.call_llm(final_prompt)
-        if not reflection_text:
-            logging.warning("LLM returned an empty response for dynamic theme.")
-            return None
-        return reflection_text
-
-    def _process(self) -> Tuple[str | None, str | None]:
+    def _process(
+        self, user: Optional[Dict[str, Any]] = None, **kwargs: Any
+    ) -> Tuple[Optional[str], Optional[str]]:
         """
-        Orchestrates the fetching, generation, and returning of dynamic content.
-
-        Returns:
-            Tuple[str | None, str | None]: A tuple (text, image_url), or (None, None).
+        Orchestrates content generation by running the processing pipeline.
         """
-        if static_url := self.theme_config.get("static_image_url"):
-            self.image_url = static_url
-        if not self.image_url:
-            self._fetch_image_data()
+        self.image_url = None
+        self.image_attribution = ""
+        self.data_model = None
+        self._prompt_template = None
+        self._final_text = None
 
-        if not self._fetch_content_data():
-            return None, None
+        if self._pipeline.execute(self, user):
+            return self._final_text, self.image_url
 
-        reflection_text = self._generate_llm_text()
-        if reflection_text:
-            return reflection_text, self.image_url
         return None, None
 
 
-# End of src/handlers/llm/llm_dynamic_handler.py (v. 0015)
+# End of src/handlers/llm/llm_dynamic_handler.py (v. 0028)

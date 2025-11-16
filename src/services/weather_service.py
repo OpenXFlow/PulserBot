@@ -64,6 +64,9 @@ class WeatherService:
                 temp = period.get("main", {}).get("temp")
                 desc = period.get("weather", [{}])[0].get("description", "N/A")
 
+                # Quick fix for a known typo in the OpenWeatherMap Slovak translation
+                desc = desc.replace("pretežno", "prevažne")
+
                 if temp is None:
                     continue
 

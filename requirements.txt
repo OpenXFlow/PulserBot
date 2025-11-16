@@ -3,12 +3,19 @@
 # For full license text, see the LICENSE file in the project root.
 
 # --- Core Application Libraries ---
-# Used for scheduling, web server, API calls, and timezone handling.
+# Used for API calls and timezone handling in the serverless (run_once.py) model.
+Babel>=2.14.0
 groq>=0.9.0
-apscheduler>=3.10.4
-Flask>=3.0.0
 httpx>=0.23.0
 tzdata>=2024.1
+
+# --- Web Service Model Dependencies ---
+# The libraries below are required ONLY when running the application as a long-running
+# web service using main.py (e.g., on Render). For the current serverless model
+# on GitHub Actions, they are not needed.
+# Uncomment the two lines below if you switch back to the web service model.
+# apscheduler>=3.10.4
+# Flask>=3.0.0
 
 # --- Local Development Utilities ---
 # For loading .env files during local testing. Not strictly needed in production.

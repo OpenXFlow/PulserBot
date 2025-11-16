@@ -69,7 +69,8 @@ class ImageService:
                     f"Triggered Unsplash download for image ID {data.get('id')}."
                 )
 
-                attribution_html = f'<i><a href="{user_link}?utm_source=yourdaily_pulse&utm_medium=referral">Photo by {user_name} on Unsplash</a></i>'
+                # --- REVERTED AND SIMPLIFIED: Back to the original, reliable format ---
+                attribution_html = f'<i>Photo by <a href="{user_link}?utm_source=yourdaily_pulse&utm_medium=referral">{user_name} on Unsplash</a></i>'
 
                 return {"image_url": image_url, "attribution_html": attribution_html}
 
@@ -125,4 +126,4 @@ def get_dynamic_image(image_config: Dict[str, str]) -> Dict[str, str] | None:
     return _image_service_instance.get_dynamic_image(image_config)
 
 
-# End of src/services/image_service.py (v. 0002)
+# End of src/services/image_service.py (v. 0004)

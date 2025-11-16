@@ -46,7 +46,7 @@ class BaseHandler(ABC):
         # app_config is loaded on demand by child classes if they need it.
 
     @abstractmethod
-    def _process(self) -> Tuple[Optional[str], Optional[str]]:
+    def _process(self, **kwargs: Any) -> Tuple[Optional[str], Optional[str]]:
         """
         The core logic for the specific handler. Must be implemented by subclasses.
 
@@ -60,20 +60,31 @@ class BaseHandler(ABC):
         """
         raise NotImplementedError
 
-    def execute(self) -> Tuple[Optional[str], Optional[str]]:
+    def execute(
+        self, user: Optional[Dict[str, Any]] = None, **kwargs: Any
+    ) -> Tuple[Optional[str], Optional[str]]:
         """
         Executes the handler's logic with centralized error handling.
 
         This is the public entry point for all handlers. It calls the specific
-        `_process` method and wraps it in a try-except block to catch any
-        unexpected errors during execution.
+        `_process` method, passing along any keyword arguments, and wraps it
+        in a try-except block to catch unexpected errors.
+
+        Args:
+            user (Optional[Dict[str, Any]]): An optional user object for personalization.
+            **kwargs: Additional keyword arguments for specific handlers.
 
         Returns:
             Tuple[Optional[str], Optional[str]]: The result from the `_process`
             method, or (None, None) if a critical error occurs.
         """
         try:
-            return self._process()
+            # Prepare arguments for the _process method.
+            process_kwargs = kwargs
+            if user is not None:
+                process_kwargs["user"] = user
+            # Pass arguments down to the process method.
+            return self._process(**process_kwargs)
         except Exception:
             theme_name = self.theme_config.get("theme_name", "Unknown Theme")
             logging.exception(
@@ -82,4 +93,4 @@ class BaseHandler(ABC):
             return None, None
 
 
-# End of src/handlers/_base/base_handler.py (v. 0001)
+# End of src/handlers/_base/base_handler.py (v. 0003)

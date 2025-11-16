@@ -1,6 +1,6 @@
 <b>{lesson_title}</b>
 
-DE: {infinitive_de}
+<blockquote>DE: {infinitive_de}</blockquote>
 ENG: {infinitive_en}
 SK: {infinitive_sk}
 
@@ -28,6 +28,8 @@ SK: {infinitive_sk}
 {sentence_futur2_de}
 <i>{sentence_futur2_en}</i>
 
-<b>Ďalšie zdroje:</b>
+<blockquote><b>Ďalšie zdroje:</b></blockquote>
 {dynamic_link_html}
 {static_grammar_link_html}
+
+<blockquote>{AI_LINKS_FOOTER}</blockquote>

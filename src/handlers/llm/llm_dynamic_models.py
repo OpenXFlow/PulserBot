@@ -44,7 +44,7 @@ class MorningBriefingData:
     DAILY_GREETING_FOREIGN: str = ""
     GREETING_LANGUAGE_ORIGIN: str = ""
     DAILY_GREETING_TRANSLATION: str = ""
-    IMAGE_ATTRIBUTION: str = ""
+    IMAGE_ATTRIBUTION: str = ""  # Reverted back from FOOTER_CONTENT
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "MorningBriefingData":
@@ -74,4 +74,4 @@ class MorningBriefingData:
         )
 
 
-# End of src/handlers/llm/llm_dynamic_models.py (v. 0001)
+# End of src/handlers/llm/llm_dynamic_models.py (v. 0004)

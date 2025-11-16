@@ -28,10 +28,11 @@ class BibleHandler(LLMStaticBaseHandler):
         Returns:
             str: A formatted string for the LLM prompt.
         """
-        # FIX: Correctly use the from_dict classmethod to create the model.
         data_model = BibleReflectionData.from_dict(item_data)
 
-        return f"- Passage: {data_model.passage}\n- Reference: {data_model.reference}"
+        # --- REFACTORED: Send only the reference, not the full passage ---
+        # The LLM will find the text itself, giving us control over formatting.
+        return f"- Reference: {data_model.reference}"
 
 
-# End of src/handlers/llm/bible_handler.py (v. 0006)
+# End of src/handlers/llm/bible_handler.py (v. 0007)

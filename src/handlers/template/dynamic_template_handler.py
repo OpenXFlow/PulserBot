@@ -4,140 +4,284 @@
 
 # src/handlers/template/dynamic_template_handler.py
 """
-Handler for the 'dynamic_template' theme type.
+Handler for the 'dynamic_template' theme type with an optimized OOP design.
 """
 
 import logging
+from abc import ABC, abstractmethod
 from dataclasses import asdict
-from typing import Any, Dict, Optional, Tuple, Union, cast
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 from ...services import sheets_service
 from .._base.base_handler import BaseHandler
-from .dynamic_template_models import GERMAN_LESSON_TITLE_MAP, GermanTerm, GermanVerb
+from .dynamic_template_models import GermanLessonModelRegistry, GermanTerm, GermanVerb
+
+# ============================================================================
+# Processing Context
+# ============================================================================
 
 
-class DynamicTemplateHandler(BaseHandler):
-    """
-    Handles complex themes that use dynamic template selection without an LLM.
+class ProcessingContext:
+    """A state container that holds all data during the pipeline's execution."""
 
-    This handler inherits from BaseHandler and implements the _process method.
-    Its logic involves fetching a content key from a rotation sheet, selecting
-    the appropriate template based on this key, creating a typed dataclass for the
-    data, and formatting the final message.
-    """
-
-    def _clean_string(self, text: Any) -> str:
+    def __init__(self, theme_config: Dict[str, Any], lang: str) -> None:
         """
-        A helper method to clean strings from sheet cells.
+        Initializes the context with the initial theme and language configuration.
 
         Args:
-            text (Any): The input value from a sheet cell.
-
-        Returns:
-            str: The cleaned, single-line string.
+            theme_config (Dict[str, Any]): The configuration for the specific theme.
+            lang (str): The language key for the content.
         """
-        return str(text or "").replace("\n", " ").strip()
+        self.theme_config: Dict[str, Any] = theme_config
+        self.lang: str = lang
+        self.theme_name: str = theme_config.get("theme_name", "Unknown Theme")
+        self.rotation_ws: Optional[Any] = None
+        self.rotation_idx: Optional[int] = None
+        self.content_key: Optional[str] = None
+        self.template_path: Optional[str] = None
+        self.lesson_ws: Optional[Any] = None
+        self.lesson_idx: Optional[int] = None
+        self.lesson_data: Optional[Dict[str, Any]] = None
+        self.data_model: Optional[Union[GermanTerm, GermanVerb]] = None
+        self.final_text: Optional[str] = None
+        self.image_url: Optional[str] = None
 
-    def _normalize_key(self, key: str) -> str:
+
+# ============================================================================
+# Processing Steps (Strategy Pattern)
+# ============================================================================
+
+
+class ProcessingStep(ABC):
+    """An abstract base class for a single step in the processing pipeline."""
+
+    @abstractmethod
+    def execute(self, context: ProcessingContext) -> bool:
         """
-        Normalizes a worksheet key to its category identifier.
+        Executes the logic for this step.
 
         Args:
-            key (str): The raw key from the rotation sheet (e.g., '02_verbs_irregular_de').
+            context (ProcessingContext): The shared context object for the pipeline.
 
         Returns:
-            str: The normalized key (e.g., 'verbs_irregular').
+            bool: True if the step was successful, False to halt the pipeline.
         """
-        normalized = key.lower()
-        parts = normalized.split("_")
-        filtered_parts = [
-            p for p in parts if not p.isdigit() and p not in ["de", "en", "sk"]
-        ]
-        return "_".join(filtered_parts)
+        pass
 
-    def _create_title_from_key(self, key: str) -> str:
+
+class RotationKeyFetcher(ProcessingStep):
+    """Fetches the content key from the rotation worksheet."""
+
+    def execute(self, context: ProcessingContext) -> bool:
         """
-        Creates a trilingual lesson title using the centralized title map.
+        Finds an unused row in the rotation sheet and extracts the content key.
 
         Args:
-            key (str): The raw worksheet key from the rotation sheet.
+            context (ProcessingContext): The shared context to populate.
 
         Returns:
-            str: A formatted title string.
+            bool: True on success, False on failure.
         """
-        normalized_key = self._normalize_key(key)
-        title = GERMAN_LESSON_TITLE_MAP.get(normalized_key, "NEMČINY")
-        return f"LEKCIA: {title}"
+        rotation_ref = context.theme_config.get("content_rotation_source")
+        if not rotation_ref:
+            logging.error("Missing 'content_rotation_source' in theme config.")
+            return False
+        context.rotation_ws = sheets_service.get_worksheet(rotation_ref)
+        if not context.rotation_ws:
+            return False
+        idx, data = sheets_service.get_unused_item(context.rotation_ws, language=None)
+        if not data or idx is None or not (key := data.get("content")):
+            logging.error("Could not get a valid content key from rotation sheet.")
+            return False
+        context.rotation_idx, context.content_key = idx, str(key).strip()
+        return True
 
-    def _get_template_path(self, content_key: str) -> Optional[str]:
+
+class TemplateSelector(ProcessingStep):
+    """Selects the appropriate template path based on the content key."""
+
+    def execute(self, context: ProcessingContext) -> bool:
         """
-        Dynamically selects the correct template path based on the content key.
+        Determines if a 'verb' or 'other' template should be used.
 
         Args:
-            content_key (str): The raw key from the rotation sheet.
+            context (ProcessingContext): The shared context to populate.
 
         Returns:
-            Optional[str]: The file path to the correct template, or None if not found.
+            bool: True on success, False if the path cannot be determined.
         """
         try:
-            prompt_config = self.theme_config["prompts"][self.lang]
-            normalized_key = self._normalize_key(content_key)
+            prompt_config = context.theme_config["prompts"][context.lang]
+            normalized_key = GermanLessonModelRegistry._normalize_key(
+                context.content_key or ""
+            )
 
             if normalized_key in ["verbs_irregular", "verbs_regular"]:
-                return cast(str, prompt_config.get("verbs"))
-            return cast(str, prompt_config.get("other"))
-        except KeyError:
-            logging.error("Could not find appropriate template path in theme config.")
-            return None
+                context.template_path = cast(str, prompt_config.get("verbs"))
+            else:
+                context.template_path = cast(str, prompt_config.get("other"))
 
-    def _get_image_url(self, content_key: str) -> Optional[str]:
+            if not context.template_path:
+                raise KeyError("Template path for this content category not found.")
+            return True
+        except KeyError as e:
+            logging.error(f"Could not determine template path: {e}")
+            return False
+
+
+class LessonDataFetcher(ProcessingStep):
+    """Fetches the main lesson data from the corresponding worksheet."""
+
+    def execute(self, context: ProcessingContext) -> bool:
         """
-        Gets the appropriate image URL for the lesson category.
+        Uses the content key to open the correct lesson sheet and fetch an unused row.
 
         Args:
-            content_key (str): The raw key from the rotation sheet.
+            context (ProcessingContext): The shared context to populate.
 
         Returns:
-            Optional[str]: The URL of the image to use, or None.
+            bool: True on success, False on failure.
         """
-        category_key = self._normalize_key(content_key)
-        specific_url_key = f"static_image_{category_key}_url"
+        rotation_ref = context.theme_config.get("content_rotation_source", {})
+        lesson_ref = {
+            "spreadsheet_key": rotation_ref.get("spreadsheet_key"),
+            "worksheet_key": context.content_key,
+        }
+        context.lesson_ws = sheets_service.get_worksheet(lesson_ref)
+        if not context.lesson_ws:
+            return False
+        idx, data = sheets_service.get_unused_item(context.lesson_ws, None)
+        if not data or idx is None:
+            logging.warning(
+                f"No unused content in sheet for key '{context.content_key}'."
+            )
+            return False
+        context.lesson_idx, context.lesson_data = idx, data
+        return True
 
-        if specific_url := self.theme_config.get(specific_url_key):
-            return cast(str, specific_url)
 
-        return cast(Optional[str], self.theme_config.get("static_image_url"))
+class DataModelBuilder(ProcessingStep):
+    """Builds the structured data model for the lesson."""
 
-    def _build_template_placeholders(
-        self, data_model: Union[GermanTerm, GermanVerb], content_key: str
-    ) -> Dict[str, Any]:
+    def execute(self, context: ProcessingContext) -> bool:
         """
-        Builds the dictionary of placeholders for the template.
+        Uses the registry to get the correct dataclass and instantiates it.
 
         Args:
-            data_model (Union[GermanTerm, GermanVerb]): The dataclass instance with lesson data.
-            content_key (str): The key from the rotation sheet.
+            context (ProcessingContext): The shared context to populate.
 
         Returns:
-            Dict[str, Any]: A dictionary ready to be used with .format().
+            bool: True on success, False on failure.
         """
-        placeholders = asdict(data_model)
-        placeholders["lesson_title"] = self._create_title_from_key(content_key)
+        model_class = GermanLessonModelRegistry.get_model_class_for_key(
+            context.content_key or ""
+        )
+        if not context.lesson_data:
+            return False
+        try:
+            context.data_model = model_class.from_dict(context.lesson_data)
+            return True
+        except Exception as e:
+            logging.error(
+                f"Failed to build data model for '{context.content_key}': {e}"
+            )
+            return False
 
-        if isinstance(data_model, GermanTerm):
+
+class TextFormatter(ProcessingStep):
+    """Builds all placeholders and formats the final text."""
+
+    def _get_auxiliary_links(self) -> Dict[str, str]:
+        """
+        Fetches auxiliary 'Slow German' and grammar links.
+
+        Returns:
+            Dict[str, str]: A dictionary with the HTML for the links.
+        """
+        links = {
+            "dynamic_link_html": "",
+            "static_grammar_link_html": 'Preskúmajte gramatiku na:\n<a href="https://deutsch.info/grammar">Deutsch.info</a>',
+        }
+        sg_ref = {
+            "spreadsheet_key": "YDP_LLM_Dynamic_GermanLesson",
+            "worksheet_key": "slow_german_links",
+        }
+        sg_ws = sheets_service.get_worksheet(sg_ref)
+        if sg_ws:
+            idx, data = sheets_service.get_unused_item(sg_ws, None)
+            if data and idx:
+                title, link = (
+                    str(data.get("name", "")).strip(),
+                    str(data.get("link", "")).strip(),
+                )
+                links["dynamic_link_html"] = (
+                    f'Dnešná audio lekcia nemčiny:\n<a href="{link}">{title}</a>'
+                )
+                sheets_service.mark_item_as_used(sg_ws, idx)
+        return links
+
+    def _get_footer_content(self) -> str:
+        """
+        Gets the AI links footer content from its template file.
+
+        Returns:
+            str: The content of the footer file.
+        """
+        try:
+            return (
+                Path("src/resources/template/footer_ai_links_slovak.txt")
+                .read_text(encoding="utf-8")
+                .strip()
+            )
+        except FileNotFoundError:
+            logging.warning("AI links footer file not found.")
+            return ""
+
+    def execute(self, context: ProcessingContext) -> bool:
+        """
+        Builds the complete placeholder dictionary and formats the final text.
+
+        Args:
+            context (ProcessingContext): The shared context to read from and populate.
+
+        Returns:
+            bool: True on success, False on failure.
+        """
+        if not context.data_model or not context.template_path:
+            return False
+        try:
+            template_str = Path(context.template_path).read_text(encoding="utf-8")
+        except FileNotFoundError:
+            logging.error(f"Template file not found: {context.template_path}")
+            return False
+
+        placeholders = asdict(context.data_model)
+        placeholders["lesson_title"] = GermanLessonModelRegistry.create_title_from_key(
+            context.content_key or ""
+        )
+        placeholders.update(self._get_auxiliary_links())
+        placeholders["AI_LINKS_FOOTER"] = self._get_footer_content()
+        placeholders["IMAGE_ATTRIBUTION"] = ""
+
+        if isinstance(context.data_model, GermanTerm):
             placeholders["term_plural_line"] = (
-                f"({data_model.term_plural})" if data_model.term_plural else ""
+                f"({context.data_model.term_plural})"
+                if context.data_model.term_plural
+                else ""
             )
             for i in range(1, 9):
                 sent = (
-                    data_model.sentences[i - 1]
-                    if i <= len(data_model.sentences)
-                    else {"de": "", "en": ""}
+                    context.data_model.sentences[i - 1]
+                    if i <= len(context.data_model.sentences)
+                    else {}
                 )
-                placeholders[f"sentence{i}_de"] = sent.get("de", "")
-                placeholders[f"sentence{i}_en"] = sent.get("en", "")
+                placeholders[f"sentence{i}_de"], placeholders[f"sentence{i}_en"] = (
+                    sent.get("de", ""),
+                    sent.get("en", ""),
+                )
 
-        if isinstance(data_model, GermanVerb):
+        if isinstance(context.data_model, GermanVerb):
             tenses = [
                 "present",
                 "preterite",
@@ -148,101 +292,132 @@ class DynamicTemplateHandler(BaseHandler):
             ]
             for i, tense in enumerate(tenses):
                 sent = (
-                    data_model.sentences[i]
-                    if i < len(data_model.sentences)
-                    else {"de": "", "en": ""}
+                    context.data_model.sentences[i]
+                    if i < len(context.data_model.sentences)
+                    else {}
                 )
-                placeholders[f"sentence_{tense}_de"] = sent.get("de", "")
-                placeholders[f"sentence_{tense}_en"] = sent.get("en", "")
-        return placeholders
-
-    def _process(self) -> Tuple[str | None, str | None]:
-        """
-        Orchestrates the fetching, composing, and formatting of the content.
-
-        Returns:
-            Tuple[str | None, str | None]: A tuple (text, image_url), or (None, None).
-        """
-        rotation_ref = self.theme_config.get("content_rotation_source")
-        if not rotation_ref:
-            logging.error("Theme is missing 'content_rotation_source' configuration.")
-            return None, None
-
-        rot_ws = sheets_service.get_worksheet(rotation_ref)
-        if not rot_ws:
-            return None, None
-        rot_idx, rot_data = sheets_service.get_unused_item(rot_ws, language=None)
-
-        if (
-            not rot_data
-            or rot_idx is None
-            or not (raw_content_key := rot_data.get("content"))
-        ):
-            logging.error("Could not get a valid content key from the rotation sheet.")
-            return None, None
-
-        content_key = self._clean_string(raw_content_key)
-        sheets_service.mark_item_as_used(rot_ws, rot_idx)
-
-        template_path = self._get_template_path(content_key)
-        if not template_path:
-            return None, None
+                (
+                    placeholders[f"sentence_{tense}_de"],
+                    placeholders[f"sentence_{tense}_en"],
+                ) = sent.get("de", ""), sent.get("en", "")
 
         try:
-            with open(template_path, "r", encoding="utf-8") as f:
-                template_str = f.read()
-        except FileNotFoundError:
-            logging.error(f"Template file not found at path: {template_path}")
-            return None, None
+            context.final_text = template_str.format_map(placeholders)
+        except KeyError as e:
+            logging.error(
+                f"Required placeholder {e} missing in template for '{context.theme_name}'."
+            )
+            return False
 
-        lesson_ref = {
-            "spreadsheet_key": rotation_ref["spreadsheet_key"],
-            "worksheet_key": content_key,
-        }
-        lesson_ws = sheets_service.get_worksheet(lesson_ref)
-        if not lesson_ws:
-            return None, None
-        lesson_idx, lesson_data = sheets_service.get_unused_item(
-            lesson_ws, language=None
+        norm_key = GermanLessonModelRegistry._normalize_key(context.content_key or "")
+        img_key = f"static_image_{norm_key}_url"
+        context.image_url = context.theme_config.get(
+            img_key
+        ) or context.theme_config.get("static_image_url")
+        return True
+
+
+class ItemMarker(ProcessingStep):
+    """A final pipeline step to mark all used Google Sheet rows."""
+
+    def execute(self, context: ProcessingContext) -> bool:
+        """
+        Marks the row in the rotation sheet and the main lesson sheet as used.
+
+        Args:
+            context (ProcessingContext): The shared context.
+
+        Returns:
+            bool: Always True, as errors here should not halt the pipeline.
+        """
+        if context.rotation_ws and context.rotation_idx:
+            sheets_service.mark_item_as_used(context.rotation_ws, context.rotation_idx)
+        if context.lesson_ws and context.lesson_idx:
+            sheets_service.mark_item_as_used(context.lesson_ws, context.lesson_idx)
+        return True
+
+
+# ============================================================================
+# Main Handler and Pipeline
+# ============================================================================
+
+
+class ProcessingPipeline:
+    """Executes a sequence of processing steps."""
+
+    def __init__(self, steps: List[ProcessingStep]):
+        """
+        Initializes the pipeline with a list of steps.
+
+        Args:
+            steps (List[ProcessingStep]): The sequence of steps to execute.
+        """
+        self.steps = steps
+
+    def run(self, context: ProcessingContext) -> bool:
+        """
+        Executes each step, halting on the first failure.
+
+        Args:
+            context (ProcessingContext): The shared context object.
+
+        Returns:
+            bool: True if all steps succeeded, False otherwise.
+        """
+        for step in self.steps:
+            if not step.execute(context):
+                return False
+        return True
+
+
+class DynamicTemplateHandler(BaseHandler):
+    """
+    Handles complex themes that use dynamic template selection without an LLM.
+    """
+
+    def __init__(self, theme_config: Dict[str, Any], lang: str) -> None:
+        """
+        Initializes the handler and its processing pipeline.
+
+        Args:
+            theme_config (Dict[str, Any]): The configuration for the specific theme.
+            lang (str): The language key for the content.
+        """
+        super().__init__(theme_config, lang)
+        self._pipeline = self._build_pipeline()
+
+    def _build_pipeline(self) -> ProcessingPipeline:
+        """
+        Constructs the sequence of processing steps for this handler.
+
+        Returns:
+            ProcessingPipeline: An instance of the pipeline with all required steps.
+        """
+        return ProcessingPipeline(
+            [
+                RotationKeyFetcher(),
+                TemplateSelector(),
+                LessonDataFetcher(),
+                DataModelBuilder(),
+                TextFormatter(),
+                ItemMarker(),
+            ]
         )
-        if not lesson_data or lesson_idx is None:
-            logging.warning(f"No unused content in sheet for key '{content_key}'.")
-            return None, None
-        sheets_service.mark_item_as_used(lesson_ws, lesson_idx)
 
-        data_model: Optional[Union[GermanTerm, GermanVerb]] = None
-        normalized_key = self._normalize_key(content_key)
-        if "verbs" in normalized_key:
-            data_model = GermanVerb.from_dict(lesson_data)
-        else:
-            data_model = GermanTerm.from_dict(lesson_data)
+    def _process(self, **kwargs: Any) -> Tuple[Optional[str], Optional[str]]:
+        """
+        Orchestrates content generation by running the processing pipeline.
 
-        placeholders = self._build_template_placeholders(data_model, content_key)
+        Args:
+            **kwargs: Additional keyword arguments (ignored).
 
-        placeholders["dynamic_link_html"] = ""
-        sg_ref = {
-            "spreadsheet_key": "YDP_LLM_Dynamic_GermanLesson",
-            "worksheet_key": "slow_german_links",
-        }
-        sg_ws = sheets_service.get_worksheet(sg_ref)
-        if sg_ws:
-            sg_idx, sg_data = sheets_service.get_unused_item(sg_ws, language=None)
-            if sg_data is not None and sg_idx is not None:
-                title = self._clean_string(sg_data.get("name", ""))
-                link = self._clean_string(sg_data.get("link", ""))
-                placeholders["dynamic_link_html"] = (
-                    f'Dnešná audio lekcia nemčiny:\n<a href="{link}">{title}</a>'
-                )
-                sheets_service.mark_item_as_used(sg_ws, sg_idx)
-
-        placeholders["static_grammar_link_html"] = (
-            'Preskúmajte gramatiku na:\n<a href="https://deutsch.info/grammar">Deutsch.info</a>'
-        )
-
-        final_text = template_str.format(**placeholders)
-        image_url = self._get_image_url(content_key)
-
-        return final_text, image_url
+        Returns:
+            Tuple[Optional[str], Optional[str]]: A tuple (text, image_url), or (None, None).
+        """
+        context = ProcessingContext(self.theme_config, self.lang)
+        if self._pipeline.run(context):
+            return context.final_text, context.image_url
+        return None, None
 
 
-# End of src/handlers/template/dynamic_template_handler.py (v. 0032)
+# End of src/handlers/template/dynamic_template_handler.py (v. 0043)

@@ -5,7 +5,7 @@ Tvojou úlohou je vystupovať ako prístupný, moderný a vtipný sprievodca sve
 ## Formát odpovede (použi HTML tagy pre tučné písmo):
 
 <b>🤔 Dnešná myšlienka od filozofa:</b>
-[Cituj krátku myšlienku a uveď meno filozofa...]
+<blockquote>[Cituj krátku myšlienku a uveď meno filozofa...]</blockquote>
 
 <b>💡 V kocke:</b>
 [V 1-2 vetách prelož komplexnú myšlienku...]
@@ -19,7 +19,8 @@ Tvojou úlohou je vystupovať ako prístupný, moderný a vtipný sprievodca sve
 <b>❓ Otázka na záver:</b>
 [Polož jednu veľmi krátku a údernú otázku (max. 10 slov)...]
 
-{IMAGE_ATTRIBUTION}
+<blockquote>{IMAGE_ATTRIBUTION}{AI_LINKS_FOOTER}</blockquote>
+
 ---
 Na základe nasledujúcich dát vygeneruj kompletnú reflexiu v jazyku: {language}.
 Dáta:

@@ -6,13 +6,13 @@ Adhere strictly to the following format and rules.
 
 ## Response Format and Rules (use ONLY the specified HTML tags):
 - Use <b> for bold headers.
-- Use <blockquote> for the biblical text itself.
+- Use <blockquote> for the biblical text and for the footer.
 - Use <i> for the image attribution.
-- **CRITICAL RULE: Every opening HTML tag (e.g., <b>) must have a corresponding closing tag (e.g., </b>). Do NOT generate unclosed tags.**
-- DO NOT use any other HTML tags like <p>, <ul>, or <li>.
+- **CRITICAL RULE 1: Every opening HTML tag (e.g., <b>) must have a corresponding closing tag (e.g., </b>).**
+- **CRITICAL RULE 2: The final output MUST end with the complete footer block provided in the placeholder.**
 
 <b>📖 Dnešný text (NÁZOV ZÁKONA):</b>
-[Here, cite the full text of the biblical passage based on the provided 'Verse Reference'. Use a modern and clear Slovak translation. Format the entire passage, including verse numbers, inside a single <blockquote> tag.]
+[**First, write out the 'Verse Reference' exactly as provided**, followed by a colon and a new line. Then, cite the full text of that biblical passage. Use a modern and clear Slovak translation. **CRITICAL: Do not insert any blank lines between the reference and the text, or between individual verses.** Format the entire passage, including the reference, inside a single <blockquote> tag.]
 
 <b>📖 Detailná informácia o texte</b>
 [Here, provide 3-4 bullet points with concise historical and contextual information. Start each bullet point with a '•' character on a new line.]
@@ -20,7 +20,7 @@ Adhere strictly to the following format and rules.
 <b>🤲 Duchovné posolstvo:</b>
 [Here, in 1-2 clear sentences, summarize the core spiritual message of this passage.]
 
-{IMAGE_ATTRIBUTION}
+<blockquote>{IMAGE_ATTRIBUTION}{AI_LINKS_FOOTER}</blockquote>
 
 ## Tone and Style:
 - Educational and Objective.
