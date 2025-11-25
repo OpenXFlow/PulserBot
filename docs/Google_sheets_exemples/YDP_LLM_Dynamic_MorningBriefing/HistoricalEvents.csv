@@ -1,5 +1,10 @@
-content,used,date_used
-01.01 "1993 ? The independent Slovak Republic and the Czech Republic are established after the dissolution of Czechoslovakia.",FALSE,
-02.01 "1959 ? The Soviet probe Luna 1 becomes the first artificial object to overcome the Earth's gravitational field.",FALSE,
-03.01 "1977 ? Apple Computer Inc. is founded.",FALSE,
-04.01 "2004 ? NASA's Spirit rover successfully lands on Mars.",FALSE,
+content,language,used,date_used
+01.01 "1993 – Vznik samostatnej Slovenskej republiky a Ceskej republiky po zániku Cesko-Slovenska.",slovak,FALSE,
+"02.01 ""1959 – Sovietska sonda Luna 1 sa stala prvým umelým telesom, ktoré prekonalo gravitacné pole Zeme.""",slovak,FALSE,
+03.01 "1977 – Bola založená spolocnost Apple Computer Inc.",slovak,FALSE,
+04.01 "2004 – Vozidlo NASA Spirit úspešne pristálo na Marse.",slovak,FALSE,
+24.04 "1990 – The Hubble Space Telescope was launched into orbit by Space Shuttle Discovery.",english,FALSE,
+25.04 "1953 – James Watson and Francis Crick published an article in Nature describing the double helix structure of DNA.",english,FALSE,
+26.04 "1986 – A disaster occurred at the Chernobyl Nuclear Power Plant in Ukraine.",english,FALSE,
+"27.04 ""1791 – Samuel Morse, inventor of the telegraph and Morse code, was born.""",english,FALSE,
+28.04 "2001 – Dennis Tito became the first space tourist.",english,FALSE,

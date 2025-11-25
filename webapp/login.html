@@ -1,0 +1,153 @@
+<!DOCTYPE HTML>
+<!--
+	YourDailyPulse - Login & Application Page (v4 - Dashboard Config)
+-->
+<html>
+	<head>
+		<title>Aplikácia - YourDailyPulse</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<link rel="stylesheet" href="assets/css/app.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<!-- Favicons -->
+        <link rel="apple-touch-icon" sizes="180x180" href="images/favicon/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="images/favicon/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="images/favicon/favicon-16x16.png">
+        <link rel="shortcut icon" href="images/favicon/favicon.ico">		
+	</head>
+	<body class="is-preload">
+
+		<!-- Sidebar -->
+			<section id="sidebar">
+				<div class="inner">
+					<nav id="app-nav"></nav>
+
+					<div class="sidebar-footer">
+						<div class="lang-switcher">
+							<span class="lang-option active" data-lang="sk">SK</span>
+							<span class="lang-separator">/</span>
+							<span class="lang-option" data-lang="en">EN</span>
+						</div>
+						<div class="back-to-home">
+							<a href="index.html" data-translate-key="backToHome"> &laquo; Späť na hlavnú stránku</a>
+						</div>
+					</div>
+				</div>
+			</section>
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+				<section id="app-main-content" class="wrapper style1 fullscreen">
+					<div class="inner">
+						
+						<div id="loading-container">
+							<h1 class="major" data-translate-key="appLoading">Načítavam aplikáciu...</h1>
+						</div>
+
+						<div id="auth-container" class="hidden">
+							<div class="form-container" id="login-form">
+								<h2 data-translate-key="loginTitle">Prihlásenie</h2>
+								<div class="fields">
+									<div class="field"><input type="email" id="login-email" placeholder="Email" required autocomplete="email"></div>
+									<div class="field"><input type="password" id="login-password" placeholder="Heslo" required autocomplete="current-password"></div>
+								</div>
+								<ul class="actions"><li><button id="login-button" class="button primary" data-translate-key="loginButton">Prihlásiť sa</button></li></ul>
+								<p class="auth-switch" data-translate-key="loginSwitch">Nemáte účet? <a href="#" id="show-signup">Zaregistrujte sa</a></p>
+								<p id="login-error" class="error-message"></p>
+							</div>
+							<div class="form-container hidden" id="signup-form">
+								<h2 data-translate-key="signupTitle">Registrácia</h2>
+								<div class="fields">
+									<div class="field"><input type="email" id="signup-email" placeholder="Email" required autocomplete="email"></div>
+									<div class="field"><input type="password" id="signup-password" placeholder="Heslo (min. 6 znakov)" required autocomplete="new-password"></div>
+								</div>
+								<ul class="actions"><li><button id="signup-button" class="button primary" data-translate-key="signupButton">Zaregistrovať sa</button></li></ul>
+								<p class="auth-switch" data-translate-key="signupSwitch">Už máte účet? <a href="#" id="show-login">Prihláste sa</a></p>
+								<p id="signup-error" class="error-message"></p>
+							</div>
+						</div>
+
+						<div id="verification-container" class="hidden">
+							<h2 data-translate-key="verifyTitle">Overte svoj email</h2>
+							<p data-translate-key="verifyText1">...</p>
+							<p data-translate-key="verifyText2">...</p>
+							<ul class="actions"><li><button id="resend-verification-button" class="button" data-translate-key="verifyButton">Poslať znova</button></li></ul>
+							
+                            <!-- Emergency Logout Link -->
+                            <p class="auth-switch" style="margin-top: 2em;">
+                                <a href="#" id="verification-logout" data-translate-key="verifyLogout">Odhlásiť sa / Zmeniť účet</a>
+                            </p>
+
+							<p id="verification-status" class="status-message"></p>
+						</div>
+
+						<div id="dashboard-container" class="hidden">
+							<h1 id="welcome-message" class="major" data-translate-key="welcomeMessage">Vitajte!</h1>
+							<p data-translate-key="dashboardSubtitle">...</p>
+							<div id="subscriptions-form">
+								<!-- Dynamic Content Loads Here -->
+							</div>
+							<hr/>
+							<ul class="actions"><li><button id="save-settings-button" class="button primary" data-translate-key="dashboardSaveButton">Uložiť Zmeny</button></li></ul>
+							<p id="save-status" class="status-message"></p>
+						</div>
+					</div>
+				</section>
+			</div>
+
+		<!-- MODAL WINDOW -->
+		<div id="user-content-modal" class="modal hidden">
+			<div class="modal-content">
+				<div class="setup-section">
+					<h3 data-translate-key="modalTitle">Upraviť Pripomienku</h3>
+					<p class="instruction" data-translate-key="modalDesc">Vložte vlastný text a odkazy, ktoré vám doručíme.</p>
+				</div>
+				
+				<h4 data-translate-key="modalLabelBlocks" style="margin-bottom: 0.5em; color: #fff;">Textové bloky</h4>
+				<div id="modal-blocks-container">
+					<!-- Dynamic Inputs inserted by app.js -->
+				</div>
+				
+				<h4 data-translate-key="modalLabelLinks" style="margin-top: 1.5em; margin-bottom: 0.5em; color: #fff;">Odkazy</h4>
+				<div id="modal-links-container">
+					<!-- Dynamic Inputs inserted by app.js -->
+				</div>
+
+				<div style="margin-top: 2em; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
+					<button id="modal-cancel-btn" class="button small" data-translate-key="modalBtnCancel">Zrušiť</button>
+					<button id="modal-save-btn" class="button small primary" data-translate-key="modalBtnSave">Uložiť</button>
+				</div>
+			</div>
+		</div>
+		<!-- END MODAL WINDOW -->
+
+		<!-- Footer -->
+			<footer id="footer" class="wrapper alt">
+				<div class="inner">
+					<ul class="menu">
+						<li data-translate-key="footerRights">&copy; 2025 PulserBot (MIT License) | Kontakt: <a href="mailto:yourpulserbot@gmail.com">yourpulserbot@gmail.com</a></li>
+						<li>Design: <a href="http://html5up.net">HTML5 UP</a> (CCA 3.0)</li>
+					</ul>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+			<!-- Minimal Dependencies -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			
+			<!-- Firebase SDK -->
+			<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+			<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+			<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+			
+			<!-- Custom App Scripts -->
+			<script src="assets/js/translations.js"></script>
+			<script src="assets/js/themes-config.js"></script> <!-- Added: Themes Config -->
+			<script src="assets/js/firebase-config.js"></script>
+			<script src="assets/js/app.js"></script>
+	</body>
+</html>
+<!-- End of webapp/login.html (v. 0010) -->

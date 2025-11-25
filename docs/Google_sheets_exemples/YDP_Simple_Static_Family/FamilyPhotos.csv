@@ -1,5 +1,12 @@
-photo_name,photo_url,caption,family_quotes,used,date_used
-vianoce_007_2008_so4wmt,https://res.cloudinary.com/dedejragd/.../xxx.jpg,memory of 2008,Family is our first mirror in which we learn who we are.,FALSE,
-vianoce_005_2008_qjaz0y,https://res.cloudinary.com/dedejragd/.../xxx.jpg,memory of 2008,"There is no perfect family, but the right one does.",FALSE,
-vianoce_006_2008_aqq3bn,https://res.cloudinary.com/dedejragd/.../xxx.jpg,memory of 2008,"The strength of a family is not measured in grand gestures, but in quiet assurances.",FALSE,
-vianoce_004_2008_tzrr6h,https://res.cloudinary.com/dedejragd/.../xxx.jpg,memory of 2008,Family is a place where we learn to let go and be forgiven.,FALSE,
+photo_name,photo_url,caption,family_quotes,language,used,date_used
+vianoce_007_2008_so4wmt,https://res.cloudinary.com....jpg,spomienka na rok 2008,Rodina je ...,slovak,TRUE,15/11/2025 19:06
+vianoce_006_2008_aqq3bn,https://res.cloudinary.com....jpg,spomienka na rok 2008,Sila rodiny sa nemeria..,slovak,TRUE,21/11/2025 10:15
+vianoce_004_2008_tzrr6h,https://res.cloudinary.com....jpg,spomienka na rok 2008,Rodina je ...,slovak,FALSE,
+vianoce_003_2008_k2r7ck,https://res.cloudinary.com....jpg,spomienka na rok 2008,Sila rodiny sa nemeria..,slovak,FALSE,
+vianoce_001_2008_sxmfsd,https://res.cloudinary.com....jpg,spomienka na rok 2008,"Rodina je miesto, kde sa..",slovak,FALSE,
+rodina_009_2019_ricv4z,https://res.cloudinary.com....jpg,spomienka na rok 2019,Sila rodiny sa nemeria..,slovak,TRUE,11/11/2025 10:16
+leto_011_2014_eny5rt,https://res.cloudinary.com....jpg,Memory from 2014,Family is the place where our past is understood and our future is welcome.,english,FALSE,
+leto_010_2017_pugeph,https://res.cloudinary.com....jpg,Memory from 2017,The power of family is in its ability to start over every day.,english,FALSE,
+leto_010_2014_gcyxmr,https://res.cloudinary.com....jpg,Memory from 2014,"In a family, we are more than just the sum of our parts.",english,FALSE,
+leto_009_2017_mbbxil,https://res.cloudinary.com....jpg,Memory from 2017,Family is the place where we can laugh the loudest and cry the safest.,english,FALSE,
+leto_009_2014_j5q1wg,https://res.cloudinary.com....jpg,Memory from 2014,"In a family, we learn the art of patience.",english,FALSE,

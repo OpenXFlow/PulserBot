@@ -1,0 +1,428 @@
+/*
+ * app.css
+ * Custom application-specific styles for YourDailyPulse login and dashboard.
+ */
+
+/* --- General Helper Classes --- */
+
+.hidden {
+    display: none !important;
+}
+
+/* --- Main Content Centering --- */
+
+#app-main-content > .inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
+    min-height: 100%; /* Ensure it takes full height */
+}
+
+/* --- Sidebar Enhancements --- */
+
+/* Make sidebar content aligned to the top, not centered vertically */
+#sidebar > .inner {
+    justify-content: flex-start;
+}
+
+/* Style for the new app navigation menu */
+#app-nav {
+    text-align: right;
+    width: 100%;
+}
+
+/* Style for the container holding lang switcher and back link */
+.sidebar-footer {
+    margin-top: auto; /* Pushes the footer to the bottom */
+    padding-top: 1.5em;
+    width: 100%;
+}
+
+#sidebar .lang-switcher {
+    text-align: right;
+    padding-bottom: 1.5em;
+}
+
+#sidebar .lang-option {
+    display: inline-block;
+    width: 32px;
+    height: 24px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 4px;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: opacity 0.2s ease-in-out;
+    opacity: 0.5;
+}
+
+#sidebar .lang-option:hover {
+    opacity: 0.75;
+}
+
+#sidebar .lang-option.active {
+    opacity: 1;
+    box-shadow: 0 0 0 2px #ffffff;
+}
+
+#sidebar .lang-option[data-lang="sk"] {
+    background-image: url('../../images/flags/sk.svg');
+}
+
+#sidebar .lang-option[data-lang="en"] {
+    background-image: url('../../images/flags/gb.svg');
+}
+
+#sidebar .lang-separator {
+    display: inline-block;
+    margin: 0 0.5em;
+    color: rgba(255, 255, 255, 0.35);
+    vertical-align: middle;
+}
+
+#sidebar .back-to-home {
+    border-top: solid 1px rgba(255, 255, 255, 0.15);
+    padding-top: 1.5em;
+    text-align: right;
+    font-size: 0.8em;
+}
+
+#sidebar .back-to-home a {
+    border: none;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+#sidebar .back-to-home a:hover {
+    color: #ffffff;
+}
+
+
+/* --- Auth Forms & Containers --- */
+
+#auth-container,
+#verification-container,
+#dashboard-container {
+    max-width: 40em;
+    width: 100%;
+}
+
+.form-container .fields {
+    width: 100%;
+    margin: 0 0 2em 0;
+    padding: 0;
+}
+
+.form-container .field {
+    width: 100%;
+    padding: 0;
+    margin-bottom: 1.5em;
+}
+
+.auth-switch {
+    margin-top: 1.5em;
+    font-size: 0.8em;
+}
+
+.auth-switch a {
+    color: #ffffff;
+    border-bottom-color: #ffffff;
+    text-decoration: none;
+}
+
+.error-message {
+    color: #ff6384;
+    font-size: 0.9em;
+    margin-top: 1em;
+    min-height: 1.5em;
+}
+
+.status-message {
+    color: #4bc0c0;
+    font-size: 0.9em;
+    margin-top: 1em;
+    min-height: 1.5em;
+}
+
+
+/* --- Dashboard Specific Styles --- */
+
+#subscriptions-form {
+    margin-top: 2em;
+}
+
+/* NEW DASHBOARD STYLES (Setup Sections) */
+.setup-section {
+    margin-bottom: 2em;
+}
+
+.setup-section h3 {
+    color: #b74e91;
+    font-size: 1.1em;
+    margin-bottom: 0.5em;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.instruction {
+    font-size: 0.9em;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1em;
+    padding-left: 0.5em;
+    border-left: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Timezone Select */
+#timezone-select {
+    height: 2.75em;
+    line-height: 2.75em;
+    background-color: #312450;
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+}
+#timezone-select option {
+    background-color: #312450;
+    color: #ffffff;
+}
+
+/* Themes List */
+.theme-row {
+    padding: 1em 1.5em;
+    background: rgba(255, 255, 255, 0.03);
+    margin-bottom: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    border: solid 1px rgba(255, 255, 255, 0.15);
+    border-radius: 0.25em;
+}
+
+.theme-header {
+    display: flex;
+    align-items: flex-start; /* Changed from center to start for multiline left side */
+    justify-content: space-between;
+    width: 100%;
+    min-height: 3em; /* Ensure height even if empty */
+}
+
+.theme-title-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5em;
+    padding-top: 0.2em; /* Align slightly with inputs */
+}
+
+.theme-header h4 {
+    margin: 0;
+    font-size: 1em;
+    color: #ffffff;
+    line-height: 1.3;
+}
+
+.theme-controls {
+    display: flex;
+    align-items: center;
+    gap: 1.5em;
+    margin-top: 0;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.control-group label {
+    font-size: 0.8em;
+    margin: 0;
+    font-weight: normal;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.theme-time-select, .theme-lang-select {
+    height: 2em;
+    line-height: 2em;
+    padding: 0 2em 0 0.5em;
+    font-size: 0.8em;
+    width: auto;
+    background-color: #312450;
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+}
+
+.theme-time-select option,
+.theme-lang-select option {
+    background-color: #312450;
+    color: #ffffff;
+}
+
+/* Custom Checkbox Group */
+.toggle-group {
+    margin-left: 1em;
+    display: flex;
+    align-items: center;
+    height: 2em;
+}
+
+input[type="checkbox"].theme-active-cb {
+    margin-top: 0;
+}
+
+
+/* --- Day Picker (Final Fix) --- */
+.day-picker {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    justify-content: flex-start;
+    padding-top: 0.8em;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-wrap: wrap;
+}
+
+.day-cb {
+    display: none !important;
+}
+
+.day-cb + label {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    
+    width: 2.2em;
+    height: 2.2em;
+    border-radius: 50%;
+    
+    padding: 0 !important; 
+    margin: 0 !important;
+    text-indent: 0 !important;
+    line-height: normal !important;
+    
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.5);
+    
+    font-size: 0.85em;
+    font-weight: normal;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.day-cb + label:before,
+.day-cb + label:after {
+    content: none !important;
+    display: none !important;
+}
+
+.day-cb:hover + label {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #ffffff;
+}
+
+.day-cb:checked + label {
+    background: #ffffff;
+    color: #5e42a6; 
+    border-color: #ffffff;
+    font-weight: bold;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+/* --- MODAL STYLES --- */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 20000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1em;
+}
+
+.modal-content {
+    background: #312450;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border-radius: 0.5em;
+}
+
+.modal-section {
+    margin-bottom: 1.5em;
+}
+
+.modal-input-row {
+    margin-bottom: 0.5em;
+    display: flex;
+    gap: 10px;
+}
+
+.modal-input-row input {
+    font-size: 0.8em;
+}
+
+/* Edit Content Button Style */
+.edit-content-btn {
+    font-size: 0.65em;
+    padding: 0 0.8em;
+    height: 1.8em;
+    line-height: 1.8em;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    color: #fff;
+    border-radius: 0.25em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+}
+
+.edit-content-btn:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: #ffffff;
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 736px) {
+    .theme-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1em;
+    }
+    .theme-controls {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 0;
+    }
+    .theme-time-select, .theme-lang-select {
+        width: 100%;
+    }
+    .day-picker {
+        justify-content: space-between;
+    }
+    .edit-content-btn {
+        margin-top: 0.5em;
+    }
+}
+
+/* --- Header Logout Button --- */
+#logout-button-container {
+    padding-left: 2em;
+}
+#logout-button {
+    padding: 0 1.5em;
+    height: 2.5em;
+    line-height: 2.5em;
+    font-size: 0.8em;
+    border: none;
+}
+
+/* End of webapp/assets/css/app.css (v. 0009) */
