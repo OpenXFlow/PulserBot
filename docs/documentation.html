@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YourDailyPulse - Developer Documentation</title>
+    <!-- Mermaid JS for diagrams -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+    <style>
+        :root {
+            --bg-color: #fdfdfd;
+            --sidebar-bg: #111827;
+            --sidebar-text: #d1d5db;
+            --sidebar-hover-bg: #1f2937;
+            --sidebar-hover-text: #ffffff;
+            --text-color: #1f2937;
+            --header-color: #000000;
+            --accent-color: #3b82f6;
+            --code-bg: #f3f4f6;
+            --border-color: #e5e7eb;
+            --note-bg: #eff6ff;
+            --note-border: #93c5fd;
+            --warning-bg: #fffbeb;
+            --warning-border: #fcd34d;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+        }
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            padding: 25px;
+            box-sizing: border-box;
+            border-right: 1px solid var(--border-color);
+        }
+        .sidebar .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+        .sidebar .tagline {
+            font-size: 0.9em;
+            color: #9ca3af;
+            margin-bottom: 30px;
+        }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar ul li a {
+            color: var(--sidebar-text);
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            border-radius: 6px;
+            transition: all 0.2s ease-in-out;
+            font-weight: 500;
+        }
+        .sidebar ul li a:hover {
+            background-color: var(--sidebar-hover-bg);
+            color: var(--sidebar-hover-text);
+        }
+        .content {
+            margin-left: 280px;
+            padding: 40px 50px;
+            width: calc(100% - 280px);
+        }
+        section { margin-bottom: 70px; padding-top: 80px; margin-top: -60px; }
+        h1, h2, h3, h4 { color: var(--header-color); scroll-margin-top: 80px; font-weight: 600; }
+        h1 { font-size: 2.5em; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; }
+        h2 { font-size: 1.8em; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 40px;}
+        h3 { font-size: 1.4em; margin-top: 30px;}
+        code {
+            background-color: var(--code-bg);
+            padding: 3px 7px;
+            border-radius: 5px;
+            font-family: "SF Mono", "Consolas", "Monaco", monospace;
+            font-size: 0.9em;
+            border: 1px solid var(--border-color);
+        }
+        pre {
+            background-color: #1f2937;
+            color: #d1d5db;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: none;
+        }
+        pre code { padding: 0; background-color: transparent; border: none; color: #d1d5db;}
+        .warning, .note { padding: 20px; margin: 25px 0; border-radius: 8px; }
+        .warning { background-color: var(--warning-bg); border-left: 5px solid var(--warning-border); }
+        .note { background-color: var(--note-bg); border-left: 5px solid var(--note-border); }
+        table { width: 100%; border-collapse: collapse; margin: 25px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        th, td { border: 1px solid var(--border-color); padding: 12px 15px; text-align: left; }
+        th { background-color: #f9fafb; font-weight: 600; }
+        .header-image {
+            max-width: 600px;
+            height: auto;
+            border-radius: 12px;
+            margin: 20px auto 40px auto;
+            display: block;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        /* Mermaid Diagram Container */
+        .mermaid {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin: 30px 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        footer { margin-top: 50px; padding-top: 25px; border-top: 1px solid var(--border-color); color: #6b7280; text-align: center; }
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .sidebar { position: static; width: 100%; height: auto; }
+            .content { margin-left: 0; width: 100%; padding: 20px; }
+            section { padding-top: 60px; margin-top: -40px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">YourDailyPulse</div>
+        <div class="tagline">Developer Documentation v3.2</div>
+        <ul>
+            <li><a href="#overview">1. Overview</a></li>
+            <li><a href="#architecture">2. Architecture & Flows</a></li>
+            <li><a href="#setup-initial">3. Initial Setup</a></li>
+            <li><a href="#setup-config">4. Configuration & DB</a></li>
+            <li><a href="#setup-local">5. Local Testing</a></li>
+            <li><a href="#deployment">6. Deployment</a></li>
+            <li><a href="#management">7. Management & Tools</a></li>
+            <li><a href="#extending">8. Extending the Bot</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <header>
+            <h1>YourDailyPulse Developer Guide</h1>
+            <p>This document provides a complete guide for setting up, configuring, deploying, and maintaining the <strong>Hybrid Firebase/Python</strong> version of YourDailyPulse.</p>
+            <img src="assets/PulserBot.png" alt="YourDailyPulse Project Visual" class="header-image">
+        </header>
+
+        <section id="overview">
+            <h2>1. Overview</h2>
+            <p><strong>YourDailyPulse</strong> is a robust hybrid system combining a user-friendly Frontend (Web App) with a powerful Backend (Python Bot).</p>
+            <h3>Key Features</h3>
+            <ul>
+                <li><strong>Hybrid Architecture:</strong> A static Web App (GitHub Pages) serves as the user interface, while a Python backend executes logic based on data in Cloud Firestore.</li>
+                <li><strong>Self-Service:</strong> Users sign up, verify emails, and configure their subscriptions/timezones via the Web App.</li>
+                <li><strong>Config is King:</strong> Operational parameters are defined in <code>config.json</code>, but user data lives dynamically in Firestore.</li>
+                <li><strong>Multi-Environment Support:</strong> Can run "Serverless" via GitHub Actions or as a "Service" via Render.</li>
+            </ul>
+        </section>
+
+        <section id="architecture">
+            <h2>2. Architecture & Flows</h2>
+            <p>The system acts as a bridge between user preferences (Frontend) and content delivery (Backend).</p>
+            
+            <h3>2.1. High-Level Component Diagram</h3>
+            <p>This diagram shows how the Frontend and Backend are completely decoupled and communicate solely through Firebase.</p>
+            <div class="mermaid">
+            graph TD
+                User((User))
+                
+                subgraph Frontend [Frontend / Web App]
+                    WebApp[HTML/JS App]
+                    ConfigJS[firebase-config.js]
+                end
+                
+                subgraph Cloud [Firebase Ecosystem]
+                    Auth[Firebase Auth]
+                    DB[(Firestore DB)]
+                end
+                
+                subgraph Backend [Backend Python]
+                    Script[Script Runner]
+                    ConfigJSON[config.json]
+                end
+                
+                subgraph External [External Services]
+                    Telegram[Telegram API]
+                    LLM[Groq LLM]
+                    Sheets[Google Sheets]
+                end
+                
+                User -->|1. Configures| WebApp
+                WebApp -->|2. Authenticates| Auth
+                WebApp -->|3. Saves Settings| DB
+                
+                Script -->|4. Reads Settings| DB
+                Script -->|5. Reads System Config| ConfigJSON
+                Script -->|6. Generates Content| LLM
+                Script -->|6. Fetches Data| Sheets
+                Script -->|7. Sends Message| Telegram
+                Telegram -->|8. Delivers| User
+            </div>
+
+            <h3>2.2. Execution Flow: GitHub Actions (Serverless)</h3>
+            <p>This is the default mode. It uses <code>run_once.py</code> triggered by a CRON job. Ideal for keeping costs at zero.</p>
+            <div class="mermaid">
+            sequenceDiagram
+                participant GA as GitHub Actions
+                participant Trigger as trigger_jobs.py
+                participant Core as run_once.py
+                participant DB as Firestore
+                participant TG as Telegram
+                
+                Note over GA: Runs every 60 mins
+                GA->>Trigger: Start Dispatcher
+                Trigger->>Trigger: Load config.json
+                Trigger->>Trigger: Check Current Time vs Schedule
+                
+                opt Schedule Match (e.g., 07:00)
+                    Trigger->>Core: Subprocess: "python run_once.py time07"
+                    Core->>DB: Fetch Active Users
+                    DB-->>Core: Users List
+                    
+                    loop For Each User
+                        Core->>Core: Calc User's LOCAL Time
+                        opt Local Time == Trigger Time (07:00)
+                            Core->>Core: Generate Content (LLM/Static)
+                            Core->>TG: Send Message
+                        end
+                    end
+                    Core-->>Trigger: Done
+                end
+                Trigger-->>GA: Exit
+            </div>
+
+            <h3>2.3. Execution Flow: Render/Heroku (Service)</h3>
+            <p>This mode uses <code>main.py</code>. It runs 24/7, has an internal scheduler, and a web server for health checks.</p>
+            <div class="mermaid">
+            sequenceDiagram
+                participant Render as Render.com
+                participant Main as main.py
+                participant Scheduler as APScheduler
+                participant Web as Flask Server
+                participant Core as Core Logic
+                
+                Render->>Main: Start Application
+                Main->>Web: Start Background Thread (Port 10000)
+                Note right of Web: Responds "OK" to Ping
+                
+                Main->>Scheduler: Start BlockingScheduler
+                Note right of Scheduler: Configured to tick at minute 0
+                
+                loop Every Hour (XX:00)
+                    Scheduler->>Core: Job: hourly_service_tick
+                    Core->>Core: (Same logic as run_once)
+                    Core->>Firestore: Fetch Users
+                    Core->>Telegram: Send Messages
+                end
+            </div>
+        </section>
+
+        <section id="setup-initial">
+            <h2>3. Initial Setup</h2>
+
+            <h3>3.1. Firebase Setup (Crucial)</h3>
+            <p>This is the heart of the new system.</p>
+            <ol>
+                <li>Create a project at <a href="https://console.firebase.google.com/">Firebase Console</a>.</li>
+                <li><strong>Authentication:</strong> Enable "Email/Password" provider.</li>
+                <li><strong>Firestore Database:</strong> Create a database. Set rules to allow users to read/write only their own documents.</li>
+                <li><strong>Service Account:</strong> Generate a new private key (JSON) in Project Settings > Service Accounts. Rename it to <code>credentials.json</code>.</li>
+                <li><strong>Web App Config:</strong> Register a Web App in Firebase settings. Copy the config object to `webapp/assets/js/firebase-config.js`.</li>
+            </ol>
+		
+            <h3>3.2. Other API Keys</h3>
+            <p>Obtain these for the backend:</p>
+            <ul>
+                <li><strong>Telegram:</strong> Bot Token via <code>@BotFather</code>.</li>
+                <li><strong>Groq:</strong> For LLM generation.</li>
+                <li><strong>Sentry:</strong> For monitoring (DSN URL).</li>
+                <li><strong>OpenWeatherMap & Unsplash:</strong> Optional but recommended.</li>
+            </ul>
+        </section>
+        
+        <section id="setup-config">
+            <h2>4. Configuration & Database</h2>
+
+            <h3>4.1. Data Flow Diagram</h3>
+            <p>Understanding where data comes from is key to customization.</p>
+            <div class="mermaid">
+            graph LR
+                Config[config.json] -- Defines Structure --> Bot
+                Sheets[Google Sheets] -- Raw Content (Verses, Quotes) --> Bot
+                
+                User[User Input] -- Preferences --> Firestore[(Firestore)]
+                Firestore -- User Settings (Timezone, Topics) --> Bot
+                
+                Bot -- Processed Message --> User
+            </div>
+
+            <h3>4.2. Firestore (User Config)</h3>
+            <p>User data is stored in the `users` collection. Each document ID is the User UID.</p>
+            <pre>{
+  "email": "user@example.com",
+  "timezone": "Europe/Bratislava",
+  "channels": [{ "platform": "telegram", "identifier": "123456" }],
+  "subscriptions": {
+    "time07": [{ "theme": "morning_briefing_sk", "days": [0,1,2,3,4,5,6] }]
+  },
+  "weather": { "locations": [{ "location": "Bratislava,SK" }] }
+}</pre>
+        </section>
+
+        <section id="setup-local">
+            <h2>5. Local Testing</h2>
+            <p>Always test your backend logic locally before pushing.</p>
+            <ol>
+                <li><strong>Environment:</strong>
+                    <pre><code>python -m venv .venv
+source .venv/bin/activate  # or .venv\Scripts\activate
+pip install -r requirements.txt</code></pre>
+                </li>
+                <li><strong>Secrets:</strong> Ensure <code>.env</code> and <code>credentials.json</code> are in the root folder.</li>
+                <li><strong>Run a Job:</strong>
+                    <div class="note">Use `run_once.py` to simulate a scheduled run.</div>
+                    <pre><code># Run logic for 'time07' for a specific user email
+python run_once.py time07 users test@example.com force</code></pre>
+                    <em>(The `force` flag ignores cache and regenerates content.)</em>
+                </li>
+            </ol>
+        </section>
+        
+        <section id="deployment">
+            <h2>6. Deployment</h2>
+            
+            <h3>6.1. Backend (GitHub Actions)</h3>
+            <ol>
+                <li>Upload code to GitHub.</li>
+                <li>In Repo Settings > Secrets, add your env variables (`GROQ_API_KEY`, `TELEGRAM_BOT_TOKEN`, etc.).</li>
+                <li>Add `GCP_SA_KEY` secret containing the <strong>text content</strong> of `credentials.json`.</li>
+                <li>The workflow in `.github/workflows/scheduler.yml` will start automatically.</li>
+            </ol>
+            
+            <h3>6.2. Frontend (GitHub Pages)</h3>
+            <ol>
+                <li>Ensure your `docs/index.html` contains the redirection logic to your Firebase Web App URL.</li>
+                <li>Go to Repo Settings > Pages.</li>
+                <li>Set Source to `main` branch and folder `/docs`.</li>
+            </ol>
+        </section>
+        
+        <section id="management">
+            <h2>7. Management & Tools</h2>
+            <p>The project includes `tools.py` for admin tasks.</p>
+
+            <h3>Database Backups</h3>
+            <p>Since users are now in Firestore, backing them up is critical.</p>
+            <pre><code># Backup Firestore users to a local JSON file
+python tools.py backup_firestore
+
+# Restore users from a backup file (WARNING: Overwrites data)
+python tools.py restore_firestore backups/firestore_users_backup_....json</code></pre>
+            
+            <h3>Content Management</h3>
+            <pre><code># Download all Google Sheets for local backup
+python tools.py download_sheets ./backups</code></pre>
+        </section>
+
+        <section id="extending">
+            <h2>8. Extending the Bot</h2>
+            <p>Adding a new theme requires changes in both Backend and Frontend.</p>
+            <ol>
+                <li><strong>Backend:</strong>
+                    <ul>
+                        <li>Create a handler in <code>src/handlers/</code>.</li>
+                        <li>Register it in `core.py` mapping.</li>
+                        <li>Add config entry in `config.json`.</li>
+                    </ul>
+                </li>
+                <li><strong>Frontend:</strong>
+                    <ul>
+                        <li>Add theme definition to `webapp/assets/js/themes-config.js`.</li>
+                        <li>Add description/images to `webapp/assets/js/theme-details.js`.</li>
+                        <li>Add translation strings to `translations.js`.</li>
+                    </ul>
+                </li>
+            </ol>
+        </section>
+
+    </div>
+    <footer>
+        YourDailyPulse Documentation v. 3.2 (Hybrid Firebase Edition)
+    </footer>
+</body>
+</html>
+--- END OF FILE documentation.html ---

@@ -1,203 +1,150 @@
-# Architecture and Data Flow: YourDailyPulse
+--- START OF FILE 00_architecture.md ---
 
-This document describes the architecture and detailed data flow of the YourDailyPulse application. The goal is to visualize how individual components and external services work together and how the application is deployed.
+# Architecture and Data Flow: YourDailyPulse (Hybrid Firebase Edition)
+
+This document describes the architecture of the YourDailyPulse application in its version 3.x. This version introduces a **Hybrid Architecture** that decouples the user interface (Frontend) from the processing logic (Backend) using cloud infrastructure.
 
 ## Key System Components
 
--   **GitHub:** Source code repository and the trigger for the automated deployment and execution process.
--   **GitHub Actions:** The primary automation tool that runs scheduled tasks.
--   **Application (Python Scripts):** The main Python application, which acts as an orchestrator and a set of tools.
--   **Sentry.io:** An external monitoring service that collects errors, logs, and performance metrics in real time.
--   **Google Sheets API:** An external service used as a persistent database for content.
--   **LLM API (e.g., Groq):** An external LLM service that generates creative text for specific topics.
--   **Telegram API:** An external service through which content is delivered to users.
--   **Image APIs (e.g., Unsplash, Cloudinary):** External services for retrieving or hosting images.
+-   **Frontend (Web App):** A static HTML/JS application hosted on **GitHub Pages**. It serves as the control panel where users register, log in, and configure their subscriptions.
+-   **Cloud Infrastructure (Firebase):**
+    -   **Authentication:** Handles user sign-up, login, and email verification securely.
+    -   **Firestore Database:** The central source of truth. It stores user profiles, subscriptions, settings, and the daily content cache.
+-   **Backend (Python Core):** The logic engine responsible for generating and delivering content. It supports two runtime modes:
+    -   **Serverless (GitHub Actions):** Runs periodically via `run_once.py` (triggered by CRON) to minimize costs.
+    -   **Service (Render):** Runs continuously via `main.py` with an internal scheduler.
+-   **External APIs:** Telegram (delivery), Groq (LLM generation), Google Sheets (static content source), Unsplash (images).
 
 ---
 
-## 1. Component Architecture Diagram
+## 1. High-Level Component Architecture
 
-This diagram shows the main **static building blocks** of the system and their dependencies.
-
-```mermaid
-graph TD
-    subgraph "Application (src/)"
-        A[Python Application]
-        A -- "Uses logic from" --> Handlers["Handlers (src/handlers/)"]
-        A -- "Reads" --> Resources["Resources (src/resources/)"]
-    end
-
-    subgraph "Main Configuration"
-        Config["config.json"]
-    end
-
-    subgraph "External Services (API)"
-        direction LR
-        GSheets["Google Sheets API"]
-        LLM["LLM API (Groq)"]
-        Telegram["Telegram API"]
-        Sentry["Sentry API"]
-        Images["Image APIs"]
-    end
-
-    A -- "Reads" --> Config
-    Handlers -- "Read" --> Resources
-    Handlers -- "Read/Write" --> GSheets
-    Handlers -- "Call" --> LLM
-    A -- "Sends messages via" --> Telegram
-    A -- "Sends logs and errors to" --> Sentry
-    Handlers -- "Retrieve images from" --> Images
-```
-
----
-
-## 2. Deployment Diagram
-
-This diagram visualizes **where each software component is deployed** and how they communicate within the real infrastructure.
+This diagram illustrates how the Frontend and Backend are decoupled and communicate solely through the Cloud Database.
 
 ```mermaid
 graph TD
-    subgraph "User"
-        UserDevice["User's Device (Mobile/PC)"]
-        UserDevice -- "interacts with" --> TelegramApp[Telegram Application]
+    subgraph "Frontend (User Control)"
+        WebApp["Web Application<br>(HTML/JS on GitHub Pages)"]
+        AuthConfig["firebase-config.js"]
     end
 
     subgraph "Cloud Infrastructure"
-        GitHub["GitHub"]
-        ExternalServices["External Services"]
+        Auth["Firebase Authentication"]
+        DB[("Firestore Database<br>(Users + Cache)")]
     end
-    
-    subgraph GitHub
+
+    subgraph "Backend (Content Worker)"
+        Orchestrator["Job Orchestrator<br>(core.py)"]
+        Handlers["Content Handlers<br>(src/handlers/)"]
+        Config["System Config<br>(config.json)"]
+    end
+
+    subgraph "External Services"
         direction LR
-        Repo["Git Repository"]
-        Actions["GitHub Actions (Runner)"]
+        Telegram["Telegram API"]
+        LLM["LLM API (Groq)"]
+        Sheets["Google Sheets"]
+        Images["Image APIs"]
     end
 
-    subgraph Actions
-        Trigger["trigger_jobs.py (Dispatcher)"]
-        RunOnce["run_once.py (Worker)"]
-    end
+    %% Flows
+    WebApp -- "Authenticates via" --> Auth
+    WebApp -- "Reads/Writes User Settings" --> DB
     
-    subgraph ExternalServices
-        LLM_API["LLM API (Groq)"]
-        GSheets_API["Google Sheets API"]
-        Telegram_API["Telegram API"]
-        Sentry_API["Sentry API"]
-        Image_APIs["Image APIs"]
-    end
-
-    Repo -- "contains code for" --> Trigger
-    Repo -- "contains code for" --> RunOnce
-    Trigger -- "runs" --> RunOnce
+    Orchestrator -- "Reads System Settings" --> Config
+    Orchestrator -- "Fetches Active Users" --> DB
+    Orchestrator -- "Checks/Saves Content Cache" --> DB
     
-    TelegramApp <--> Telegram_API
-    RunOnce -- "calls" --> LLM_API
-    RunOnce -- "reads/writes to" --> GSheets_API
-    RunOnce -- "sends via" --> Telegram_API
-    RunOnce -- "reports to" --> Sentry_API
-    RunOnce -- "retrieves from" --> Image_APIs
-    Trigger -- "reads/writes to" --> GSheets_API
-    Trigger -- "reports to" --> Sentry_API
+    Orchestrator -- "Dispatches to" --> Handlers
+    Handlers -- "Fetches Raw Content" --> Sheets
+    Handlers -- "Generates Text" --> LLM
+    Handlers -- "Fetches Images" --> Images
+    
+    Orchestrator -- "Delivers Message" --> Telegram
 ```
 
 ---
 
-## 3. CI/CD Process Diagram (Continuous Integration / Continuous Deployment)
+## 2. Execution Flow: Backend (Serverless / GitHub Actions)
 
-This diagram describes how code changes are automatically deployed and executed.
-
-```mermaid
-graph LR
-    subgraph "Developer (Your PC)"
-        A["Code Changes"]
-    end
-
-    subgraph "Versioning and Automation"
-        B["GitHub Repository"]
-        C["GitHub Actions"]
-    end
-
-    A -- "1. git push" --> B
-    B -- "2. Triggers Workflow (on push/schedule)" --> C
-    C -- "3. Fetches latest code" --> B
-    C -- "4. Installs dependencies" --> C
-    C -- "5. Runs dispatcher script (trigger_jobs.py)" --> C
-```
-
----
-
-## 4. Sequence Diagram: Complete Flow from Scheduler to User
-
-This diagram shows the complete **communication over time** between all components of the live application.
+This is the standard execution mode triggered by a CRON schedule (e.g., every hour).
 
 ```mermaid
 sequenceDiagram
-    participant GitHub Actions
-    participant Dispatcher (trigger_jobs.py)
-    participant Worker (run_once.py)
-    participant Sentry API
-    participant Google Sheets API
-    participant Telegram API
-
-    GitHub Actions->>Dispatcher: Runs script on schedule (e.g., every hour)
-    Dispatcher->>Sentry API: Initialize Sentry SDK
-    Dispatcher->>Google Sheets API: Check for a lock in the 'Jobs' sheet
-    Google Sheets API->>Dispatcher: Return status (not found)
+    participant GA as GitHub Actions
+    participant Trigger as Trigger Script (trigger_jobs.py)
+    participant Core as Core Logic (run_once.py)
+    participant DB as Firestore
+    participant Handler as Content Handler
+    participant TG as Telegram
     
-    Dispatcher->>Google Sheets API: Write a new lock to the 'Jobs' sheet
-    Dispatcher->>Worker: subprocess.run('python run_once.py timeX')
+    Note over GA: Scheduled Trigger (e.g. every 60 mins)
+    GA->>Trigger: Execute trigger_jobs.py
+    Trigger->>Trigger: Load config.json
+    Trigger->>Trigger: Check Current Time vs Schedule
     
-    Worker->>Sentry API: Initialize Sentry SDK
-    Worker->>Worker: Prepare content groups
-    
-    loop For each group (theme, language)
-        Worker->>Worker: _process_group (creates and runs a Handler)
-        Note over Worker: Handler loads content (Sheets, API) and composes the text
-        Worker->>Telegram API: Send photo/message
+    opt Schedule Match (e.g., "time07" at 07:00)
+        Trigger->>Core: Subprocess: "python run_once.py time07"
+        
+        rect rgb(240, 248, 255)
+            note right of Core: Initialization
+            Core->>DB: Fetch Active Users (Snapshot)
+            DB-->>Core: User List (Timezones, Subs)
+        end
+        
+        loop For Each User
+            Core->>Core: Calculate User's LOCAL Time
+            
+            opt Local Time == Trigger Time
+                note right of Core: Processing
+                Core->>Handler: Execute Handler (e.g. Morning Briefing)
+                
+                alt Cache Enabled?
+                    Handler->>DB: Get Cached Content?
+                end
+                
+                alt Cache Hit
+                    DB-->>Handler: Return Cached Text/Image
+                else Cache Miss
+                    Handler->>Handler: Call LLM / Sheets / Images
+                    Handler->>DB: Save to Cache
+                end
+                
+                Handler-->>Core: Final Content
+                Core->>TG: Send Message (Text/Photo)
+            end
+        end
+        Core-->>Trigger: Job Complete
     end
-    
-    Worker->>Sentry API: Flush remaining events
-    Dispatcher->>Dispatcher: Script ends
+    Trigger-->>GA: Exit
 ```
 
 ---
 
-## 5. Internal Flow Diagram of `JobProcessor` (Handler Pattern)
+## 3. Execution Flow: Backend (Service / Render)
 
-This diagram illustrates the **logical steps and decisions** within the main `JobProcessor` class, highlighting the use of the new "Handler" design pattern.
+This mode uses `main.py` as a persistent service.
 
 ```mermaid
-graph TD
-    A["Start job for 'time_key'"] --> B["_prepare_content_groups()"];
+sequenceDiagram
+    participant Render as Render.com
+    participant Main as main.py
+    participant Scheduler as APScheduler
+    participant Web as Flask Server
+    participant Core as Core Logic
     
-    subgraph "Parallel Monitoring"
-        Sentry["All steps and errors are logged to Sentry"]
+    Render->>Main: Start Application
+    Main->>Web: Start Background Thread (Port 10000)
+    Note right of Web: Responds "OK" to Ping
+    
+    Main->>Scheduler: Start BlockingScheduler
+    Note right of Scheduler: Configured to tick at minute 0
+    
+    loop Every Hour (XX:00)
+        Scheduler->>Core: Job: hourly_service_tick
+        Core->>Core: (Same logic as run_once)
+        Core->>Firestore: Fetch Users
+        Core->>Telegram: Send Messages
     end
-
-    A -- Log --> Sentry
-
-    B --> C{"Are there any subscribed users?"};
-    C -- No --> End["End job"];
-    C -- Yes --> D["Group users by (theme, language)"];
-    
-    D --> E{"Loop: For each group"};
-    E -- All groups processed --> End;
-    
-    E --> F["Get theme_config from config.json"];
-    F --> G["_process_group(theme, language, config)"];
-    
-    subgraph G [Processing via Handler]
-        direction LR
-        G1["Get 'handler_class' from config"] --> G2["Dynamically import and<br>create Handler instance<br>(e.g., BibleHandler)"];
-        G2 --> G3["Call handler.execute()"];
-        G3 --> G4["Return (text, image_url)"];
-    end
-
-    G --> H{"Content generated?"};
-    H -- No --> E;
-    H -- Yes --> I["_distribute_content()"];
-    I --> J{"Loop: For each user in the group"};
-    J --> K["Send message via Telegram API"];
-    K --> J;
-    J -- All users served --> E;
 ```
+--- END OF FILE 00_architecture.md ---

@@ -1,48 +1,73 @@
-### Theme Overview by Processing Type (`type`)
+Tu je aktualizovaný `promt_types.md`.
 
-These tables provide a detailed breakdown of each theme, its processing type, the specific source files it uses, and the Google Spreadsheets it connects to for its data. This document serves as a technical reference for understanding the data flow and logic of the application.
+**Hlavné zmeny:**
+1.  Pridaný nový typ handlera: **`UserDefinedHandler`** (pre tému Užívateľská Pripomienka).
+2.  Aktualizovaný popis pre `llm_dynamic` (zmena v počítaní komponentov).
+3.  Jasnejšie rozdelenie podľa toho, či sa používa Cache alebo nie.
+
+--- START OF FILE promt_types.md ---
+
+### Theme Overview by Processing Handler
+
+These tables provide a detailed breakdown of each theme, its processing logic (Handler), and the specific source files it uses. This document serves as a technical reference for understanding the data flow.
 
 ---
 
-#### Type: `llm_static`
+#### Handler: `LLMStaticBaseHandler` (Cached)
 
-**Description:** These themes operate by fetching a single row of static content from a designated Google Sheet. This raw data is then combined with a set of instructions from a prompt file and sent to an **LLM (Large Language Model)** for creative text generation. These themes may also be configured to fetch a dynamic image from an external provider like Unsplash to accompany the text.
+**Description:** These themes operate by fetching a single row of static content from a designated Google Sheet. This raw data is then combined with a set of instructions from a prompt file and sent to an **LLM** for creative text generation. Content is cached in Firestore for 24 hours to save costs.
 
 | Theme Name | Source Spreadsheet | Source Sheet (Worksheet) | Prompt File Used |
 | :--- | :--- | :--- | :--- |
-| `bible_sk` | `YDP_LLM_Static_Spiritual` | `BibleSk` | `src/rsc_llm_prompts/prompt_bible_slovak.txt` |
-| `bible_en` | `YDP_LLM_Static_Spiritual` | `BibleEng` | `src/rsc_llm_prompts/prompt_bible_english.txt` |
-| `philosophy_mix`| `YDP_LLM_Static_Spiritual` | `PhilosophySk` | `src/rsc_llm_prompts/prompt_philosophy_mix_slovak.txt` |
-| `stary_zakon_sk`| `YDP_LLM_Static_Spiritual` | `StaryZakonSk` | `src/rsc_llm_prompts/prompt_bible_study_slovak.txt` |
-| `novy_zakon_sk`| `YDP_LLM_Static_Spiritual` | `NovyZakonSk` | `src/rsc_llm_prompts/prompt_bible_study_slovak.txt` |
+| `bible_sk` | `YDP_LLM_Static_Spiritual` | `BibleSk` | `src/resources/llm/slovak/prompt_bible.txt` |
+| `bible_en` | `YDP_LLM_Static_Spiritual` | `BibleEng` | `src/resources/llm/english/prompt_bible.txt` |
+| `philosophy_mix`| `YDP_LLM_Static_Spiritual` | `PhilosophySk` | `src/resources/llm/slovak/prompt_philosophy_mix.txt` |
+| `stary_zakon_sk`| `YDP_LLM_Static_Spiritual` | `StaryZakonSk` | `src/resources/llm/slovak/prompt_bible_study.txt` |
+| `novy_zakon_sk`| `YDP_LLM_Static_Spiritual` | `NovyZakonSk` | `src/resources/llm/slovak/prompt_bible_study.txt` |
 
 ---
 
-#### Type: `llm_dynamic`
+#### Handler: `LLMDynamicHandler` (Cached)
 
-**Description:** This is a highly dynamic theme type that gathers data in real-time from **multiple, often rotating, sources**. It is orchestrated by the `dynamic_content_service`, which can fetch data such as weather from an API, name days from a sheet, and a rotating piece of content determined by a `Rotation` sheet. All collected data points are then injected into a prompt and sent to an **LLM**, which composes them into a single, coherent, and well-formatted message.
+**Description:** A highly dynamic handler that orchestrates a pipeline to gather data from multiple sources (Name days, Weather placeholders, Rotating content). All collected data points are injected into a prompt and sent to an **LLM**. The result is cached and shared among all users in the same group.
 
 | Theme Name | Source Spreadsheet | Source Sheets (Worksheets) | Prompt File Used |
 | :--- | :--- | :--- | :--- |
-| `morning_briefing_sk` | `YDP_LLM_Dynamic_MorningBriefing` | `Rotation`, `meninySk`, `DailyGreetings`, `HistoricalEvents`, `FunFacts`, `Quotes`, `Reflections`, `Challenges`, `Perspectives`, `WordOfTheDay` | `src/rsc_llm_prompts/prompt_morning_briefing_slovak.txt` |
+| `morning_briefing_sk` | `YDP_LLM_Dynamic_MorningBriefing` | `Rotation`, `meninySk`, `DailyGreetings`, `HistoricalEvents`... | `src/resources/llm/slovak/prompt_morning_briefing.txt` |
+| `morning_briefing_en` | `YDP_LLM_Dynamic_MorningBriefing` | `Rotation`, `DailyGreetings`, `HistoricalEvents`... | `src/resources/llm/english/prompt_morning_briefing.txt` |
 
 ---
 
-#### Type: `simple_static`
+#### Handler: `SimpleStaticHandler` (Cached)
 
-**Description:** This is the most straightforward processing type. It loads a **single row from a single static Google Sheet** and formats the data using a simple text template file. It **does not use an LLM**, instead performing a direct find-and-replace on placeholders within the template. This type is ideal for content with a fixed and unchanging structure, such as private photo captions or simple data displays.
+**Description:** The most straightforward processing type. It loads a **single row from a single static Google Sheet** and formats the data using a simple text template file (NO LLM). Ideal for content with a fixed structure, like photos with captions.
 
 | Theme Name | Source Spreadsheet | Source Sheet (Worksheet) | Template File Used |
 | :--- | :--- | :--- | :--- |
-| `family_photo` | `YDP_Simple_Static_Family` | `FamilyPhotos` | `src/rsc_templates/family_photo_slovak.txt` |
-| `european_art` | `YDP_Simple_Static_Art` | `EuArt` | `src/rsc_templates/european_art_slovak.txt` |
+| `family_photo` | `YDP_Simple_Static_Family` | `FamilyPhotos` | `src/resources/template/slovak/family_photo.txt` |
+| `european_art` | `YDP_Simple_Static_Art` | `EuArt` | `src/resources/template/slovak/european_art.txt` |
 
 ---
 
-#### Type: `dynamic_template`
+#### Handler: `DynamicTemplateHandler` (Cached)
 
-**Description:** This is an advanced, highly efficient theme type designed for complex but structured content. It dynamically assembles data from multiple sources based on a rotation mechanism, similar to `llm_dynamic`. However, it **does not use an LLM** for the final output. Instead, it **dynamically selects the appropriate text template** based on the type of content for the day (e.g., choosing a "verbs" template or an "other" template) and directly substitutes the fetched data into the placeholders. This provides dynamic content with zero LLM-related costs and maximum speed.
+**Description:** An advanced handler for complex structured content (like language lessons). It uses a **Rotation** sheet to determine the topic (e.g., "Verbs") and then dynamically selects the appropriate template file (`verbs.txt` vs `other.txt`). Zero LLM costs, high speed.
 
 | Theme Name | Source Spreadsheet | Source Sheets (Worksheets) | Template Files Used |
 | :--- | :--- | :--- | :--- |
-| `german_lesson` | `YDP_LLM_Dynamic_GermanLesson` | `Rotation`, `SlowGermanLinks`, `01_nouns_de`, `02_verbs_irregular_de`, etc. | `src/rsc_templates/german_lesson_verbs_slovak.txt`<br>`src/rsc_templates/german_lesson_other_slovak.txt` |
+| `german_lesson` | `YDP_LLM_Dynamic_GermanLesson` | `Rotation`, `SlowGermanLinks`, `01_nouns_de`... | `src/resources/template/slovak/german_lesson_verbs.txt`<br>`src/resources/template/slovak/german_lesson_other.txt` |
+
+---
+
+#### Handler: `UserDefinedHandler` (Personalized / No Cache)
+
+**Description:** The only handler that generates unique content for **every single user**. It reads custom text blocks and links directly from the User Profile in Firestore. It does NOT use Google Sheets for content.
+*Note: The accompanying image is cached globally to save API calls.*
+
+| Theme Name | Data Source | Processing Strategy | Template |
+| :--- | :--- | :--- | :--- |
+| `user_reminder` | **Firestore User Profile** | `per_user` | *Hardcoded in Handler* |
+
+--- END OF FILE promt_types.md ---
+
+Som pripravený generovať posledný súbor. Napíš **ok**.

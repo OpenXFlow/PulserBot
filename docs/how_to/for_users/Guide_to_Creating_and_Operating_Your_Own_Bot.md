@@ -1,199 +1,137 @@
-# Guide to Creating and Operating Your Own Bot
+--- START OF FILE Guide_to_Creating_and_Operating_Your_Own_Bot.md ---
 
-This document provides a comprehensive, step-by-step guide for creating, configuring, deploying, and maintaining your own automated bot instance based on the **YourDailyPulse** project. This guide is intended for technically proficient users (e.g., developers) who are comfortable with Git, Python, and cloud service APIs.
+# Guide to Creating and Operating Your Own Bot (v3.0 Hybrid)
+
+This document provides a comprehensive, step-by-step guide for creating, configuring, deploying, and maintaining your own automated bot instance based on the **YourDailyPulse** project.
+
+**Version 3.0 Update:** This guide covers the **Hybrid Architecture**, which includes setting up a **Firebase Database** and a **Frontend Web Application**.
+
+---
 
 ## 1. Initial Environment Setup
 
-This phase involves preparing your local and cloud environments.
+This phase involves preparing your local machine and registering for necessary cloud services.
 
 ### 1.1. Core Prerequisites
-- **GitHub Account:** If you don't have one, register at [github.com](https://github.com).
-- **Software Installation:** Ensure you have **Git** and **Python** (version 3.11 or newer) installed on your local machine.
-- **Code Editor:** A modern code editor like Visual Studio Code is highly recommended.
+- **GitHub Account:** Required for code hosting and automation.
+- **Google Account:** Required for Firebase and Google Sheets.
+- **Software:** Install **Git** and **Python** (3.11+) on your computer.
+- **Editor:** Visual Studio Code is recommended.
 
 ### 1.2. Project Scaffolding
-1.  **Clone the Source Project:** Download the original public project from its repository.
+1.  **Clone the Source:**
     ```bash
-    git clone https://github.com/your-username/YourDailyPulse.git
+    git clone https://github.com/YourUsername/YourDailyPulse.git
+    cd YourDailyPulse
     ```
-2.  **Create Your Private Repository:**
-    - On GitHub, create a **new, personal repository**.
-    - **Crucially, set this repository to `Private`**. This is essential to protect your personal content, API keys, and configuration files from public exposure.
-3.  **Prepare Your Local Project:**
-    - Clone your new, empty private repository to your local machine.
-    - Copy all files and folders from the original `YourDailyPulse` project into your new private project's directory.
-    - From now on, you will work exclusively within your own private repository.
-
-### 1.3. Obtaining API Keys & Credentials
-For the bot to function, you must register with several cloud services and obtain API keys. Store these keys securely, as you will need them for the `.env` file.
-
-| Service | Purpose |
-| :--- | :--- |
-| **Telegram** | To create the bot itself and get a token for sending messages. |
-| **Google Cloud** | To get `credentials.json` for accessing Google Sheets API and Google Drive API. |
-| **Groq** | Provides the LLM for creative text generation. |
-| **Sentry** | For professional error logging and application monitoring. |
-| **Unsplash** | Provides high-quality, public-domain photos. |
-| **Cloudinary** | (Optional) For hosting your own private photos (e.g., family pictures). |
-| **OpenWeatherMap**| Provides real-time weather forecasts. |
+2.  **Private Repository:** It is highly recommended to push this code to a **Private Repository** on GitHub to protect your API keys and configuration.
 
 ---
 
-## 2. Comprehensive Configuration
+## 2. Cloud Services Setup (The "Brain")
 
-This is the most critical phase. The bot's behavior is entirely controlled by three main configuration entities: `.env`, `credentials.json`, and `config.json`.
+The bot relies on external services. You must set them up first.
 
-### 2.1. `.env` File - Storing Secrets
-This file stores all your secret API keys and tokens, keeping them out of your main configuration. In the project root, rename the example file `.env.example` to **`.env`** and carefully fill in all the API keys you obtained.
+### 2.1. Firebase (Database & Auth) - **CRITICAL STEP**
+This is the central hub for user data.
+1.  Go to [console.firebase.google.com](https://console.firebase.google.com/) and create a new project (e.g., "daily-pulse-bot").
+2.  **Authentication:**
+    -   Go to **Build -> Authentication -> Sign-in method**.
+    -   Enable **Email/Password**.
+3.  **Firestore Database:**
+    -   Go to **Build -> Firestore Database**.
+    -   Click **Create Database**. Start in **Production mode**.
+    -   Choose a location near you (e.g., `eur3` for Europe).
+    -   **Set Rules:** Go to the "Rules" tab and paste the secure rules (see `docs/firestore.rules.txt`).
+4.  **Get Service Account (Backend Key):**
+    -   Project Settings -> **Service accounts**.
+    -   Click **Generate new private key**.
+    -   Save the JSON file as **`credentials.json`** in your project root.
+5.  **Get Web Config (Frontend Key):**
+    -   Project Settings -> General -> **Your apps**.
+    -   Click **</> (Web)** icon. Register app (e.g., "WebApp").
+    -   Copy the `firebaseConfig` object (API Key, etc.). You will need this for Step 4.
 
-#### How to Create a Bot and Get a Token on Telegram
-1.  **Find BotFather:** In the Telegram app, search for `@BotFather` (it has a blue verification checkmark).
-2.  **Create a New Bot:** Send the command `/newbot`.
-3.  **Set a Name:** Provide a friendly, human-readable name (e.g., `My Daily Companion`).
-4.  **Set a Username:** Provide a unique username that must end in "bot" (e.g., `MyDailyCompanion123Bot`).
-5.  **Copy the Token:** BotFather will provide a long API token. Copy this token and paste it into your `.env` file under the `TELEGRAM_BOT_TOKEN` variable.
-
-### 2.2. `credentials.json` File - Access to Google Services
-This file acts as a private key, allowing your application to authenticate with your Google account as a service.
-
-#### How to Obtain `credentials.json`
-1.  **Go to Google Cloud Console:** Navigate to [console.cloud.google.com](https://console.cloud.google.com/) and select your project (or create a new one).
-2.  **Enable APIs:** In the sidebar menu, go to **APIs & Services -> Library**. Search for and **enable** both of these APIs:
-    - **Google Drive API** (essential for discovering files)
-    - **Google Sheets API** (essential for reading/writing data)
-3.  **Create a Service Account:**
-    - Go to **IAM & Admin -> Service Accounts**.
-    - Click **+ CREATE SERVICE ACCOUNT**.
-    - Give it a name (e.g., `yourdailypulse-bot`) and click **CREATE AND CONTINUE**.
-    - In the "Grant this service account access to project" step, assign the **Editor** role to give it sufficient permissions within the project. Click **CONTINUE**, then **DONE**.
-4.  **Generate a JSON Key:**
-    - Find your newly created service account in the list. Click the three dots at the end of its row and select **Manage keys**.
-    - Click **ADD KEY -> Create new key**.
-    - Select **JSON** as the key type and click **CREATE**.
-    - Your browser will automatically download a JSON file. Rename this file to **`credentials.json`** and place it in the root directory of your project.
-
-### 2.3. Google Sheets - The Content Database
-Your content lives in Google Sheets. Our new architecture uses multiple, logically separated spreadsheets for better organization and security.
-
-#### How to Prepare Your Google Sheets
-1.  **Create the Spreadsheets:**
-    - Go to [sheets.google.com](https://sheets.google.com) and create the six required spreadsheets with these exact names:
-        1.  `YDP_System`
-        2.  `YDP_LLM_Static_Spiritual`
-        3.  `YDP_Simple_Static_Family`
-        4.  `YDP_Simple_Static_Art`
-        5.  `YDP_LLM_Dynamic_MorningBriefing`
-        6.  `YDP_LLM_Dynamic_GermanLesson`
-2.  **Create and Populate Worksheets:**
-    - For each spreadsheet, create the necessary worksheets (tabs) as defined in `config.json`.
-    - **Crucially, copy the exact column headers** for each sheet from the project's documentation (e.g., from `docs/Google_sheets_examples/`).
-    - Populate the sheets with your own data. For all new content rows, ensure the `used` column is set to `FALSE`.
-3.  **Share All Spreadsheets with the Service Account:**
-    - Open your `credentials.json` file and copy the `client_email` address (e.g., `yourdailypulse-bot@...gserviceaccount.com`).
-    - For **each of your six spreadsheets**, click the "Share" button, paste the service account's email, assign it the **Editor** role, and save.
-
-### 2.4. `config.json` - The Brain of the Application
-This file orchestrates everything. You must carefully update it to point to your new resources.
-
-1.  **Update `spreadsheet_url`:**
-    - For each of the six main entries in the `data_sources` section (`YDP_System`, `YDP_LLM_Static_Spiritual`, etc.), paste the corresponding spreadsheet URL you get from the "Share" dialog in Google Sheets.
-2.  **Configure Users and Subscriptions:**
-    - **Get Your Chat ID:** On Telegram, find `@userinfobot`, send it the `/start` command, and it will reply with your unique Chat ID (a number).
-    - **Add Yourself as a User:** In the `users` section, create an entry for yourself. Set `description`, `language`, and paste your Chat ID into the `identifier` field.
-    - **Set Subscriptions:** In the `subscriptions` block for your user, define which themes (`bible_sk`, `german_lesson`, etc.) you want to receive at which scheduled time (`time1`, `time2`, etc.).
+### 2.2. Other API Keys
+-   **Telegram:** Talk to `@BotFather` to create a bot and get the `TELEGRAM_BOT_TOKEN`.
+-   **Groq:** Get an API Key for the LLM at [console.groq.com](https://console.groq.com).
+-   **Sentry (Optional):** Create a project for Python/Flask to get a `DSN` for error monitoring.
+-   **OpenWeatherMap / Unsplash:** Register for free API keys.
 
 ---
 
-## 3. Local Testing
+## 3. Local Configuration
 
-Before deploying, always test your setup locally.
-
-1.  **Install Dependencies:**
-    - It is highly recommended to use a virtual environment.
-    ```bash
-    # Create and activate the environment
-    python -m venv .venv
-    # On Windows:
-    .venv\Scripts\activate
-    # On macOS/Linux:
-    # source .venv/bin/activate
-    
-    # Install required packages
-    pip install -r requirements.txt
-    ```
-2.  **Run a Test:**
-    - Use the `run_once.py` script to trigger a specific job for a specific user. This allows for isolated and repeatable testing.
-    ```bash
-    # Example: Run the 'time3' job for user 'Jozef_D'
-    python run_once.py time3 users Jozef_D
-    ```
-    - Check your Telegram for the message and review the console output for any `ERROR` or `WARNING` logs.
-
----
-
-## 4. Deployment to GitHub Actions
-
-Once local testing is successful, you can deploy the bot for fully automated, scheduled execution.
-
-### 4.1. Set GitHub Secrets
-This is the most critical step for security.
-1.  Go to your private repository on GitHub.
-2.  Navigate to **Settings -> Secrets and variables -> Actions**.
-3.  Under **Repository secrets**, click **New repository secret** for each of the following, ensuring the names match exactly.
-
-| Secret Name | Secret Value (Copied from your local files) |
-| :--- | :--- |
-| `GCP_SA_KEY` | The **entire content** of your `credentials.json` file. |
-| `GROQ_API_KEY` | Your API key from the `.env` file. |
-| `TELEGRAM_BOT_TOKEN` | Your Telegram bot token from the `.env` file. |
-| `OPENWEATHER_API_KEY`| Your OpenWeatherMap key from the `.env` file. |
-| `UNSPLASH_ACCESS_KEY` | Your Unsplash key from the `.env` file. |
-| `SENTRY_DSN` | Your Sentry DSN from the `.env` file. |
-| `CLOUDINARY_CLOUD_NAME`| Your Cloudinary name from the `.env` file. |
-| `CLOUDINARY_API_KEY` | Your Cloudinary API key from the `.env` file. |
-| `CLOUDINARY_API_SECRET`| Your Cloudinary API secret from the `.env` file. |
-
-### 4.2. Push Your Code
-- Commit all your configured files (`config.json`, etc.) and push them to the `main` branch of your private repository.
-- **NEVER commit your `.env` or `credentials.json` files.** The `.gitignore` file should already be configured to prevent this.
-
-**Deployment is complete!** GitHub Actions will now automatically run your `trigger_jobs.py` script based on the `cron` schedule defined in `.github/workflows/scheduler.yml` (e.g., every hour).
-
----
-
-## 5. Management and Troubleshooting
-
-### Temporarily Disabling the Bot
-1.  Go to the **Actions** tab in your GitHub repository.
-2.  Select the workflow (e.g., `YourDailyPulse Job Scheduler`) from the left sidebar.
-3.  Click the three-dots menu (`...`) and choose **Disable workflow**.
-
-### Analyzing a Failed Run
-If you see a **red cross (❌)** next to a workflow run, it has failed.
-1.  Click on the name of the failed run.
-2.  In the left summary, click on the job name (e.g., `run-dispatcher`).
-3.  Find the step with the red cross (usually `Run the dispatcher script`).
-4.  Expand its details to view the full log output. The error message will be at the bottom, typically highlighted in red.
-
----
-
-## 6. Developer Tools (`tools.py`)
-
-The project includes `tools.py`, a powerful command-line script for manual data management.
-
-### `generate_photo_db`
-Connects to Cloudinary and generates a CSV file of your photos, ready for import into your `FamilyPhotos` Google Sheet.
-```bash
-python tools.py generate_photo_db <cloudinary_folder_name> <output_file.csv>
+### 3.1. `.env` File (Secrets)
+Create a file named `.env` in the root directory and fill in your keys:
+```ini
+TELEGRAM_BOT_TOKEN=your_token_here
+GROQ_API_KEY=gsk_...
+OPENWEATHER_API_KEY=...
+UNSPLASH_ACCESS_KEY=...
+SENTRY_DSN=...
+TZ=Europe/Bratislava
 ```
 
-### `download_sheets`
-Reads your `config.json` and downloads a local backup of every worksheet from every configured spreadsheet into a structured directory. This is essential for backups and version control.
-```bash
-python tools.py download_sheets <output_directory>```
+### 3.2. `config.json` (System Config)
+Open `config.json`. You do **NOT** need to add users here anymore.
+-   **Schedule:** Define when the global trigger runs (e.g., "07:00").
+-   **Data Sources:** Update the `spreadsheet_url` for your Google Sheets (see Section 3.3).
 
-### `fetch_art_data`
-Fetches artwork data from The MET API for a specified department and saves it to a CSV, ready for import into your `EuArt` Google Sheet.
-```bash
-python tools.py fetch_art_data <department_id> <data_output.csv> <id_cache.csv> [max_items]
-```
+### 3.3. Google Sheets (Content DB)
+1.  Create the necessary Google Sheets (Templates are in `docs/Google_sheets_examples/`).
+2.  **Share** each sheet with the `client_email` address found inside your `credentials.json` file (give "Editor" access).
+
+---
+
+## 4. Frontend Setup (Web App)
+
+The Web App allows you (and others) to register, log in, and configure settings.
+
+1.  **Update Config:** Open `webapp/assets/js/firebase-config.js`. Paste the `firebaseConfig` object you got in Step 2.1 (Web Config).
+2.  **Redirect Page:** Ensure `docs/index.html` is configured to redirect to your live app URL (you will get this URL after the first deployment, or you can use the Firebase Hosting URL if you deploy there. For GitHub Pages, it's `https://yourname.github.io/YourRepo/`).
+
+---
+
+## 5. Deployment
+
+### 5.1. Deploy Backend (GitHub Actions)
+1.  Push your code to GitHub.
+2.  Go to **Settings -> Secrets and variables -> Actions**.
+3.  Add Repository Secrets:
+    -   `GCP_SA_KEY`: Paste the **entire content** of `credentials.json`.
+    -   Add all other keys from `.env` (`TELEGRAM_BOT_TOKEN`, `GROQ_API_KEY`, etc.).
+4.  The bot will now run automatically according to the schedule in `.github/workflows/scheduler.yml`.
+
+### 5.2. Deploy Frontend (GitHub Pages)
+1.  Go to **Settings -> Pages**.
+2.  Source: **Deploy from a branch**.
+3.  Branch: `main`, Folder: `/docs`. (This hosts the documentation and redirect).
+4.  **Alternative:** You can host the `webapp` folder directly on Firebase Hosting for better performance, or configure GitHub Pages to serve the `webapp` folder if you prefer.
+
+---
+
+## 6. How to Start Using the Bot
+
+1.  **Open your Web App** (the GitHub Pages URL).
+2.  **Register** a new account with your email and password.
+3.  **Verify Email:** Check your inbox and click the link.
+4.  **Log In:** Go back to the app.
+5.  **Configure:**
+    -   **Telegram Setup:** Enter the command `/start` to your bot in Telegram. Get your ID from `@userinfobot` and save it in the Web App.
+    -   **Subscriptions:** Choose themes (e.g., Morning Briefing) and times.
+    -   **Save.**
+6.  **Done!** The backend will pick up your user profile on the next scheduled run (e.g., next hour) and send you messages if the time matches.
+
+---
+
+## 7. Troubleshooting & Maintenance
+
+-   **Logs:** Check **Sentry** for errors or the **GitHub Actions** run history.
+-   **Manual Run:** You can trigger a run manually via GitHub Actions "Run workflow" button to test if messages are delivered.
+-   **Backups:** Use `tools.py` to backup your Firestore users regularly:
+    ```bash
+    python tools.py backup_firestore
+    ```
+
+--- END OF FILE Guide_to_Creating_and_Operating_Your_Own_Bot.md ---

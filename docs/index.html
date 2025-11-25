@@ -1,310 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YourDailyPulse - Developer Documentation</title>
-    <style>
-        :root {
-            --bg-color: #fdfdfd;
-            --sidebar-bg: #111827;
-            --sidebar-text: #d1d5db;
-            --sidebar-hover-bg: #1f2937;
-            --sidebar-hover-text: #ffffff;
-            --text-color: #1f2937;
-            --header-color: #000000;
-            --accent-color: #3b82f6;
-            --code-bg: #f3f4f6;
-            --border-color: #e5e7eb;
-            --note-bg: #eff6ff;
-            --note-border: #93c5fd;
-            --warning-bg: #fffbeb;
-            --warning-border: #fcd34d;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            display: flex;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.7;
-        }
-        .sidebar {
-            width: 280px;
-            background-color: var(--sidebar-bg);
-            color: var(--sidebar-text);
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            overflow-y: auto;
-            padding: 25px;
-            box-sizing: border-box;
-            border-right: 1px solid var(--border-color);
-        }
-        .sidebar .logo {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #ffffff;
-            margin-bottom: 5px;
-        }
-        .sidebar .tagline {
-            font-size: 0.9em;
-            color: #9ca3af;
-            margin-bottom: 30px;
-        }
-        .sidebar ul { list-style: none; padding: 0; }
-        .sidebar ul li a {
-            color: var(--sidebar-text);
-            text-decoration: none;
-            display: block;
-            padding: 10px 15px;
-            border-radius: 6px;
-            transition: all 0.2s ease-in-out;
-            font-weight: 500;
-        }
-        .sidebar ul li a:hover {
-            background-color: var(--sidebar-hover-bg);
-            color: var(--sidebar-hover-text);
-        }
-        .content {
-            margin-left: 280px;
-            padding: 40px 50px;
-            width: calc(100% - 280px);
-        }
-        section { margin-bottom: 70px; padding-top: 80px; margin-top: -60px; }
-        h1, h2, h3, h4 { color: var(--header-color); scroll-margin-top: 80px; font-weight: 600; }
-        h1 { font-size: 2.5em; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; }
-        h2 { font-size: 1.8em; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 40px;}
-        h3 { font-size: 1.4em; margin-top: 30px;}
-        code {
-            background-color: var(--code-bg);
-            padding: 3px 7px;
-            border-radius: 5px;
-            font-family: "SF Mono", "Consolas", "Monaco", monospace;
-            font-size: 0.9em;
-            border: 1px solid var(--border-color);
-        }
-        pre {
-            background-color: #1f2937;
-            color: #d1d5db;
-            padding: 20px;
-            border-radius: 8px;
-            overflow-x: auto;
-            border: none;
-        }
-        pre code { padding: 0; background-color: transparent; border: none; color: #d1d5db;}
-        .warning, .note { padding: 20px; margin: 25px 0; border-radius: 8px; }
-        .warning { background-color: var(--warning-bg); border-left: 5px solid var(--warning-border); }
-        .note { background-color: var(--note-bg); border-left: 5px solid var(--note-border); }
-        table { width: 100%; border-collapse: collapse; margin: 25px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        th, td { border: 1px solid var(--border-color); padding: 12px 15px; text-align: left; }
-        th { background-color: #f9fafb; font-weight: 600; }
-        .header-image {
-            max-width: 600px;
-            height: auto;
-            border-radius: 12px;
-            margin: 20px auto 40px auto;
-            display: block;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        .header-image-large {
-            max-width: 1200px;
-            height: auto;
-            border-radius: 12px;
-            margin: 20px auto 40px auto;
-            display: block;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border: 1px solid var(--border-color);
-        }
-        footer { margin-top: 50px; padding-top: 25px; border-top: 1px solid var(--border-color); color: #6b7280; text-align: center; }
-        @media (max-width: 900px) {
-            body { flex-direction: column; }
-            .sidebar { position: static; width: 100%; height: auto; }
-            .content { margin-left: 0; width: 100%; padding: 20px; }
-            section { padding-top: 60px; margin-top: -40px; }
-            .header-image-large { max-width: 100%; }
-        }
-    </style>
-</head>
-<body>
-    <div class="sidebar">
-        <div class="logo">YourDailyPulse</div>
-        <div class="tagline">Developer Documentation</div>
-        <ul>
-            <li><a href="#overview">1. Overview</a></li>
-            <li><a href="#architecture">2. Architecture Deep Dive</a></li>
-            <li><a href="#setup-initial">3. Initial Setup</a></li>
-            <li><a href="#setup-config">4. Configuration Deep Dive</a></li>
-            <li><a href="#setup-local">5. Local Testing</a></li>
-            <li><a href="#deployment">6. Deployment</a></li>
-            <li><a href="#management">7. Management & Tools</a></li>
-            <li><a href="#extending">8. Extending the Bot</a></li>
-        </ul>
-    </div>
-
-    <div class="content">
-        <header>
-            <h1>YourDailyPulse Developer Guide</h1>
-            <p>This document provides a complete guide for setting up, configuring, deploying, and maintaining your own automated bot instance based on the YourDailyPulse project.</p>
-            <img src="assets/PulserBot.png" alt="YourDailyPulse Project Visual" class="header-image">
-        </header>
-
-        <section id="overview">
-            <h2>1. Overview</h2>
-            <p><strong>YourDailyPulse</strong> is a sophisticated, open-source platform for building automated bots that deliver personalized, multi-theme, and multi-language content. The application is designed for maximum flexibility, where nearly all behavior is driven by external configuration files rather than hard-coded logic.</p>
-            <h3>Core Principles</h3>
-            <ul>
-                <li><strong>Config is King:</strong> All operational parameters (schedules, users, themes, data sources) are defined in <code>config.json</code>. The application is merely an engine that executes this configuration.</li>
-                <li><strong>Content as Data:</strong> All static content (quotes, verses, lessons) is stored and managed in an external database (Google Sheets), completely separating content from code.</li>
-                <li><strong>Strategy Pattern:</strong> The core logic is decoupled into "strategy" modules located in <code>src/prompt_type/</code>. Adding a new content processing type is as simple as creating a new strategy file and updating the configuration.</li>
-                <li><strong>Generate-Once, Distribute-Many:</strong> To conserve API costs and improve performance, content for each unique (theme, language) combination is generated only once per run and then distributed to all relevant users.</li>
-            </ul>
-        </section>
-
-        <section id="architecture">
-            <h2>2. Architecture Deep Dive</h2>
-            <p>The application follows a modular, event-driven architecture. The process is initiated by a scheduler, which triggers a series of orchestrated steps.</p>
-            <img src="assets/deployment_diagram.png" alt="Architecture Diagram" class="header-image-large">
-            <h3>Execution Flow</h3>
-            <ol>
-                <li><strong>Trigger:</strong> A scheduler (either GitHub Actions or a local APScheduler) executes <code>run_once.py</code> or <code>main.py</code> with a specific time key (e.g., `time1`).</li>
-                <li><strong>Orchestration (<code>core.py</code>):</strong> The `JobProcessor` class loads <code>config.json</code>, identifies all active users subscribed to the current time key, and groups them by `(theme, language)`.</li>
-                <li><strong>Strategy Dispatch:</strong> For each group, the orchestrator reads the theme's `type` from the config and dynamically calls the `process()` function from the corresponding strategy module in <code>src/prompt_type/</code>.</li>
-                <li><strong>Data Fetching & Processing (Strategy Execution):</strong> The chosen strategy module takes over. It uses services from <code>src/services/</code> (like `sheets_service.py`) to fetch data, build a "payload," and, if necessary, call the LLM for text generation.</li>
-                <li><strong>Delivery (<code>telegram_channel.py</code>):</strong> The final, formatted content is sent to all users in the group via the Telegram API.</li>
-            </ol>
-            <p>The application follows a modular, event-driven architecture. The process is initiated by a scheduler, which triggers a series of orchestrated steps.</p>
-            <img src="assets/primary_sequence_diagram.png" alt="Architecture Diagram" class="header-image-large">
-
-        </section>
-
-        <section id="setup-initial">
-            <h2>3. Initial Setup</h2>
-
-            <p>The application follows a modular, event-driven architecture. The process is initiated by a scheduler, which triggers a series of orchestrated steps.</p>
-            <img src="assets/component_diagram.png" alt="Architecture Diagram" class="header-image-large">
-		
-            <h3>3.1. API Keys and Credentials</h3>
-            <p>Before you begin, register and obtain API keys/credentials from these essential services. You will need them for the <code>.env</code> and <code>credentials.json</code> files.</p>
-            <ul>
-                <li><strong>Telegram:</strong> Create a bot via <code>@BotFather</code>.</li>
-                <li><strong>Google Cloud:</strong> Create a Service Account and enable **Google Drive API** and **Google Sheets API**.</li>
-                <li><strong>Groq:</strong> For the LLM that generates creative text.</li>
-                <li><strong>Sentry:</strong> For professional error logging and application monitoring.</li>
-                <li><strong>Optional Services:</strong> Unsplash (photos), Cloudinary (personal photos), OpenWeatherMap (weather).</li>
-            </ul>
-
-            <h3>3.2. Google Sheets as a Database</h3>
-            <p>Your content resides in a set of logically separated Google Spreadsheets.</p>
-            <ol>
-                <li><strong>Create Spreadsheets:</strong> Go to [sheets.google.com](https://sheets.google.com) and create the required spreadsheets (e.g., `YDP_System`, `YDP_LLM_Static_Spiritual`, etc., as defined in your `config.json`).</li>
-                <li><strong>Create Worksheets:</strong> Inside each spreadsheet, create the necessary worksheets (tabs) (e.g., `Jobs`, `BibleSk`, `Rotation`).</li>
-                <li><strong>Set Column Headers:</strong> For each worksheet, populate the first row with the exact column headers. You can find the required structures in the project's `docs/Google_sheets_examples/` directory.</li>
-                <li><strong>Share with Service Account:</strong> This is a critical step. For **each spreadsheet**, click the "Share" button and give **Editor** permissions to the `client_email` address found in your `credentials.json` file.</li>
-            </ol>
-        </section>
+<!DOCTYPE HTML>
+<!--
+	YourDailyPulse Hub
+    - Redirects to the live Firebase App.
+    - Provides access to Documentation.
+-->
+<html>
+	<head>
+		<title>YourDailyPulse | Redirecting...</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
         
-        <section id="setup-config">
-            <h2>4. Configuration Deep Dive</h2>
-            <p>The entire application is controlled by three key files in your project root.</p>
+        <!-- 1. ZÁLOŽNÉ PRESMEROVANIE (META TAG) - 12 sekúnd (rezerva, ak by zlyhal JS) -->
+        <meta http-equiv="refresh" content="12;url=https://key-perigee-474220-u3.web.app/index.html" />
 
-            <h3>4.1. <code>.env</code> File</h3>
-            <p>This file stores your secret API keys. Rename <code>.env.example</code> to <code>.env</code> and paste in the keys you obtained.</p>
-            <div class="warning"><strong>Security:</strong> The <code>.gitignore</code> file is configured to ignore <code>.env</code>. Never commit this file to your repository.</div>
-            
-            <h3>4.2. <code>credentials.json</code></h3>
-            <p>This is the key to your Google Service Account. Place the file you downloaded from Google Cloud directly into your project's root directory.</p>
+        <!-- 2. VIZUÁL: Ťaháme štýly z ostrej verzie, aby to ladilo -->
+		<link rel="stylesheet" href="https://key-perigee-474220-u3.web.app/assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="https://key-perigee-474220-u3.web.app/assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
 
-            <h3>4.3. <code>config.json</code> - The Brain</h3>
-            <p>This is the central control file. It is divided into several key sections:</p>
-            <ul>
-                <li><code><strong>schedule</strong></code>: Defines the time keys (e.g., `time1`) and their corresponding execution times (e.g., "06:00").</li>
-                <li><code><strong>users</strong></code>: A list of all users who can receive content. Each user has a unique `description`, `language`, `chat_id` (identifier), and a `subscriptions` object that maps time keys to a list of theme names.</li>
-                <li><code><strong>themes</strong></code>: Defines every available content theme, its processing `type`, its data source, and the path to its prompt or template file.</li>
-                <li><code><strong>data_sources</strong></code>: A hierarchical catalog of all your Google Spreadsheets. It maps logical spreadsheet keys (e.g., `YDP_LLM_Static_Spiritual`) to their actual `spreadsheet_url` and contains a nested map of logical worksheet keys to their physical names. This structure eliminates redundancy and makes configuration clean and easy to maintain.</li>
-            </ul>
-        </section>
+		<!-- Sidebar (Len vizuál) -->
+			<section id="sidebar">
+				<div class="inner">
+					<nav>
+						<ul>
+							<li><a href="#">Redirecting...</a></li>
+                            <!-- Odkaz na dokumentáciu -->
+                            <li><a href="documentation.html" target="_blank" style="color: #aaa;">Developer Docs <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i></a></li>
+						</ul>
+					</nav>
+				</div>
+			</section>
 
-        <section id="setup-local">
-            <h2>5. Local Testing</h2>
-            <p>Always test your configuration locally before deploying.</p>
-            <ol>
-                <li><strong>Set up Virtual Environment:</strong>
-                    <pre><code># Create and activate the environment
-python -m venv .venv
-# On Windows:
-.venv\Scripts\activate
-# On macOS/Linux:
-# source .venv/bin/activate
+		<!-- Wrapper -->
+			<div id="wrapper">
+					<section id="intro" class="wrapper style1 fullscreen fade-up">
+						<div class="inner">
+							<h1>YourDailyPulse</h1>
+							
+                            <!-- Odpočítavanie -->
+							<p style="font-size: 1.3em;">
+                                Redirecting to the application in <span id="countdown" style="color: #b74e91; font-weight: bold;">10</span> seconds...
+                            </p>
+                            
+							<ul class="actions">
+                                <!-- Tlačidlo 1: Okamžité presmerovanie -->
+								<li><a href="https://key-perigee-474220-u3.web.app/index.html" class="button primary">Open App Now</a></li>
+                                
+                                <!-- Tlačidlo 2: Dokumentácia v NOVOM OKNE (target="_blank") -->
+                                <!-- Vďaka target="_blank" táto stránka ostane otvorená a odpočet dobehne -->
+                                <li><a href="documentation.html" target="_blank" class="button">Read Documentation</a></li>
+							</ul>
+						</div>
+					</section>
+			</div>
 
-# Install dependencies
-pip install -r requirements.txt</code></pre>
-                </li>
-                <li><strong>Run a Test Job with <code>run_once.py</code>:</strong>
-                    <div class="note">The <code>run_once.py</code> script is your primary tool for debugging. It allows you to trigger a specific job for a specific user, giving you isolated and predictable results.</div>
-                    <pre><code># Run the 'time2' job for a single user named 'Jozef_D'
-python run_once.py time2 users Jozef_D
-</code></pre>
-                </li>
-            </ol>
-        </section>
-        
-        <section id="deployment">
-            <h2>6. Deployment via GitHub Actions</h2>
-            <p>The project is designed for serverless deployment using GitHub Actions, which is free for private repositories within generous limits.</p>
-            
-            <h3>6.1. Configure GitHub Secrets</h3>
-            <p>This is the most critical step for a secure deployment.</p>
-            <ol>
-                <li>In your private GitHub repository, navigate to <strong>Settings > Secrets and variables > Actions</strong>.</li>
-                <li>Click <strong>New repository secret</strong>.</li>
-                <li>Create a secret for each variable in your <code>.env</code> file. For the <code>GCP_SA_KEY</code> secret, paste the **entire content** of your <code>credentials.json</code> file.</li>
-            </ol>
-            
-            <h3>6.2. Push and Go Live</h3>
-            <p>Commit and push all your configured files (except <code>.env</code> and <code>credentials.json</code>) to your `main` branch. The GitHub Actions workflow defined in <code>.github/workflows/scheduler.yml</code> will automatically pick up the changes and start executing your bot on the defined schedule.</p>
-        </section>
-        
-        <section id="management">
-            <h2>7. Management & Tools</h2>
-            <p>The project includes a powerful command-line script, <code>tools.py</code>, for various data management tasks.</p>
+        <!-- 3. LOGIKA ODPOČÍTAVANIA -->
+        <script>
+            // Nastavenie času (v sekundách)
+            var secondsLeft = 10;
+            var targetUrl = "https://key-perigee-474220-u3.web.app/index.html";
+            var countdownElement = document.getElementById('countdown');
 
-            <h3><code>download_sheets</code></h3>
-            <p>Downloads a local backup of every worksheet from every configured spreadsheet into a structured, timestamped directory. Essential for backups.</p>
-            <pre><code>python tools.py download_sheets ./backups</code></pre>
-            
-            <h3><code>generate_photo_db</code></h3>
-            <p>Connects to your Cloudinary account and generates a CSV file of your photos, ready for import into your `FamilyPhotos` Google Sheet.</p>
-            <pre><code>python tools.py generate_photo_db my_cloudinary_folder photos_for_import.csv</code></pre>
-            
-            <h3><code>fetch_art_data</code></h3>
-            <p>Fetches public domain artwork data from The MET API for a specified department and saves it to a CSV.</p>
-            <pre><code># Fetch 50 paintings from the European Paintings department (ID 11)
-python tools.py fetch_art_data 11 met_paintings.csv met_ids.csv 50</code></pre>
-        </section>
+            // Funkcia, ktorá sa spustí každú sekundu
+            var countdownInterval = setInterval(function() {
+                secondsLeft--;
+                
+                // Aktualizácia čísla na obrazovke
+                if (countdownElement) {
+                    countdownElement.textContent = secondsLeft;
+                }
 
-        <section id="extending">
-            <h2>8. Extending the Bot</h2>
-            <p>The Strategy Pattern makes extending the bot incredibly simple.</p>
-            <h3>How to Add a New Content Type (e.g., a "Quote of the Day")</h3>
-            <ol>
-                <li><strong>Create a New Strategy File:</strong> In <code>src/prompt_type/</code>, create a new file, e.g., <code>quote_of_the_day.py</code>. This file only needs a <code>process(theme_config, lang)</code> function.</li>
-                <li><strong>Add a New Template:</strong> In <code>src/rsc_templates/</code>, create a new template file, e.g., <code>quote_of_the_day_slovak.txt</code>.</li>
-                <li><strong>Prepare Your Data:</strong> Create a new Google Sheet for your quotes and share it.</li>
-                <li><strong>Update <code>config.json</code>:</strong>
-                    <ul>
-                        <li>Add the new spreadsheet to your `data_sources`.</li>
-                        <li>Create a new theme in the `themes` section with `type: "simple_static"` (or another type) and point it to your new data source and template file.</li>
-                    </ul>
-                </li>
-                <li><strong>Done!</strong> The bot will automatically pick up the new theme. No changes to the core application logic are required.</li>
-            </ol>
-        </section>
+                // Keď čas vyprší
+                if (secondsLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = targetUrl;
+                }
+            }, 1000); // 1000 ms = 1 sekunda
+        </script>
 
-    </div>
-    <footer>
-        YourDailyPulse Documentation v. 2.2
-    </footer>
-</body>
+        <!-- Načítanie skriptov pre vizuálne efekty -->
+        <script src="https://key-perigee-474220-u3.web.app/assets/js/jquery.min.js"></script>
+        <script src="https://key-perigee-474220-u3.web.app/assets/js/browser.min.js"></script>
+        <script src="https://key-perigee-474220-u3.web.app/assets/js/breakpoints.min.js"></script>
+        <script src="https://key-perigee-474220-u3.web.app/assets/js/util.js"></script>
+        <script src="https://key-perigee-474220-u3.web.app/assets/js/main.js"></script>
+
+	</body>
 </html>

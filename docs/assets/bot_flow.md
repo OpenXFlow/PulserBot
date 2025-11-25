@@ -1,203 +1,186 @@
-# Architecture and Data Flow: YourDailyPulse
+# Architecture and Data Flow: YourDailyPulse (v3.x Hybrid)
 
-This document describes the architecture and detailed data flow of the YourDailyPulse application. The goal is to visualize how individual components and external services interact and how the application is deployed.
+This document describes the architecture and detailed data flow of the YourDailyPulse application. It reflects the **Hybrid Architecture** introduced in version 3.0, which decouples user management (Frontend) from content delivery (Backend) using Firebase.
 
 ## Key System Components
 
--   **Deployment Platforms:** Render (primary) or GitHub Actions (alternative).
--   **Application (Python Scripts):** The main Python application, which acts as an orchestrator and set of tools.
--   **Sentry.io:** An external monitoring service that collects errors, logs, and performance metrics in real-time.
--   **Google Sheets API:** An external service used as a persistent content database.
--   **LLM API (e.g., Groq):** An external LLM service that generates creative text.
--   **Telegram API:** The external service through which content is delivered to users.
--   **Image APIs (e.g., Unsplash):** External services for fetching images.
+-   **Frontend (Web App):** A static site hosted on GitHub Pages where users manage settings.
+-   **Backend (Python):** The core logic runner, deployed on GitHub Actions (Serverless) or Render (Service).
+-   **Firebase (Firestore & Auth):** The central nervous system. Stores user profiles, subscriptions, and caches generated content.
+-   **Google Sheets API:** Used as a database for *static content* (e.g., quotes, verses).
+-   **LLM API (Groq):** Generates creative text and translations.
+-   **Telegram API:** Delivers the final content to the user.
+-   **Sentry.io:** Monitors errors and performance.
 
 ---
 
-## 1. Component Architecture Diagram
+## 1. High-Level Component Architecture
 
-This diagram shows the main **static building blocks** of the system and their dependencies.
-
-```mermaid
-graph TD
-    subgraph "Application (Python Code)"
-        App["Orchestration & Logic<br>(core.py, strategies, services)"]
-    end
-
-    subgraph "Local Configuration"
-        direction LR
-        Config["config.json"]
-        Prompts["src/rsc_llm_prompts/"]
-        Templates["src/rsc_templates/"]
-    end
-
-    subgraph "External Services (APIs)"
-        direction LR
-        GSheets["Google Sheets API"]
-        LLM["LLM API (Groq)"]
-        Telegram["Telegram API"]
-        Sentry["Sentry API"]
-        Images["Image APIs"]
-    end
-
-    App -- "Reads Behavior From" --> Config
-    App -- "Reads Instructions From" --> Prompts
-    App -- "Reads Formats From" --> Templates
-    App -- "Reads/Writes Content" --> GSheets
-    App -- "Generates Text via" --> LLM
-    App -- "Sends Messages via" --> Telegram
-    App -- "Sends Logs & Errors to" --> Sentry
-    App -- "Fetches Images from" --> Images
-```
-
----
-
-## 2. Deployment Architecture Diagram
-
-This diagram visualizes **where each software component is deployed** and how they communicate. It shows both the primary (Render) and alternative (GitHub Actions) deployment models.
+This diagram illustrates how the Frontend and Backend are decoupled and communicate solely through the Cloud Database.
 
 ```mermaid
 graph TD
-    subgraph "User"
-        UserDevice["User's Device"] -- "interacts with" --> TelegramApp[Telegram App]
+    subgraph "Frontend (User Control)"
+        WebApp["Web Application<br>(HTML/JS on GitHub Pages)"]
+        AuthConfig["firebase-config.js"]
     end
 
-    subgraph "Primary Deployment (Render.com)"
-        direction TB
-        Render["Render Web Service"]
-        Scheduler["APScheduler (inside main.py)"]
-        WorkerA["generate_and_send()"]
-        Render -- "runs" --> Scheduler
-        Scheduler -- "triggers periodically" --> WorkerA
+    subgraph "Cloud Infrastructure"
+        Auth["Firebase Authentication"]
+        DB[("Firestore Database<br>(Users + Cache)")]
     end
 
-    subgraph "Alternative Deployment (GitHub)"
-        direction TB
-        GHA["GitHub Actions (Runner)"]
-        Dispatcher["trigger_jobs.py"]
-        WorkerB["run_once.py"]
-        GHA -- "runs on schedule" --> Dispatcher
-        Dispatcher -- "executes" --> WorkerB
+    subgraph "Backend (Content Worker)"
+        Orchestrator["Job Orchestrator<br>(core.py)"]
+        Handlers["Content Handlers<br>(src/handlers/)"]
+        Config["System Config<br>(config.json)"]
     end
 
     subgraph "External Services"
-        ExternalAPIs["All External APIs<br>(Google, Groq, Telegram, Sentry...)"]
+        direction LR
+        Telegram["Telegram API"]
+        LLM["LLM API (Groq)"]
+        Sheets["Google Sheets"]
+        Images["Image APIs"]
     end
 
-    TelegramApp <--> ExternalAPIs
-    WorkerA -- "communicates with" --> ExternalAPIs
-    WorkerB -- "communicates with" --> ExternalAPIs
-```
-
----
-
-## 3. CI/CD Process Diagram (Continuous Integration / Continuous Deployment)
-
-This diagram describes how code changes are automatically deployed to the Render platform.
-
-```mermaid
-graph LR
-    subgraph "Developer (Your PC)"
-        A["Code & Config Changes"]
-    end
-
-    subgraph "Version Control (GitHub)"
-        B["GitHub Repository"]
-    end
+    %% Flows
+    WebApp -- "Authenticates via" --> Auth
+    WebApp -- "Reads/Writes User Settings" --> DB
     
-    subgraph "Deployment Platform (Render)"
-        C["Render.com Service"]
-    end
-
-    A -- "1. git push" --> B
-    B -- "2. Webhook triggers Auto-Deploy" --> C
-    C -- "3. Pulls latest code from" --> B
-    C -- "4. Installs dependencies" --> C
-    C -- "5. Restarts the service with new code" --> C
+    Orchestrator -- "Reads System Settings" --> Config
+    Orchestrator -- "Fetches Active Users" --> DB
+    Orchestrator -- "Checks/Saves Content" --> DB
+    
+    Orchestrator -- "Dispatches to" --> Handlers
+    Handlers -- "Fetches Raw Data" --> Sheets
+    Handlers -- "Generates Text" --> LLM
+    Handlers -- "Fetches Assets" --> Images
+    
+    Orchestrator -- "Delivers Message" --> Telegram
 ```
 
 ---
 
-## 4. Sequence Diagram: Primary Flow (Render with APScheduler)
+## 2. Execution Flow: Backend (Serverless)
 
-This diagram shows the complete **communication over time** between all components in the primary deployment model.
+This sequence diagram details the lifecycle of a job run when triggered by GitHub Actions (cron).
 
 ```mermaid
 sequenceDiagram
-    participant Scheduler as Scheduler (APScheduler in main.py)
-    participant Worker as Worker (core.py)
-    participant Sentry as Sentry API
-    participant Sheets as Sheets API
-    participant Other as Other APIs (LLM, Images)
-    participant Telegram as Telegram API
-    participant Strategy
-
-    Scheduler->>Worker: Calls generate_and_send('timeX')
+    participant GA as GitHub Actions
+    participant Trigger as Trigger Script (trigger_jobs.py)
+    participant Core as Core Logic (run_once.py)
+    participant DB as Firestore
+    participant Handler as Content Handler
+    participant TG as Telegram
     
-    Worker->>Sentry: Start Transaction
-    Worker->>Worker: Load config.json
-    Worker->>Sheets: Initialize service with config
-    Worker->>Worker: _prepare_content_groups()
+    Note over GA: Scheduled Trigger (e.g. every 60 mins)
+    GA->>Trigger: Execute Dispatcher
+    Trigger->>Trigger: Load config.json
+    Trigger->>Trigger: Check Current Time vs Schedule
     
-    loop For each (theme, language) group
-        Worker->>Worker: _process_group() [Call Strategy]
+    opt Schedule Match (e.g., "time07" at 07:00)
+        Trigger->>Core: Subprocess: "python run_once.py time07"
         
-        Worker->>Strategy: process()
-        Strategy->>Sheets: get_worksheet() & get_unused_item()
-        Sheets-->>Strategy: Return content data
-        Strategy->>Other: Fetch images, etc.
-        Other-->>Strategy: Return dynamic data
-        Note over Strategy: If LLM is used, calls LLM API.
-        Strategy-->>Worker: Return final (text, image_url)
+        rect rgb(240, 248, 255)
+            note right of Core: Initialization
+            Core->>DB: Fetch Active Users (Snapshot)
+            DB-->>Core: User List (Timezones, Subs)
+        end
         
-        Worker->>Telegram: send_photo() / send_message()
-        Telegram-->>Worker: Acknowledge
+        loop For Each User
+            Core->>Core: Calculate User's LOCAL Time
+            
+            opt Local Time == Trigger Time
+                note right of Core: Processing
+                Core->>Handler: Execute Handler (e.g. Morning Briefing)
+                
+                alt Cache Enabled?
+                    Handler->>DB: Get Cached Content?
+                end
+                
+                alt Cache Hit
+                    DB-->>Handler: Return Cached Text/Image
+                else Cache Miss
+                    Handler->>Handler: Call LLM / Sheets / Images
+                    Handler->>DB: Save to Cache
+                end
+                
+                Handler-->>Core: Final Content
+                Core->>TG: Send Message (Text/Photo)
+            end
+        end
+        Core-->>Trigger: Job Complete
     end
-    
-    Worker->>Sentry: Flush remaining events
+    Trigger-->>GA: Exit
 ```
 
 ---
 
-## 5. Internal Flow Diagram of `JobProcessor`
+## 3. Internal Flow of `JobOrchestrator`
 
-This diagram illustrates the **logical steps and decisions** within the main `JobProcessor` class, showcasing the Strategy Pattern.
+This diagram illustrates the logic inside `src/core.py`, focusing on how users are filtered and how content is generated.
 
 ```mermaid
 graph TD
-    A["Start Job for 'time_key'"] --> B["Load config.json"];
+    Start["Start Job (time_key)"] --> InitServices["Initialize Services<br>(Sheets, Firestore)"];
     
-    B --> B_INIT["Initialize Services<br>(e.g., sheets_service.initialize_sheets_service)"];
-    B_INIT --> C["_prepare_content_groups()"];
+    InitServices --> FetchUsers["Fetch Active Users from Firestore"];
     
-    subgraph "Parallel Monitoring"
-        Sentry["All steps & errors are logged to Sentry"]
+    FetchUsers --> Grouping["<b>Group Users by Content</b><br>1. Calc User's Local Time<br>2. Check Subscriptions<br>3. Group by (Theme, Language)"];
+    
+    Grouping --> LoopGroups{"Loop: For each Group"};
+    
+    LoopGroups -- Done --> End["End Job"];
+    LoopGroups -- Next Group --> SelectHandler["Instantiate Handler<br>(from src/handlers/)"];
+    
+    SelectHandler --> CheckStrategy{"Strategy Type?"};
+    
+    CheckStrategy -- "Shared (Default)" --> GenShared["Generate Content Once<br>(Check Cache -> Gen -> Save Cache)"];
+    CheckStrategy -- "Per User (Personal)" --> GenPersonal["Generate per User"];
+    
+    GenShared --> Distribute["Distribute Async"];
+    GenPersonal --> Distribute;
+    
+    subgraph Distribute ["Distribution Loop"]
+        D1["Personalize (e.g. Weather)"] --> D2["Send to Telegram"];
     end
-
-    A -- Log --> Sentry
-
-    C --> D{"Are there any subscribed users?"};
-    D -- No --> End["End Job"];
-    D -- Yes --> E["Group users by (theme, language)"];
     
-    E --> F{"Loop: For each group"};
-    F -- All groups processed --> End;
-    
-    F --> G["Get theme_config from config.json"];
-    G --> H["_process_group(theme, lang, config)"];
-    
-    subgraph H ["Strategy Dispatch"]
-        direction LR
-        H1["Get 'type' from config"] --> H2["Dynamically import strategy<br>from 'src/prompt_type/'"];
-        H2 --> H3["Call strategy.process()"];
-        H3 --> H4["Return (text, image_url)"];
-    end
+    Distribute --> LoopGroups;
+```
 
-    H --> I{"Content generated?"};
-    I -- No --> F;
-    I -- Yes --> J["_distribute_content()"];
-    J --> K{"Loop: For each user in group"};
-    K --> L["Send message via Telegram API"];
-    L --> K;
-    K -- All users processed --> F;
+---
 
+## 4. Data Storage Structure
+
+### Google Sheets (Static Content)
+Used for content curation.
+-   **Structure:** Rows with columns like `quote`, `author`, `theme`, `used` (boolean).
+
+### Firestore (Dynamic State)
+Used for application state.
+
+**Collection: `users`**
+```json
+{
+  "uid": "user_123",
+  "email": "user@example.com",
+  "timezone": "Europe/Bratislava",
+  "subscriptions": {
+    "time07": [{ "theme": "morning_briefing_sk", "days": [0,1,2,3,4,5,6] }]
+  },
+  "weather": { ... }
+}
+```
+
+**Collection: `daily_content_cache`**
+```json
+{
+  "id": "2025-11-25_morning_briefing_sk",
+  "content": {
+    "text": "Dobré ráno...",
+    "image_url": "https://..."
+  },
+  "created_at": "timestamp"
+}

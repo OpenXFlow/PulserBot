@@ -1,75 +1,86 @@
-### Sequence Diagram: Complete Flow of the `run_once.py time3 users Jozef_D` Command
+### 1. `01_run_once_flow.md`
+*Zmeny: Aktualizovaný názov triedy na `JobOrchestrator`, pridané volanie `firestore_service` na získanie používateľov a ukážka, ako sa pre tému 'german_lesson' (ktorá je dynamická) preskočí globálna cache, ak je tak nastavená, alebo sa použije.*
 
-This diagram illustrates in detail the calls between the main files and classes, using the `german_lesson` theme as an example to demonstrate the most interesting logic.
+--- START OF FILE 01_run_once_flow.md ---
+
+### Sequence Diagram: Complete Flow of the `run_once.py` Command
+
+This diagram illustrates in detail the calls between the main python classes during a manual CLI execution (e.g., `python run_once.py time3 users Jozef_D`).
+
+It uses the **`german_lesson`** theme as an example to demonstrate the interaction between the Orchestrator, Firestore, and the Template Handler.
 
 ```mermaid
 sequenceDiagram
     participant CLI as User (Terminal)
-    participant run_once.py
-    participant core.py
-    participant JobProcessor
-    participant config.py
-    participant SheetsService
-    participant DynamicTemplateHandler
-    participant TelegramChannel
+    participant Runner as run_once.py
+    participant Core as core.py
+    participant Orchestrator as JobOrchestrator
+    participant Firestore as FirestoreService
+    participant Handler as DynamicTemplateHandler
+    participant Sheets as SheetsService
+    participant Telegram as TelegramChannel
 
-    CLI->>run_once.py: `python run_once.py time3 users Jozef_D`
+    CLI->>Runner: `python run_once.py time3 users Jozef_D`
     
-    activate run_once.py
-    run_once.py->>run_once.py: main()
-    Note right of run_once.py: Loads arguments from `sys.argv`
-    run_once.py->>core.py: generate_and_send('time3', ['Jozef_D'])
+    activate Runner
+    Runner->>Core: generate_and_send_async('time3', ...)
     
-    activate core.py
-    core.py->>JobProcessor: Creates an instance: processor = JobProcessor(...)
+    activate Core
+    Core->>Orchestrator: __init__ (Load config.json, Initialize)
+    Core->>Orchestrator: execute_async()
     
-    activate JobProcessor
-    JobProcessor->>config.py: load_app_config()
+    activate Orchestrator
+    Note right of Orchestrator: Pipeline Step 1: Initialization
+    Orchestrator->>Sheets: initialize_sheets_service(app_config)
     
-    activate config.py
-    config.py->>config.py: Opens and loads 'config.json'
-    config.py-->>JobProcessor: Returns (app_config, tz)
-    deactivate config.py
+    Note right of Orchestrator: Pipeline Step 2: Get Users
+    Orchestrator->>Firestore: get_active_users()
+    Firestore-->>Orchestrator: Returns List[UserDict] (from Cloud DB)
     
-    JobProcessor-->>core.py: `processor` instance is created
-    
-    core.py->>JobProcessor: processor.execute()
-    
-    JobProcessor->>SheetsService: initialize_sheets_service(self.app_config)
-    
-    JobProcessor->>JobProcessor: _prepare_content_groups()
-    Note right of JobProcessor: Loads `users` and `subscriptions` from `self.app_config`,<br>returns the group ('german_lesson', 'slovak').
+    Orchestrator->>Orchestrator: _prepare_content_groups()
+    Note right of Orchestrator: Filters users by time/name.<br>Returns group: ('german_lesson', 'slovak')
 
+    Note right of Orchestrator: Pipeline Step 3: Process Groups
     loop For each group
-        JobProcessor->>JobProcessor: _process_group('german_lesson', 'slovak', theme_config)
-        Note right of JobProcessor: Loads `handler_class` from `theme_config`:<br>"DynamicTemplateHandler"
+        Orchestrator->>Handler: Instantiate DynamicTemplateHandler
+        Orchestrator->>Handler: execute(user, force_update)
         
-        JobProcessor->>DynamicTemplateHandler: Creates a handler instance
-        JobProcessor->>DynamicTemplateHandler: Calls handler.execute()
+        activate Handler
+        Note over Handler: BaseHandler Logic (Caching)
+        Handler->>Firestore: get_cached_content(date, 'german_lesson')
         
-        activate DynamicTemplateHandler
-        DynamicTemplateHandler->>DynamicTemplateHandler: _process()
+        alt Cache Miss (Data not generated yet)
+            Handler->>Handler: _process()
+            
+            Note over Handler, Sheets: Handler fetches raw data from Google Sheets
+            Handler->>Sheets: get_worksheet(rotation)
+            Sheets-->>Handler: Worksheet Object
+            Handler->>Sheets: get_unused_item(worksheet)
+            Sheets-->>Handler: Row Data (e.g. "Verbs")
+            
+            Handler->>Handler: Format Text & Select Image
+            
+            Handler->>Firestore: save_cached_content(...)
+            Note right of Handler: Content saved for other users today
+        else Cache Hit
+             Firestore-->>Handler: Returns {text, image_url}
+        end
         
-        Note over DynamicTemplateHandler, SheetsService: Inside _process(), multiple calls<br>are made to SheetsService:<br>1. get_worksheet(rotation_ref)<br>2. get_unused_item(rot_ws)<br>3. get_worksheet(lesson_ref)<br>4. get_unused_item(lesson_ws)<br>5. get_worksheet(sg_ref)<br>6. get_unused_item(sg_ws)
+        Handler-->>Orchestrator: Returns (Final Text, Image URL)
+        deactivate Handler
         
-        DynamicTemplateHandler-->>JobProcessor: Returns (final_text, image_url)
-        deactivate DynamicTemplateHandler
-        
-        JobProcessor->>JobProcessor: _distribute_content(...)
-        JobProcessor->>TelegramChannel: send_photo(chat_id, url, text)
-        
-        activate TelegramChannel
-        TelegramChannel->>TelegramChannel: _sanitize_html(text)
-        Note right of TelegramChannel: Sends a request to the Telegram API
-        TelegramChannel-->>JobProcessor: Returns True/False
-        deactivate TelegramChannel
+        Orchestrator->>Orchestrator: _distribute_content_async(...)
+        Orchestrator->>Telegram: send_photo(chat_id, url, text)
+        Telegram-->>Orchestrator: Success
     end
 
-    JobProcessor-->>core.py: Finishes execute()
-    deactivate JobProcessor
+    Orchestrator-->>Core: Job Finished
+    deactivate Orchestrator
     
-    core.py-->>run_once.py: Finishes generate_and_send()
-    deactivate core.py
+    Core-->>Runner: Async task complete
+    deactivate Core
     
-    run_once.py->>CLI: Prints final logs and exits
+    Runner->>CLI: Exit
 ```
+--- END OF FILE 01_run_once_flow.md ---
+

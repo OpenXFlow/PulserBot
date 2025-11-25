@@ -1,107 +1,96 @@
-# Detailed Logic: `sheets_service.py`
+--- START OF FILE 05_service_sheets.md ---
 
-This document provides an in-depth look at the internal logic of the `sheets_service.py` module, which is responsible for all communication with the Google Sheets API. It is intended for developers who need to understand exactly how data loading, reference resolution, and automatic content resetting work.
+# Detailed Logic: Google Sheets Service (Content DB)
 
----
+This document details the `sheets_service.py` module. In the **Hybrid v3.0 Architecture**, this service acts as the interface for the **Static Content Database**.
 
-## 1. Main Public Functions (Module API)
-
-Other parts of the application communicate with the service exclusively through these four functions:
-
--   **`initialize_sheets_service(app_config)`**: Must be called at the beginning of each run. It sets the global `app_config` for internal use within the service.
--   **`get_worksheet(data_source_ref)`**: The main entry point for obtaining a `Worksheet` object. It takes a reference dictionary from `config.json` as a parameter.
--   **`get_unused_item(worksheet, language)`**: Retrieves one random, unused row from the given sheet.
--   **`mark_item_as_used(worksheet, row_index)`**: Marks a specific row as used.
+**Distinction:**
+-   **Firestore:** Stores *Users*, *Subscriptions*, and *Daily Cache*.
+-   **Google Sheets:** Stores *Source Content* (Quotes, Verses, Lesson definitions) managed by humans.
 
 ---
 
-## 2. Data Flow for Retrieving a Sheet (`get_worksheet`)
+## 1. Service Responsibility
 
-The `get_worksheet` method is crucial because it translates abstract references into concrete objects.
+The `SheetsService` is responsible for:
+1.  **Authentication:** Managing the connection to Google APIs using `credentials.json` (passed securely via GitHub Secrets).
+2.  **Reference Resolution:** Converting logical IDs (e.g., `bible_sk`) from `config.json` into actual Spreadsheet URLs and Worksheet names.
+3.  **Content Rotation:** Selecting unused content rows and handling the **Auto-Reset** logic when content runs out.
+
+---
+
+## 2. Main Public API
+
+Handlers communicate with this service via these four functions:
+
+-   **`initialize_sheets_service(app_config)`**:
+    -   Called once at startup by `JobOrchestrator`.
+    -   Loads the `data_sources` map from `config.json`.
+-   **`get_worksheet(data_source_ref)`**:
+    -   Resolves a dictionary like `{"spreadsheet_key": "...", "worksheet_key": "..."}` into a live `gspread.Worksheet` object.
+-   **`get_unused_item(worksheet, language)`**:
+    -   The core logic. Returns a random row where `used == FALSE`.
+-   **`mark_item_as_used(worksheet, row_index)`**:
+    -   Updates the `used` column to `TRUE` and writes the current timestamp.
+
+---
+
+## 3. Logic Flow: resolving `get_worksheet`
+
+This diagram shows how abstract configuration keys translate to physical data connections.
 
 ```mermaid
 sequenceDiagram
-    participant Strategy as Strategy (e.g., BibleHandler)
-    participant SheetsService as sheets_service
-    participant Config as config.json (in memory)
-    participant gspread
+    participant Handler as Content Handler
+    participant Sheets as SheetsService
+    participant Config as config.json (Memory)
+    participant Google as Google API
 
-    Strategy->>SheetsService: get_worksheet({"spreadsheet_key": "YDP_...", "worksheet_key": "bible_sk"})
-    activate SheetsService
-
-    SheetsService->>SheetsService: _resolve_data_source(ref)
-    Note right of SheetsService: Calls an internal helper method.
-
-    SheetsService->>Config: Loads data_sources["YDP_..."]
-    Config-->>SheetsService: Returns { "spreadsheet_url": "...", "worksheets": {...} }
-
-    SheetsService->>Config: Loads worksheets["bible_sk"]
-    Config-->>SheetsService: Returns "BibleSk"
-
-    SheetsService-->>SheetsService: Returns ("https://url...", "BibleSk")
+    Handler->>Sheets: get_worksheet(ref_dict)
     
-    SheetsService->>gspread: _get_client()
-    Note right of SheetsService: Obtains an authorized client.
-    gspread-->>SheetsService: Returns gspread.Client
-
-    SheetsService->>gspread: client.open_by_url("https://url...")
-    gspread-->>SheetsService: Returns Spreadsheet object
-
-    SheetsService->>gspread: spreadsheet.worksheet("BibleSk")
-    gspread-->>SheetsService: Returns Worksheet object
-
-    SheetsService-->>Strategy: Returns Worksheet object
-    deactivate SheetsService
+    Sheets->>Config: Look up 'spreadsheet_key'
+    Config-->>Sheets: Return URL (https://docs.google.com/...)
+    
+    Sheets->>Config: Look up 'worksheet_key'
+    Config-->>Sheets: Return Tab Name (e.g., "BibleSk")
+    
+    Sheets->>Google: client.open_by_url(URL).worksheet(TabName)
+    Google-->>Sheets: Worksheet Object
+    
+    Sheets-->>Handler: Ready-to-use Worksheet
 ```
 
-## 3. Detailed Flow of the `get_unused_item` Function (with Auto-Reset)
+---
 
-This is the most complex and important function in the module. Its robustness ensures the smooth and maintenance-free operation of the application.
+## 4. Critical Logic: Content Selection & Auto-Reset
+
+The `get_unused_item` function ensures the bot **never stops working**, even if it runs out of new quotes.
 
 ```mermaid
 graph TD
-    A[Start: get_unused_item] --> B[Load all rows<br/>worksheet.get_all_values];
-    B --> C[Filter unused rows<br/>_filter_unused_items];
-    C --> D{Found any unused rows?};
+    Start[Request Content] --> Load[Load All Rows];
+    Load --> Filter[Filter: used == FALSE];
     
-    D -- Yes --> E[Select a random row<br/>random.choice];
-    E --> F[Return row index and data];
+    Filter --> Check{Any Rows Left?};
     
-    D -- No --> G[log.warning: No content];
-    G --> H[Call auto-reset<br/>_reset_used_flags];
+    Check -- Yes --> Pick[Randomly Select One];
+    Pick --> Return[Return Row Data];
     
-    H --> I{Reset successful?};
+    Check -- No (Empty) --> Warn[Log Warning: Content Depleted];
+    Warn --> Reset[<b>Trigger Auto-Reset</b><br>Set all 'used' cells to FALSE];
     
-    I -- No --> J[log.error: Reset failed];
-    J --> K[Return None, None];
+    Reset --> RetryLoad[Reload All Rows];
+    RetryLoad --> RetryFilter[Filter: used == FALSE];
     
-    I -- Yes --> L[Load all rows<br/>AGAIN];
-    L --> M[Filter unused rows<br/>AGAIN];
-    M --> N{Found any unused rows?};
+    RetryFilter --> CheckRetry{Any Rows Now?};
     
-    N -- Yes --> E;
-    N -- No --> O[log.error: Still no content];
-    O --> K;
-
-    subgraph Auto-Reset Cycle
-        G
-        H
-        I
-        L
-        M
-        N
-        O
-        J
-    end
-
-    style F fill:#9f9,stroke:#333,stroke-width:2px
-    style K fill:#f99,stroke:#333,stroke-width:2px
+    CheckRetry -- Yes --> Pick;
+    CheckRetry -- No --> Error[Critical Error: Sheet is Empty];
 ```
 
-**Key points of the algorithm:**
-1.  **First Attempt:** The function first tries to find any rows where the `used` column is set to `FALSE`.
-2.  **Success Path:** If it finds at least one such row, it randomly selects one and returns its data and index.
-3.  **Failure Path (Triggering Auto-Reset):** If it finds no unused rows, "Plan B" is executed:
-    a.  The internal method `_reset_used_flags` is called, which sets the `used` column back to `FALSE` for all relevant rows.
-    b.  **Second Attempt:** After a successful reset, the function **attempts to load and filter the data one more time**. This is a critical step that ensures the application can seamlessly continue into a new cycle.
-    c.  If it still finds no data after the reset (which could only happen with an empty sheet), it logs a critical error and terminates.
+### The Auto-Reset Mechanism
+1.  **Detection:** When the bot filters rows and finds that 0 rows remain unused.
+2.  **Action:** It iterates through the entire sheet and sets the `used` column to `FALSE` for every row that matches the language criteria.
+3.  **Seamless Recovery:** It immediately retries the selection process in the same execution. The user never notices that the content pool was exhausted; they simply start seeing older content again (rotation).
+
+--- END OF FILE 05_service_sheets.md ---
