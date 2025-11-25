@@ -1,0 +1,477 @@
+{
+  "1jU5zdDfErWACAiLLxokIpg3ft73": {
+    "lastUpdated": "2025-11-23T20:59:57.193000+00:00",
+    "description": "user1@gmail.com",
+    "weather": {
+      "locations": [
+        {
+          "location": "Bratislava,SK"
+        },
+        {
+          "location": "Trnava,SK"
+        }
+      ]
+    },
+    "channels": [
+      {
+        "platform": "telegram",
+        "identifier": "xxxxxxxxxx"
+      }
+    ],
+    "subscriptions": {
+      "time12": [
+        {
+          "theme": "german_lesson_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time9": [
+        {
+          "theme": "philosophy_mix_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time7": [
+        {
+          "theme": "bible_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time17": [
+        {
+          "theme": "stary_zakon_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time10": [
+        {
+          "theme": "european_art_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time6": [
+        {
+          "theme": "morning_briefing_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time11": [
+        {
+          "theme": "family_photo_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time16": [
+        {
+          "theme": "novy_zakon_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ]
+    },
+    "custom_content": {
+      "blocks": [
+        "Drink enough fluids during the day to avoid headaches",
+        "If possible, cook with love...",
+        "If not, check the lunch menu"
+      ],
+      "links": [
+        {
+          "title": "Menu Igi's Canteen",
+          "url": "https://jedalenuigiho.sk/section:menu"
+        },
+        {
+          "title": "",
+          "url": ""
+        },
+        {
+          "title": "",
+          "url": ""
+        }
+      ]
+    },
+    "language": "english",
+    "timezone": "Europe/Bratislava",
+    "active": true,
+    "isAdmin": true
+  },
+  "JeMVt2kxkkVzQQfgp0omc4akfox1": {
+    "lastUpdated": "2025-11-24T15:52:54.820000+00:00",
+    "description": "yyy@yahoo.com",
+    "weather": {
+      "locations": [
+        {
+          "location": "Trnava,SK"
+        },
+        {
+          "location": "Bratislava,SK"
+        },
+        {
+          "location": "Garfield,NJ,US"
+        }
+      ]
+    },
+    "channels": [
+      {
+        "platform": "telegram",
+        "identifier": "yyyyyyyyyy"
+      }
+    ],
+    "subscriptions": {
+      "time12": [
+        {
+          "theme": "european_art_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time15": [
+        {
+          "theme": "novy_zakon_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time7": [
+        {
+          "theme": "bible_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time8": [
+        {
+          "theme": "user_reminder_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time6": [
+        {
+          "theme": "morning_briefing_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time11": [
+        {
+          "theme": "philosophy_mix_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time16": [
+        {
+          "theme": "stary_zakon_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ]
+    },
+    "custom_content": {
+      "blocks": [
+        "Take your pills in the morning and measure your blood pressure",
+        "Treat yourself to a cooked meal for lunch\nIn the evening, check if pills need refilling",
+        "Check the daily lunch menu\nclick the links below"
+      ],
+      "links": [
+        {
+          "title": "Daily Menu Smak SP",
+          "url": "https://www.smakfastfood.sk/"
+        },
+        {
+          "title": "Weekly Menu Nezabudka",
+          "url": "https://www.nezabudkapenzion.sk/tyzdenne-obedove-menu/"
+        },
+        {
+          "url": "https://stropkov.vermexsk.sk/obedove-menu/",
+          "title": "Daily Menu Vermex"
+        }
+      ]
+    },
+    "language": "english",
+    "timezone": "Europe/Bratislava",
+    "active": true
+  },
+  "lfgXKNIZBATKSLCWgpC5ULCxKd52": {
+    "lastUpdated": "2025-11-24T19:16:51.090000+00:00",
+    "description": "zzz@yahoo.com",
+    "weather": {
+      "locations": [
+        {
+          "location": "Bratislava,SK"
+        },
+        {
+          "location": "Trnava,SK"
+        }
+      ]
+    },
+    "channels": [
+      {
+        "platform": "telegram",
+        "identifier": "zzzzzzzzzz"
+      }
+    ],
+    "subscriptions": {
+      "time12": [
+        {
+          "theme": "german_lesson_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time10": [
+        {
+          "theme": "philosophy_mix_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "theme": "european_art_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time17": [
+        {
+          "theme": "novy_zakon_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time6": [
+        {
+          "theme": "morning_briefing_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "theme": "bible_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time18": [
+        {
+          "theme": "stary_zakon_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time13": [
+        {
+          "theme": "family_photo_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "time11": [
+        {
+          "theme": "user_reminder_en",
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ]
+    },
+    "custom_content": {
+      "blocks": [
+        "Smile",
+        "check your mail\nhttps://www.yahoo.com/",
+        "Check the lunch menu"
+      ],
+      "links": [
+        {
+          "title": "Fresh Market Bratislava",
+          "url": "https://www.freshmarket.sk/prevadzky#zazitkova-kuchyna"
+        },
+        {
+          "title": "Wolt Bratislava",
+          "url": "https://wolt.com/sk/svk/bratislava/restaurant/johny-italian-bistro?utm_source=googlemapreserved&utm_campaign=johny-italian-bistro&utm_content=5dd26e10ce8f6c59fb6fdab7&rwg_token=ACgRB3cLZmQGg5j-3Tg_0nd0zn5pbuDtcvgjKjG3IeZ9-AQzWaP3eErHhoTLZZugvMjDN_SH-Pmo2ZdG1I9hj0UbyTyH3bs_MAgQ_eUw3T9QNbDfgsirquU%3D"
+        },
+        {
+          "title": "Le Due Sicilie Bratislava",
+          "url": "https://pikmenu.com/sk/le-due-sicilie/en"
+        }
+      ]
+    },
+    "language": "english",
+    "timezone": "Europe/Bratislava",
+    "active": true,
+    "isAdmin": true
+  }
+}
