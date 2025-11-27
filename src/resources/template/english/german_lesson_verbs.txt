@@ -1,0 +1,34 @@
+<b>{lesson_title}</b>
+
+<blockquote>DE: {infinitive_de}</blockquote>
+ENG: {infinitive_en}
+
+<b>Present (Präsens):</b> {present_3rd_person}
+{sentence_present_de}
+<i>{sentence_present_en}</i>
+
+<b>Past (Präteritum):</b> {preterite}
+{sentence_preterite_de}
+<i>{sentence_preterite_en}</i>
+
+<b>Perfect (Perfekt):</b> {perfect}
+{sentence_perfect_de}
+<i>{sentence_perfect_en}</i>
+
+<b>Pluperfect (Plusquamperfekt):</b> {plusquamperfekt}
+{sentence_plusquamperfekt_de}
+<i>{sentence_plusquamperfekt_en}</i>
+
+<b>Future I (Futur I):</b> {futur1}
+{sentence_futur1_de}
+<i>{sentence_futur1_en}</i>
+
+<b>Future II (Futur II):</b> {futur2}
+{sentence_futur2_de}
+<i>{sentence_futur2_en}</i>
+
+<blockquote><b>More Resources:</b></blockquote>
+{dynamic_link_html}
+{static_grammar_link_html}
+
+<blockquote>{AI_LINKS_FOOTER}</blockquote>

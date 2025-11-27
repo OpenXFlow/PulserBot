@@ -1,0 +1,4 @@
+<blockquote>{caption}</blockquote>
+
+<b>❤️ Family Thought for Today:</b>
+{family_quote}

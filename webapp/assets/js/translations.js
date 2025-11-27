@@ -83,16 +83,25 @@ const translations = {
         footerRights: `&copy; 2025 <a href="https://github.com/OpenXFlow/PulserBot">PulserBot</a> (MIT License) | Kontakt: <a href="mailto:yourpulserbot@gmail.com">yourpulserbot@gmail.com</a>`,
 
         // -- App Translations --
-        appLoading: "Načítavam aplikáciu...",
+        appLoading: "Loading application...",
         appPleaseWait: "Prosím, čakajte.",
         
         // Auth Forms
         loginTitle: "Prihlásenie",
         loginButton: "Prihlásiť sa",
         loginSwitch: "Nemáte účet? <a href=\"#\" id=\"show-signup\">Zaregistrujte sa</a>",
+        loginForgotPassword: "Zabudli ste heslo?",
+        
         signupTitle: "Registrácia",
         signupButton: "Zaregistrovať sa",
         signupSwitch: "Už máte účet? <a href=\"#\" id=\"show-login\">Prihláste sa</a>",
+        
+        // Password Reset
+        resetPasswordTitle: "Obnova hesla",
+        resetPasswordButton: "Poslať obnovovací link",
+        resetPasswordBack: "Späť na prihlásenie",
+        resetPasswordSuccess: "Email na obnovu hesla bol odoslaný. Skontrolujte si schránku.",
+        resetPasswordError: "Chyba: Skontrolujte emailovú adresu.",
 
         // Auth Errors
         authErrorInvalid: "Nesprávny email alebo heslo.",
@@ -101,6 +110,8 @@ const translations = {
         authErrorWeakPassword: "Heslo je príliš slabé (min. 6 znakov).",
         authErrorTooManyRequests: "Príliš veľa pokusov. Skúste to neskôr.",
         authErrorDefault: "Nastala chyba. Skúste to znova.",
+        
+        passwordPlaceholder: "Heslo (min. 6 znakov)",
 
         // Verification Screen
         verifyTitle: "Overte svoj email",
@@ -252,15 +263,28 @@ const translations = {
         loginTitle: "Login",
         loginButton: "Log In",
         loginSwitch: "Don't have an account? <a href=\"#\" id=\"show-signup\">Sign up</a>",
+        loginForgotPassword: "Forgot Password?",
+
         signupTitle: "Sign Up",
         signupButton: "Sign Up",
         signupSwitch: "Already have an account? <a href=\"#\" id=\"show-login\">Log in</a>",
+        
+        // Password Reset
+        resetPasswordTitle: "Reset Password",
+        resetPasswordButton: "Send Reset Link",
+        resetPasswordBack: "Back to Login",
+        resetPasswordSuccess: "Password reset email sent. Check your inbox.",
+        resetPasswordError: "Error: Check your email address.",
+
         authErrorInvalid: "Invalid email or password.",
         authErrorUserNotFound: "User not found.",
         authErrorEmailInUse: "Email already in use.",
         authErrorWeakPassword: "Password is too weak (min. 6 chars).",
         authErrorTooManyRequests: "Too many requests. Try again later.",
         authErrorDefault: "An error occurred. Please try again.",
+        
+        passwordPlaceholder: "Password (min. 6 chars)",
+
         verifyTitle: "Verify Your Email",
         verifyText1: "Thank you for signing up! We've sent a verification link to your email address.",
         verifyText2: "Please click the link in the email to activate your account. You can then log in.",
@@ -325,4 +349,4 @@ const translations = {
     }
 };
 
-// End of webapp/assets/js/translations.js (v. 0022)
+// End of webapp/assets/js/translations.js (v. 0023)

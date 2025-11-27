@@ -425,4 +425,36 @@ input[type="checkbox"].theme-active-cb {
     border: none;
 }
 
-/* End of webapp/assets/css/app.css (v. 0009) */
+/* --- FIX: Footer Visibility --- */
+#footer {
+    position: relative;
+    z-index: 1; /* Above background, below sidebar if overlapping handled */
+    padding-left: 2em;
+    padding-right: 2em;
+    text-align: center;
+}
+
+/* Ensure long text wraps on smaller screens */
+#footer .menu li {
+    white-space: normal;
+    display: inline-block;
+    line-height: 1.5em;
+}
+
+/* Desktop: Push footer right to avoid sidebar overlap */
+@media screen and (min-width: 1281px) {
+    #footer {
+        margin-left: 18em; /* Same as sidebar width */
+        width: calc(100% - 18em);
+    }
+}
+
+/* Mobile/Tablet: Full width */
+@media screen and (max-width: 1280px) {
+    #footer {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* End of webapp/assets/css/app.css (v. 0010) */

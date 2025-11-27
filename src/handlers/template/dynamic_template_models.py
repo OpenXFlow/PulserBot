@@ -91,14 +91,36 @@ class GermanVerb:
 class GermanLessonModelRegistry:
     """A central registry for German lesson configurations and models."""
 
-    _TITLE_MAP: Dict[str, str] = {
-        "verbs_irregular": "NEPRAVIDELNÉ SLOVESÁ / IRREGULAR VERBS / UNREGELMÄSSIGE VERBEN",
-        "verbs_regular": "PRAVIDELNÉ SLOVESÁ / REGULAR VERBS / REGELMÄSSIGE VERBEN",
-        "pronouns": "ZÁMENÁ / PRONOUNS / PRONOMEN",
-        "adjectives": "PRÍDAVNÉ MENÁ / ADJECTIVES / ADJEKTIVE",
-        "adverbs": "PRÍSLOVKY / ADVERBS / ADVERBIEN",
-        "prepositions": "PREDLOŽKY / PREPOSITIONS / PRÄPOSITIONEN",
-        "nouns": "PODSTATNÉ MENÁ / NOUNS / SUBSTANTIVE",
+    # Updated structure to support multiple languages
+    _TITLE_MAP: Dict[str, Dict[str, str]] = {
+        "verbs_irregular": {
+            "sk": "LEKCIA: NEPRAVIDELNÉ SLOVESÁ / UNREGELMÄSSIGE VERBEN",
+            "en": "LESSON: IRREGULAR VERBS / UNREGELMÄSSIGE VERBEN",
+        },
+        "verbs_regular": {
+            "sk": "LEKCIA: PRAVIDELNÉ SLOVESÁ / REGELMÄSSIGE VERBEN",
+            "en": "LESSON: REGULAR VERBS / REGELMÄSSIGE VERBEN",
+        },
+        "pronouns": {
+            "sk": "LEKCIA: ZÁMENÁ / PRONOMEN",
+            "en": "LESSON: PRONOUNS / PRONOMEN",
+        },
+        "adjectives": {
+            "sk": "LEKCIA: PRÍDAVNÉ MENÁ / ADJEKTIVE",
+            "en": "LESSON: ADJECTIVES / ADJEKTIVE",
+        },
+        "adverbs": {
+            "sk": "LEKCIA: PRÍSLOVKY / ADVERBIEN",
+            "en": "LESSON: ADVERBS / ADVERBIEN",
+        },
+        "prepositions": {
+            "sk": "LEKCIA: PREDLOŽKY / PRÄPOSITIONEN",
+            "en": "LESSON: PREPOSITIONS / PRÄPOSITIONEN",
+        },
+        "nouns": {
+            "sk": "LEKCIA: PODSTATNÉ MENÁ / SUBSTANTIVE",
+            "en": "LESSON: NOUNS / SUBSTANTIVE",
+        },
     }
 
     @staticmethod
@@ -115,17 +137,26 @@ class GermanLessonModelRegistry:
     ) -> Type[Union[GermanTerm, GermanVerb]]:
         """Selects the correct data model class based on the content key."""
         normalized_key = cls._normalize_key(content_key)
-        # --- CORRECTED LOGIC ---
         if normalized_key in ["verbs_irregular", "verbs_regular"]:
             return GermanVerb
         return GermanTerm
 
     @classmethod
-    def create_title_from_key(cls, content_key: str) -> str:
-        """Creates a formatted, trilingual title for the lesson."""
+    def get_title_from_key(cls, content_key: str, lang: str = "sk") -> str:
+        """
+        Creates a localized title for the lesson.
+
+        Args:
+            content_key (str): The worksheet key.
+            lang (str): The target language ('sk' or 'en').
+        """
         normalized_key = cls._normalize_key(content_key)
-        title_base = cls._TITLE_MAP.get(normalized_key, "NEMČINY")
-        return f"LEKCIA: {title_base}"
+
+        # Map 'english' to 'en', 'slovak' to 'sk' just in case
+        lang_code = "en" if lang in ["english", "en"] else "sk"
+
+        titles = cls._TITLE_MAP.get(normalized_key, {})
+        return titles.get(lang_code, f"LESSON ({lang_code.upper()})")
 
 
-# End of src/handlers/template/dynamic_template_models.py (v. 0009)
+# End of src/handlers/template/dynamic_template_models.py (v. 0010)

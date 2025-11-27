@@ -42,37 +42,79 @@
 					<div class="inner">
 						
 						<div id="loading-container">
-							<h1 class="major" data-translate-key="appLoading">Načítavam aplikáciu...</h1>
+							<!-- Bilingual Loading Text for initial render -->
+							<h1 class="major" data-translate-key="appLoading">Loading... / Načítavam...</h1>
 						</div>
 
 						<div id="auth-container" class="hidden">
+							<!-- Login Form -->
 							<div class="form-container" id="login-form">
 								<h2 data-translate-key="loginTitle">Prihlásenie</h2>
 								<div class="fields">
-									<div class="field"><input type="email" id="login-email" placeholder="Email" required autocomplete="email"></div>
-									<div class="field"><input type="password" id="login-password" placeholder="Heslo" required autocomplete="current-password"></div>
+									<div class="field">
+										<input type="email" id="login-email" placeholder="Email" required autocomplete="email">
+									</div>
+									<div class="field">
+										<input type="password" id="login-password" placeholder="Heslo" required autocomplete="current-password" data-translate-placeholder="passwordPlaceholder">
+										
+										<!-- Forgot Password Link (Positioned under input) -->
+										<div style="text-align: right; margin-top: 0.5em;">
+											<a href="#" id="show-reset-password" data-translate-key="loginForgotPassword" style="font-size: 0.8em; border-bottom: none; color: rgba(255,255,255,0.6);">Zabudli ste heslo?</a>
+										</div>
+									</div>
 								</div>
-								<ul class="actions"><li><button id="login-button" class="button primary" data-translate-key="loginButton">Prihlásiť sa</button></li></ul>
+								<ul class="actions">
+									<li><button id="login-button" class="button primary" data-translate-key="loginButton">Prihlásiť sa</button></li>
+								</ul>
 								<p class="auth-switch" data-translate-key="loginSwitch">Nemáte účet? <a href="#" id="show-signup">Zaregistrujte sa</a></p>
 								<p id="login-error" class="error-message"></p>
 							</div>
+
+							<!-- Signup Form -->
 							<div class="form-container hidden" id="signup-form">
 								<h2 data-translate-key="signupTitle">Registrácia</h2>
 								<div class="fields">
-									<div class="field"><input type="email" id="signup-email" placeholder="Email" required autocomplete="email"></div>
-									<div class="field"><input type="password" id="signup-password" placeholder="Heslo (min. 6 znakov)" required autocomplete="new-password"></div>
+									<div class="field">
+										<input type="email" id="signup-email" placeholder="Email" required autocomplete="email">
+									</div>
+									<div class="field">
+										<input type="password" id="signup-password" placeholder="Heslo (min. 6 znakov)" required autocomplete="new-password" data-translate-placeholder="passwordPlaceholder">
+									</div>
 								</div>
-								<ul class="actions"><li><button id="signup-button" class="button primary" data-translate-key="signupButton">Zaregistrovať sa</button></li></ul>
+								<ul class="actions">
+									<li><button id="signup-button" class="button primary" data-translate-key="signupButton">Zaregistrovať sa</button></li>
+								</ul>
 								<p class="auth-switch" data-translate-key="signupSwitch">Už máte účet? <a href="#" id="show-login">Prihláste sa</a></p>
 								<p id="signup-error" class="error-message"></p>
 							</div>
+
+							<!-- Reset Password Form -->
+							<div class="form-container hidden" id="reset-password-form">
+								<h2 data-translate-key="resetPasswordTitle">Obnova hesla</h2>
+								<p class="instruction" style="margin-bottom: 1.5em;" data-translate-key="resetPasswordSuccess">Zadajte váš email a my vám pošleme inštrukcie na zmenu hesla.</p>
+								<div class="fields">
+									<div class="field">
+										<input type="email" id="reset-email" placeholder="Email" required>
+									</div>
+								</div>
+								<ul class="actions">
+									<li><button id="reset-password-button" class="button primary" data-translate-key="resetPasswordButton">Poslať link</button></li>
+								</ul>
+								<p class="auth-switch">
+									<a href="#" id="back-from-reset" data-translate-key="resetPasswordBack">Späť na prihlásenie</a>
+								</p>
+								<p id="reset-status" class="status-message"></p>
+							</div>
 						</div>
 
+						<!-- Verification Container -->
 						<div id="verification-container" class="hidden">
 							<h2 data-translate-key="verifyTitle">Overte svoj email</h2>
 							<p data-translate-key="verifyText1">...</p>
 							<p data-translate-key="verifyText2">...</p>
-							<ul class="actions"><li><button id="resend-verification-button" class="button" data-translate-key="verifyButton">Poslať znova</button></li></ul>
+							<ul class="actions">
+								<li><button id="resend-verification-button" class="button" data-translate-key="verifyButton">Poslať znova</button></li>
+							</ul>
 							
                             <!-- Emergency Logout Link -->
                             <p class="auth-switch" style="margin-top: 2em;">
@@ -82,6 +124,7 @@
 							<p id="verification-status" class="status-message"></p>
 						</div>
 
+						<!-- Dashboard Container -->
 						<div id="dashboard-container" class="hidden">
 							<h1 id="welcome-message" class="major" data-translate-key="welcomeMessage">Vitajte!</h1>
 							<p data-translate-key="dashboardSubtitle">...</p>
@@ -89,7 +132,9 @@
 								<!-- Dynamic Content Loads Here -->
 							</div>
 							<hr/>
-							<ul class="actions"><li><button id="save-settings-button" class="button primary" data-translate-key="dashboardSaveButton">Uložiť Zmeny</button></li></ul>
+							<ul class="actions">
+								<li><button id="save-settings-button" class="button primary" data-translate-key="dashboardSaveButton">Uložiť Zmeny</button></li>
+							</ul>
 							<p id="save-status" class="status-message"></p>
 						</div>
 					</div>
@@ -150,4 +195,4 @@
 			<script src="assets/js/app.js"></script>
 	</body>
 </html>
-<!-- End of webapp/login.html (v. 0010) -->
+<!-- End of webapp/login.html (v. 0012) -->

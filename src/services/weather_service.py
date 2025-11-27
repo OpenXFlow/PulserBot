@@ -5,6 +5,7 @@
 # src/services/weather_service.py
 """
 A dedicated service module for all interactions with the OpenWeatherMap API.
+Updated to support asynchronous I/O and In-Memory Caching to minimize API calls.
 """
 
 import logging
@@ -17,55 +18,114 @@ from .. import config
 
 class WeatherService:
     """
-    Encapsulates all logic for fetching weather forecasts.
+    Encapsulates all logic for fetching weather forecasts asynchronously.
+    Includes caching mechanism to prevent duplicate calls for the same location within one run.
     """
 
-    def get_weather_forecast(
+    # Internal cache to store results during a single script execution
+    # Key: "location|lang", Value: Formatted string
+    _cache: Dict[str, str] = {}
+
+    TRANSLATIONS = {
+        "sk": {
+            "morning": "Ráno",
+            "noon": "Na obed",
+            "evening": "Večer",
+            "missing_key": "Predpoveď počasia nie je dostupná (chýba API kľúč).",
+            "no_data": "Pre danú lokalitu neboli nájdené žiadne dáta.",
+            "not_found": "Lokalita '{location}' nebola nájdená.",
+            "unavailable": "Predpoveď počasia nie je momentálne dostupná.",
+            "limit_reached": "Denný limit pre počasie bol vyčerpaný.",
+        },
+        "en": {
+            "morning": "Morning",
+            "noon": "Noon",
+            "evening": "Evening",
+            "missing_key": "Weather forecast not available (missing API key).",
+            "no_data": "No data found for this location.",
+            "not_found": "Location '{location}' not found.",
+            "unavailable": "Weather forecast is currently unavailable.",
+            "limit_reached": "Daily weather API limit reached.",
+        },
+    }
+
+    async def get_weather_forecast(
         self, location: str, units: str = "metric", lang: str = "sk"
     ) -> str:
         """
-        Fetches and formats a weather forecast for a specific location.
+        Fetches and formats a weather forecast for a specific location asynchronously.
+        Uses caching to avoid repeated API calls for the same location.
 
         Args:
             location (str): The location string (e.g., "Bratislava,SK").
             units (str): The units for temperature ('metric' or 'imperial').
-            lang (str): The language code for the description.
+            lang (str): The language code ('sk' or 'en').
 
         Returns:
             str: A formatted string with the weather forecast.
         """
-        logging.info(f"Fetching weather forecast for '{location}' in lang '{lang}'...")
-        forecast: Dict[str, Any] = {"morning": "N/A", "noon": "N/A", "evening": "N/A"}
+        # 1. Normalize inputs for cache key
+        valid_lang = lang if lang in self.TRANSLATIONS else "sk"
+        t = self.TRANSLATIONS[valid_lang]
+
+        cache_key = f"{location.lower().strip()}|{valid_lang}|{units}"
+
+        # 2. Check Cache
+        if cache_key in self._cache:
+            logging.debug(f"Weather Cache HIT for '{location}' ({valid_lang})")
+            return self._cache[cache_key]
+
+        # 3. API Call (if not in cache)
+        logging.info(
+            f"Weather Cache MISS. Fetching API for '{location}' in '{valid_lang}'..."
+        )
 
         if not config.OPENWEATHER_API_KEY:
             logging.error("OpenWeatherMap API key is not configured.")
-            return "Predpoveď počasia nie je dostupná (chýba API kľúč)."
+            return t["missing_key"]
+
+        result_str = t["unavailable"]  # Default fallback
 
         try:
             params = {
                 "q": location,
                 "appid": config.OPENWEATHER_API_KEY,
                 "units": units,
-                "lang": lang,  # <-- FIX: Use the 'lang' parameter passed to the function
+                "lang": valid_lang,
             }
-            with httpx.Client(timeout=10.0) as client:
-                res = client.get(
+
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                res = await client.get(
                     "https://api.openweathermap.org/data/2.5/forecast", params=params
                 )
-                res.raise_for_status()
 
-            data = res.json()
+                # Specific handling for Rate Limiting (429)
+                if res.status_code == 429:
+                    logging.warning("OpenWeatherMap API limit reached (429).")
+                    # We cache the error message too, so we don't hammer the API again in this run
+                    self._cache[cache_key] = t["limit_reached"]
+                    return t["limit_reached"]
+
+                res.raise_for_status()
+                data = res.json()
+
             if not data.get("list"):
                 logging.warning(f"No forecast data returned for location '{location}'.")
-                return "Pre danú lokalitu neboli nájdené žiadne dáta."
+                return t["no_data"]
+
+            forecast: Dict[str, Any] = {
+                "morning": "N/A",
+                "noon": "N/A",
+                "evening": "N/A",
+            }
 
             for period in data["list"]:
                 hour = int(period["dt_txt"].split(" ")[1][:2])
                 temp = period.get("main", {}).get("temp")
                 desc = period.get("weather", [{}])[0].get("description", "N/A")
 
-                # Quick fix for a known typo in the OpenWeatherMap Slovak translation
-                desc = desc.replace("pretežno", "prevažne")
+                if valid_lang == "sk":
+                    desc = desc.replace("pretežno", "prevažne")
 
                 if temp is None:
                     continue
@@ -78,29 +138,36 @@ class WeatherService:
                 if 17 <= hour <= 20 and forecast["evening"] == "N/A":
                     forecast["evening"] = forecast_str
 
-            return f"Ráno: {forecast['morning']}, Na obed: {forecast['noon']}, Večer: {forecast['evening']}"
+            result_str = f"{t['morning']}: {forecast['morning']}, {t['noon']}: {forecast['noon']}, {t['evening']}: {forecast['evening']}"
 
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 404:
                 logging.error(f"Weather location '{location}' not found (404).")
-                return f"Lokalita '{location.split(',')[0]}' nebola nájdená."
-            logging.exception("HTTP error while fetching weather forecast.")
+                location_name = location.split(",")[0]
+                result_str = t["not_found"].replace("{location}", location_name)
+            else:
+                logging.exception(f"HTTP error while fetching weather forecast: {e}")
+
         except Exception:
             logging.exception(
                 "An unexpected error occurred while fetching weather forecast."
             )
 
-        return "Predpoveď počasia nie je momentálne dostupná."
+        # 4. Save result to cache (even if it's an error message, to prevent retry loops)
+        self._cache[cache_key] = result_str
+        return result_str
 
 
 _weather_service_instance = WeatherService()
 
 
-def get_weather_forecast(location: str, units: str = "metric", lang: str = "sk") -> str:
+async def get_weather_forecast(
+    location: str, units: str = "metric", lang: str = "sk"
+) -> str:
     """
-    Public-facing function to get a formatted weather forecast.
+    Public-facing async function to get a formatted weather forecast.
     """
-    return _weather_service_instance.get_weather_forecast(location, units, lang)
+    return await _weather_service_instance.get_weather_forecast(location, units, lang)
 
 
-# End of src/services/weather_service.py (v. 0002)
+# End of src/services/weather_service.py (v. 0005)

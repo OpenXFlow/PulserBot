@@ -192,16 +192,27 @@ class DataModelBuilder(ProcessingStep):
 class TextFormatter(ProcessingStep):
     """Builds all placeholders and formats the final text."""
 
-    def _get_auxiliary_links(self) -> Dict[str, str]:
+    def _get_auxiliary_links(self, lang: str) -> Dict[str, str]:
         """
-        Fetches auxiliary 'Slow German' and grammar links.
+        Fetches auxiliary 'Slow German' and grammar links, localized.
+
+        Args:
+            lang (str): The language key ('slovak', 'english').
 
         Returns:
             Dict[str, str]: A dictionary with the HTML for the links.
         """
+        # Define labels based on language
+        if lang == "english":
+            lbl_audio = "Today's Audio German Lesson:"
+            lbl_grammar = "Explore grammar at:"
+        else:
+            lbl_audio = "Dnešná audio lekcia nemčiny:"
+            lbl_grammar = "Preskúmajte gramatiku na:"
+
         links = {
             "dynamic_link_html": "",
-            "static_grammar_link_html": 'Preskúmajte gramatiku na:\n<a href="https://deutsch.info/grammar">Deutsch.info</a>',
+            "static_grammar_link_html": f'{lbl_grammar}\n<a href="https://deutsch.info/grammar">Deutsch.info</a>',
         }
         sg_ref = {
             "spreadsheet_key": "YDP_LLM_Dynamic_GermanLesson",
@@ -216,26 +227,30 @@ class TextFormatter(ProcessingStep):
                     str(data.get("link", "")).strip(),
                 )
                 links["dynamic_link_html"] = (
-                    f'Dnešná audio lekcia nemčiny:\n<a href="{link}">{title}</a>'
+                    f'{lbl_audio}\n<a href="{link}">{title}</a>'
                 )
                 sheets_service.mark_item_as_used(sg_ws, idx)
         return links
 
-    def _get_footer_content(self) -> str:
+    def _get_footer_content(self, lang: str) -> str:
         """
         Gets the AI links footer content from its template file.
+
+        Args:
+            lang (str): Language key.
 
         Returns:
             str: The content of the footer file.
         """
         try:
+            # Use dynamic path based on language
             return (
-                Path("src/resources/template/footer_ai_links_slovak.txt")
+                Path(f"src/resources/template/{lang}/footer_ai_links.txt")
                 .read_text(encoding="utf-8")
                 .strip()
             )
         except FileNotFoundError:
-            logging.warning("AI links footer file not found.")
+            logging.warning(f"AI links footer file not found for {lang}.")
             return ""
 
     def execute(self, context: ProcessingContext) -> bool:
@@ -257,11 +272,18 @@ class TextFormatter(ProcessingStep):
             return False
 
         placeholders = asdict(context.data_model)
-        placeholders["lesson_title"] = GermanLessonModelRegistry.create_title_from_key(
-            context.content_key or ""
+
+        # Updated: Get localized title
+        placeholders["lesson_title"] = GermanLessonModelRegistry.get_title_from_key(
+            context.content_key or "", context.lang
         )
-        placeholders.update(self._get_auxiliary_links())
-        placeholders["AI_LINKS_FOOTER"] = self._get_footer_content()
+
+        # Updated: Pass language to auxiliary links
+        placeholders.update(self._get_auxiliary_links(context.lang))
+
+        # Updated: Pass language to footer
+        placeholders["AI_LINKS_FOOTER"] = self._get_footer_content(context.lang)
+
         placeholders["IMAGE_ATTRIBUTION"] = ""
 
         if isinstance(context.data_model, GermanTerm):
@@ -420,4 +442,4 @@ class DynamicTemplateHandler(BaseHandler):
         return None, None
 
 
-# End of src/handlers/template/dynamic_template_handler.py (v. 0043)
+# End of src/handlers/template/dynamic_template_handler.py (v. 0045)

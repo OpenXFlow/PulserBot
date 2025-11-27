@@ -27,21 +27,28 @@ from .llm_dynamic_models import MorningBriefingData
 class ResourceCache:
     """Centralized cache for frequently accessed resources."""
 
-    _footer_cache: Optional[str] = None
+    # Changed from Optional[str] to Dict to support multiple languages
+    _footer_cache: Dict[str, str] = {}
     _prompts_cache: Dict[str, str] = {}
 
     @classmethod
-    def get_footer(cls) -> str:
-        """Get AI links footer content (cached)."""
-        if cls._footer_cache is None:
-            footer_path = Path("src/resources/template/footer_ai_links_slovak.txt")
+    def get_footer(cls, lang: str) -> str:
+        """
+        Get AI links footer content (cached per language).
+        
+        Args:
+            lang (str): Language code (e.g., 'slovak', 'english').
+        """
+        if lang not in cls._footer_cache:
+            # Construct path dynamically based on language
+            footer_path = Path(f"src/resources/template/{lang}/footer_ai_links.txt")
             try:
                 with open(footer_path, "r", encoding="utf-8") as f:
-                    cls._footer_cache = f.read().strip()
+                    cls._footer_cache[lang] = f.read().strip()
             except FileNotFoundError:
-                logging.warning("AI links footer file not found. Using empty footer.")
-                cls._footer_cache = ""
-        return cls._footer_cache
+                logging.warning(f"AI links footer file not found at: {footer_path}. Using empty footer.")
+                cls._footer_cache[lang] = ""
+        return cls._footer_cache[lang]
 
     @classmethod
     def get_prompt(cls, prompt_path: str) -> Optional[str]:
@@ -170,7 +177,9 @@ class PromptBuilder:
         placeholders = asdict(handler.data_model)
         placeholders["IMAGE_ATTRIBUTION"] = handler.image_attribution
 
-        footer = ResourceCache.get_footer()
+        # Pass the handler's language to get the correct footer
+        footer = ResourceCache.get_footer(handler.lang)
+        
         if handler.image_attribution and footer:
             footer = "\n" + footer
         placeholders["AI_LINKS_FOOTER"] = footer
@@ -300,4 +309,4 @@ class LLMDynamicHandler(BaseHandler):
         return None, None
 
 
-# End of src/handlers/llm/llm_dynamic_handler.py (v. 0028)
+# End of src/handlers/llm/llm_dynamic_handler.py (v. 0029)

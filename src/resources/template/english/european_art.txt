@@ -1,0 +1,11 @@
+<b>🎨 European Masterpiece of the Day:</b>
+<blockquote><i>{art_title}</i> by <i>{art_artist}</i> ({art_year})</blockquote>
+
+<b>Medium:</b> {art_medium}
+<b>Dimensions:</b> {art_dimensions}
+
+<b>Credit Line:</b> {art_credit_line}
+<i>{art_owner}</i>
+
+<blockquote><a href="{art_object_url}">View artwork online</a>
+{AI_LINKS_FOOTER}</blockquote>

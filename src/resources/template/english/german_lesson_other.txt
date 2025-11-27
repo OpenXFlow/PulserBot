@@ -1,0 +1,36 @@
+<b>{lesson_title}</b>
+
+<blockquote>DE: {term_de} {term_plural_line}</blockquote>
+ENG: {term_en}
+
+<b>Example Sentences:</b>
+
+1. {sentence1_de}
+   <i>{sentence1_en}</i>
+
+2. {sentence2_de}
+   <i>{sentence2_en}</i>
+
+3. {sentence3_de}
+   <i>{sentence3_en}</i>
+
+4. {sentence4_de}
+   <i>{sentence4_en}</i>
+
+5. {sentence5_de}
+   <i>{sentence5_en}</i>
+
+6. {sentence6_de}
+   <i>{sentence6_en}</i>
+
+7. {sentence7_de}
+   <i>{sentence7_en}</i>
+
+8. {sentence8_de}
+   <i>{sentence8_en}</i>
+
+<blockquote><b>More Resources:</b></blockquote>
+{dynamic_link_html}
+{static_grammar_link_html}
+
+<blockquote>{AI_LINKS_FOOTER}</blockquote>

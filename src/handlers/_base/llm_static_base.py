@@ -59,17 +59,14 @@ class LLMStaticBaseHandler(BaseHandler):
             logging.error(f"Prompt file not found at path: {base_prompt_path}")
             return None
 
-        # --- FINALIZED FOOTER LOGIC ---
+        # --- UPDATED FOOTER LOGIC (Dynamic Language) ---
         try:
-            with open(
-                "src/resources/template/footer_ai_links_slovak.txt",
-                "r",
-                encoding="utf-8",
-            ) as f:
+            footer_path = f"src/resources/template/{self.lang}/footer_ai_links.txt"
+            with open(footer_path, "r", encoding="utf-8") as f:
                 ai_links_content = f.read().strip()
         except FileNotFoundError:
             ai_links_content = ""
-            logging.warning("AI links footer file not found. Skipping.")
+            logging.warning(f"AI links footer file not found for lang '{self.lang}'. Skipping.")
 
         image_attribution_content = self.image_attribution
 
@@ -78,7 +75,6 @@ class LLMStaticBaseHandler(BaseHandler):
 
         content_payload = self._build_content_payload(item_data)
 
-        # --- CORRECTED .format() CALL ---
         final_prompt = base_prompt.format(
             content_payload=content_payload,
             language=self.lang,
@@ -127,4 +123,4 @@ class LLMStaticBaseHandler(BaseHandler):
         return None, None
 
 
-# End of src/handlers/_base/llm_static_base.py (v. 0018)
+# End of src/handlers/_base/llm_static_base.py (v. 0019)
