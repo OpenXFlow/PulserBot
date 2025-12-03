@@ -1,6 +1,6 @@
 /*
  * app.css
- * Custom application-specific styles for YourDailyPulse login and dashboard.
+ * Custom application-specific styles for YourDailyPulse login, dashboard and landing page.
  */
 
 /* --- General Helper Classes --- */
@@ -25,7 +25,7 @@
     justify-content: flex-start;
 }
 
-/* Style for the new app navigation menu */
+/* Style for the new app navigation menu (Dashboard) */
 #app-nav {
     text-align: right;
     width: 100%;
@@ -94,6 +94,42 @@
 
 #sidebar .back-to-home a:hover {
     color: #ffffff;
+}
+
+/* --- Sidebar Submenu Styles (Landing Page) --- */
+#sidebar nav > ul > li > ul.submenu {
+    display: block;
+    margin: 0.5em 0 1em 0;
+    padding-left: 0;
+    list-style: none;
+    border-top: none; /* Remove line above submenu */
+}
+
+#sidebar nav > ul > li > ul.submenu > li {
+    margin: 0;
+    padding: 0;
+    border: none; /* Remove lines between items */
+    opacity: 1;
+    transform: none; /* Reset animations to prevent flickering */
+}
+
+#sidebar nav > ul > li > ul.submenu > li > a {
+    font-size: 0.5em; /* Smaller font than main menu */
+    padding: 0.4em 0;
+    color: rgba(255, 255, 255, 0.4); /* Dimmer color */
+    text-transform: none;
+    letter-spacing: 0.1em;
+    border: none;
+    text-align: right;
+}
+
+#sidebar nav > ul > li > ul.submenu > li > a:hover {
+    color: #ffffff;
+}
+
+/* Remove the gradient line after submenu items */
+#sidebar nav > ul > li > ul.submenu > li > a:after {
+    display: none;
 }
 
 
@@ -198,10 +234,10 @@
 
 .theme-header {
     display: flex;
-    align-items: flex-start; /* Changed from center to start for multiline left side */
+    align-items: flex-start;
     justify-content: space-between;
     width: 100%;
-    min-height: 3em; /* Ensure height even if empty */
+    min-height: 3em;
 }
 
 .theme-title-wrapper {
@@ -209,7 +245,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5em;
-    padding-top: 0.2em; /* Align slightly with inputs */
+    padding-top: 0.2em;
 }
 
 .theme-header h4 {
@@ -269,7 +305,7 @@ input[type="checkbox"].theme-active-cb {
 }
 
 
-/* --- Day Picker (Final Fix) --- */
+/* --- Day Picker --- */
 .day-picker {
     display: flex;
     gap: 8px;
@@ -457,4 +493,4 @@ input[type="checkbox"].theme-active-cb {
     }
 }
 
-/* End of webapp/assets/css/app.css (v. 0010) */
+/* End of webapp/assets/css/app.css (v. 0011) */

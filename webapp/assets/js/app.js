@@ -20,7 +20,6 @@ $(function() {
         dashboardContainer: $('#dashboard-container'),
         loginForm: $('#login-form'),
         signupForm: $('#signup-form'),
-        // NEW: Reset Password Form Selector
         resetPasswordForm: $('#reset-password-form'),
         
         appNav: $('#app-nav'),
@@ -151,14 +150,19 @@ $(function() {
                 if (theme.adminOnly && !isAdmin) return; 
 
                 const variants = theme.variants || {};
-                const hasSk = !!variants.sk;
-                const hasEn = !!variants.en;
-
+                // Pre-calculate defaults
                 let isActive = false;
                 let selectedTime = `time${parseInt(theme.defaultTime)}`;
+                
+                // Determine default lang based on available variants
                 let selectedLang = 'sk'; 
-                let activeDays = []; // Default empty
+                if (variants.sk) selectedLang = 'sk';
+                else if (variants.en) selectedLang = 'en';
+                else if (variants.de) selectedLang = 'de';
 
+                let activeDays = []; 
+
+                // Check subscriptions to set current state
                 if (data.subscriptions) {
                     for (const [timeKey, subList] of Object.entries(data.subscriptions)) {
                         if (!Array.isArray(subList)) continue;
@@ -175,12 +179,18 @@ $(function() {
                                 itemDays = item.days;
                             }
 
-                            if ((hasSk && themeId === variants.sk) || (hasEn && themeId === variants.en)) {
-                                isActive = true;
-                                selectedTime = timeKey;
-                                selectedLang = (themeId === variants.en) ? 'en' : 'sk';
-                                if (itemDays) activeDays = itemDays;
-                                break;
+                            // Check against all possible language variants
+                            if (variants.sk && themeId === variants.sk) {
+                                isActive = true; selectedTime = timeKey; selectedLang = 'sk';
+                                if (itemDays) activeDays = itemDays; break;
+                            }
+                            if (variants.en && themeId === variants.en) {
+                                isActive = true; selectedTime = timeKey; selectedLang = 'en';
+                                if (itemDays) activeDays = itemDays; break;
+                            }
+                            if (variants.de && themeId === variants.de) {
+                                isActive = true; selectedTime = timeKey; selectedLang = 'de';
+                                if (itemDays) activeDays = itemDays; break;
                             }
                         }
                         if (isActive) break;
@@ -190,22 +200,31 @@ $(function() {
                 const label = t[theme.labelKey] + (theme.suffix ? ` ${theme.suffix}` : '');
                 const adminBadge = theme.adminOnly ? ' <span style="color: #ff6384; font-size: 0.7em; border: 1px solid #ff6384; padding: 0 4px; border-radius: 4px; margin-left: 5px;">ADMIN</span>' : '';
 
-                // Language Selector
+                // --- LANGUAGE SELECTOR LOGIC (SK / EN / DE) ---
+                let langOptionsHtml = '';
+                let availableLangsCount = 0;
+
+                if (variants.sk) { langOptionsHtml += '<option value="sk">SK</option>'; availableLangsCount++; }
+                if (variants.en) { langOptionsHtml += '<option value="en">EN</option>'; availableLangsCount++; }
+                if (variants.de) { langOptionsHtml += '<option value="de">DE</option>'; availableLangsCount++; }
+
                 let langSelectHtml = '';
-                if (hasSk && hasEn) {
+                
+                if (availableLangsCount > 1) {
                     langSelectHtml = `
                         <div class="control-group" style="margin-left: 1em;">
                             <label style="margin-right: 0.5em;">${t.themeLangLabel}</label>
                             <select class="theme-lang-select">
-                                <option value="sk">SK</option>
-                                <option value="en">EN</option>
+                                ${langOptionsHtml}
                             </select>
                         </div>
                     `;
                 } else {
-                    const singleLang = hasSk ? 'sk' : 'en';
+                    // If only one language available, use hidden input
+                    const singleLang = Object.keys(variants)[0]; 
                     langSelectHtml = `<input type="hidden" class="theme-lang-select" value="${singleLang}">`;
                 }
+                // ---------------------------------------------
                 
                 // Edit Button
                 let editBtnHtml = '';
@@ -272,11 +291,13 @@ $(function() {
                 if (theme.adminOnly && !(data.isAdmin === true)) return;
                 
                 const variants = theme.variants || {};
-                const hasSk = !!variants.sk;
-                const hasEn = !!variants.en;
                 
+                // Determine default
                 let selectedTime = `time${parseInt(theme.defaultTime)}`;
                 let selectedLang = 'sk';
+                if (variants.sk) selectedLang = 'sk';
+                else if (variants.en) selectedLang = 'en';
+                else if (variants.de) selectedLang = 'de';
 
                 if (data.subscriptions) {
                     for (const [timeKey, subList] of Object.entries(data.subscriptions)) {
@@ -284,18 +305,23 @@ $(function() {
                          for (const item of subList) {
                              const themeId = (typeof item === 'string') ? item : item.theme;
                              
-                             if (hasSk && themeId === variants.sk) {
+                             // Check variants to find matching language
+                             if (variants.sk && themeId === variants.sk) {
                                  selectedTime = timeKey; selectedLang = 'sk'; break;
                              }
-                             if (hasEn && themeId === variants.en) {
+                             if (variants.en && themeId === variants.en) {
                                  selectedTime = timeKey; selectedLang = 'en'; break;
+                             }
+                             if (variants.de && themeId === variants.de) {
+                                 selectedTime = timeKey; selectedLang = 'de'; break;
                              }
                          }
                     }
                 }
                 const $row = $(`[data-theme-base-id="${theme.id}"]`);
                 $row.find('.theme-time-select').val(selectedTime);
-                if (hasSk && hasEn) {
+                // Set language dropdown if it exists
+                if ($row.find('.theme-lang-select').is('select')) {
                     $row.find('.theme-lang-select').val(selectedLang);
                 }
             });
@@ -427,7 +453,7 @@ $(function() {
             elements.loginForm.toggleClass('hidden', form !== 'login-form');
             elements.signupForm.toggleClass('hidden', form !== 'signup-form');
             
-            // NEW: Handle Reset Form visibility
+            // Handle Reset Form visibility
             if (elements.resetPasswordForm.length) {
                 elements.resetPasswordForm.toggleClass('hidden', form !== 'reset-password-form');
             }
@@ -505,7 +531,7 @@ $(function() {
             if (state.currentUser) state.currentUser.sendEmailVerification().catch(console.error);
         },
 
-        // NEW: Send Password Reset
+        // Send Password Reset
         sendPasswordReset: function() {
             const email = $('#reset-email').val();
             const t = translations[state.lang];
@@ -573,14 +599,10 @@ $(function() {
             }
 
             // --- VALIDATION: Check Unique Telegram ID ---
-            // NOTE: Requires specific Firestore rules (list access) to work perfectly.
-            // In standard 'own-only' rules, this might fail or return nothing.
-            // Kept here for completeness, but be aware of permissions.
+            // NOTE: Logic commented out for security reasons (requires 'list' permissions)
             try {
                 const channelQuery = { platform: "telegram", identifier: telegramId };
-                // This line might need index or permission fix if strictly locked down
                 // const snapshot = await db.collection('users').where('channels', 'array-contains', channelQuery).get();
-                // Validation logic omitted for simplicity in strict mode to avoid permission errors
             } catch (error) {
                 console.error("Validation error:", error);
             }
@@ -681,7 +703,7 @@ $(function() {
         $(document.body).on('click', '#show-signup, [data-auth-form="signup-form"]', function(e) { e.preventDefault(); UIManager.showAuthForm('signup-form'); });
         $(document.body).on('click', '#show-login, [data-auth-form="login-form"]', function(e) { e.preventDefault(); UIManager.showAuthForm('login-form'); });
         
-        // NEW: Password Reset Bindings
+        // Password Reset Bindings
         $(document.body).on('click', '#show-reset-password', function(e) { e.preventDefault(); UIManager.showAuthForm('reset-password-form'); });
         $(document.body).on('click', '#back-from-reset', function(e) { e.preventDefault(); UIManager.showAuthForm('login-form'); });
         $('#reset-password-button').on('click', function(e) { e.preventDefault(); AuthManager.sendPasswordReset(); });
@@ -709,4 +731,4 @@ $(function() {
     bindEvents();
 });
 
-// End of webapp/assets/js/app.js (v. 0039)
+// End of webapp/assets/js/app.js (v. 0040)

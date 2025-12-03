@@ -1,0 +1,11 @@
+<b>📚 Literárna ochutnávka:</b>
+<b>Autor:</b> {lit_author}
+<b>Dielo:</b> {lit_work}
+
+<b>📜 Úryvok:</b>
+<blockquote>{lit_excerpt}</blockquote>
+
+<b>💡 Prečo je to skvost:</b>
+{lit_gem_reason}
+
+<blockquote>{AI_LINKS_FOOTER}</blockquote>

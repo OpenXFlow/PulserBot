@@ -97,6 +97,55 @@ const themeDetails = {
             backButton: "Back to All Themes"
         }
     },
+    world_literature: {
+            sk: {
+                title: "Téma: Svetová Literatúra",
+                pageTitle: "Svetová Literatúra - YourDailyPulse",
+                description1: "Knihy sú najtichší a najstálejší priatelia. Táto téma je pre tých, ktorí milujú vôňu stránok a hĺbku myšlienok, no v rýchlom svete si ťažko hľadajú čas na klasiku. My vám ten čas vrátime – v podobe jednej perfektne vybranej pasáže denne.",
+                description2: "Náš systém vyberá diela, ktoré formovali civilizáciu. Nejde len o suché fakty. Dostanete dlhší, súvislý úryvok (cca pol strany), ktorý vám umožní nasať atmosféru a štýl autora. K tomu pridávame stručné vysvetlenie, prečo je práve toto dielo považované za skvost.",
+                listTitle: "Čo nájdete v správe?",
+                listItems: [
+                "<strong>Autor a Dielo:</strong> Základná orientácia v čase a priestore svetovej literatúry.",
+                "<strong>Rozsiahly Úryvok:</strong> To najdôležitejšie. 15-20 viet, ktoré vás vtiahnu do deja. Či už je to existenciálna úzkosť Kafku alebo magický realizmus Márqueza, zažijete to na vlastnej koži.",
+                "<strong>Prečo je to skvost:</strong> Krátka, úderná analýza. Vysvetlíme vám kontext, štýl alebo skrytý význam, ktorý robí toto dielo nesmrteľným.",
+                "<strong>Vizuálny zážitok:</strong> Správu otvára tematický obrázok (obálka knihy, portrét autora alebo atmosféra knižnice) pre dokonalý zážitok.",
+                // NOVÝ BOD - INTERAKCIA S AI:
+                "<strong>Interakcia s AI (Váš osobný literárny kritik):</strong> Text v správe je síce fixný, ale diskusia nekončí. Skopírujte úryvok do ChatGPT/Gemini a skúste tieto prompty:<ul><li>'Analyzuj jazykové prostriedky, ktoré autor v tomto úryvku používa na vyvolanie napätia.'</li><li>'Vysvetli mi historický kontext tohto diela. Reagoval autor na nejakú konkrétnu udalosť?'</li><li>'Porovnaj tento štýl písania so súčasnou modernou literatúrou.'</li><li>(Hlasom) 'Prečítaj mi tento úryvok dramatickým tónom a potom rozoberme psychológiu postáv.'</li></ul>"
+            ],                galleryTitle: "Ukážky",
+                galleryImages: [
+                    "images/themes/world_literature/literature_sk_01.png",
+                    "images/themes/world_literature/literature_sk_02.png",
+                    "images/themes/world_literature/literature_sk_03.png"
+                ],
+                ctaTitle: "Chýba vám dobré čítanie?",
+                ctaSubtitle: "Prihláste sa na odber Svetovej literatúry a budujte si svoju vnútornú knižnicu.",
+                ctaButton: "Vyskúšať Teraz",
+                backButton: "Späť na Všetky Témy"
+            },
+            en: {
+                title: "Theme: World Literature",
+                pageTitle: "World Literature - YourDailyPulse",
+                description1: "Books are the quietest and most constant of friends. This theme is for those who love the depth of thought but struggle to find time for classics in a fast-paced world. We give you that time back – in the form of one perfectly chosen passage a day.",
+                description2: "Our system selects works that shaped civilization. It's not just dry facts. You receive a longer, coherent excerpt (approx. half a page) that allows you to soak up the atmosphere and the author's style. We add a concise explanation of why this particular work is considered a masterpiece.",
+                listTitle: "What will you find in the message?",
+                listItems: [
+                "<strong>Author and Work:</strong> Basic orientation in the time and space of world literature.",
+                "<strong>Extensive Excerpt:</strong> The most important part. 15-20 sentences that draw you into the story. Whether it's Kafka's existential anxiety or Márquez's magical realism, you will experience it firsthand.",
+                "<strong>Why it is a gem:</strong> A short, punchy analysis. We explain the context, style, or hidden meaning that makes this work immortal.",
+                "<strong>Visual Experience:</strong> The message opens with a thematic image (book cover, author portrait, or library atmosphere) for a perfect experience.",
+                "<strong>Interact with AI (Your Personal Literary Critic):</strong> The text is curated, but the discussion is limitless. Copy the excerpt into ChatGPT/Gemini and try these prompts:<ul><li>'Analyze the linguistic devices the author uses in this excerpt to create tension.'</li><li>'Explain the historical context of this work. Was the author reacting to a specific event?'</li><li>'Compare this writing style with contemporary modern literature.'</li><li>(Voice) 'Read this excerpt to me in a dramatic tone, and then let's discuss the psychology of the characters.'</li></ul>"
+            ],                galleryTitle: "Showcase",
+                galleryImages: [
+                    "images/themes/world_literature/literature_en_01.png",
+                    "images/themes/world_literature/literature_en_02.png",
+                    "images/themes/world_literature/literature_en_03.png"
+                ],
+                ctaTitle: "Miss good reading?",
+                ctaSubtitle: "Subscribe to World Literature and build your inner library.",
+                ctaButton: "Try It Now",
+                backButton: "Back to All Themes"
+            }
+        },
     art: {
         sk: {
             title: "Téma: Dnešné Európske Dielo",

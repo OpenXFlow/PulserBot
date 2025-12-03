@@ -1,0 +1,11 @@
+<b>📚 Literarische Kostprobe:</b>
+<b>Autor:</b> {lit_author}
+<b>Werk:</b> {lit_work}
+
+<b>📜 Auszug:</b>
+<blockquote>{lit_excerpt}</blockquote>
+
+<b>💡 Warum es ein Meisterwerk ist:</b>
+{lit_gem_reason}
+
+<blockquote>{AI_LINKS_FOOTER}</blockquote>

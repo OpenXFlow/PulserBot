@@ -46,6 +46,9 @@ const translations = {
         spotlight7_title: "Štúdium Biblie",
         spotlight7_desc: "Ponorte sa hlbšie do textov Starého a Nového zákona. Každá lekcia prináša detailný historický a duchovný kontext k vybranému veršu.",
 
+        spotlight_lit_title: "Svetová Literatúra",
+        spotlight_lit_desc: "Ponorte sa do hlbín ľudskej duše. Každý deň jeden literárny skvost – od Dostojevského po Hemingwaya. Dlhší úryvok na čítanie a krátka analýza geniality diela.",
+
         // --- NEW SPOTLIGHT ---
         spotlight8_title: "Užívateľská Pripomienka",
         spotlight8_desc: "Vytvorte si vlastný obsah. Nastavte si denné pripomienky, odkazy na obedové menu reštaurácií alebo motivačné citáty, ktoré chcete vidieť každý deň.",
@@ -227,6 +230,9 @@ const translations = {
 
         spotlight7_title: "Bible Study",
         spotlight7_desc: "Dive deeper into the texts of the Old and New Testaments. Each lesson provides detailed historical and spiritual context to a selected verse.",
+
+        spotlight_lit_title: "World Literature",
+        spotlight_lit_desc: "Dive into the depths of the human soul. Every day a literary gem – from Dostoevsky to Hemingway. A longer excerpt for reading and a brief analysis of the work's genius.",
 
         // --- NEW SPOTLIGHT ---
         spotlight8_title: "User Reminder",

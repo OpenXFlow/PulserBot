@@ -1,0 +1,11 @@
+<b>📚 Literary Tasting:</b>
+<b>Author:</b> {lit_author}
+<b>Work:</b> {lit_work}
+
+<b>📜 Excerpt:</b>
+<blockquote>{lit_excerpt}</blockquote>
+
+<b>💡 Why it's a gem:</b>
+{lit_gem_reason}
+
+<blockquote>{AI_LINKS_FOOTER}</blockquote>

@@ -224,6 +224,10 @@ class PrepareContentGroups(ProcessingStep):
                             item_lang = "english"
                         elif theme_id.endswith("_sk") or theme_id.endswith("_slovak"):
                             item_lang = "slovak"
+                        elif theme_id.endswith("_de") or theme_id.endswith(
+                            "_german"
+                        ):  # <--- PRIDANÉ
+                            item_lang = "german"
                         else:
                             item_lang = user.get("language", "slovak")
 

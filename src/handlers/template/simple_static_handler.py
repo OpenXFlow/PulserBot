@@ -5,6 +5,8 @@
 # src/handlers/template/simple_static_handler.py
 """
 Handler for the 'simple_static' theme type with optimized OOP design.
+Updated to support Unsplash fallback if image_url is missing in Sheet.
+Supports SK, EN, and DE language filtering.
 """
 
 import logging
@@ -13,14 +15,15 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Type
 
-from ...services import sheets_service
+from ...services import image_service, sheets_service
 from .._base.base_handler import BaseHandler
-from .simple_static_models import EuropeanArtData, FamilyPhotoData
-
+from .simple_static_models import EuropeanArtData, FamilyPhotoData, LiteratureData
 
 # ============================================================================
 # Configuration and Registry
 # ============================================================================
+
+
 class ThemeRegistry:
     """A central registry for theme-specific configurations."""
 
@@ -29,9 +32,19 @@ class ThemeRegistry:
         "family_photo_en": FamilyPhotoData,
         "european_art": EuropeanArtData,
         "european_art_en": EuropeanArtData,
+        "world_literature": LiteratureData,
+        "world_literature_en": LiteratureData,
+        # NEW: German Literature
+        "world_literature_de": LiteratureData,
     }
 
-    _FOOTER_THEMES: set[str] = {"european_art", "european_art_en"}
+    _FOOTER_THEMES: set[str] = {
+        "european_art",
+        "european_art_en",
+        "world_literature",
+        "world_literature_en",
+        "world_literature_de",
+    }
 
     @classmethod
     def get_model_class(cls, theme_name: str) -> Optional[Type[Any]]:
@@ -54,6 +67,8 @@ class ThemeRegistry:
 # ============================================================================
 # Processing Steps (Strategy Pattern)
 # ============================================================================
+
+
 class ProcessingContext:
     """
     A state container that holds all data during the execution of a pipeline.
@@ -71,6 +86,7 @@ class ProcessingContext:
         self.template_content: Optional[str] = None
         self.final_text: Optional[str] = None
         self.image_url: Optional[str] = None
+        self.image_attribution: str = ""  # New field for Unsplash credits
 
 
 class ProcessingStep(ABC):
@@ -111,20 +127,14 @@ class UnusedItemFetcher(ProcessingStep):
 
     def execute(self, context: ProcessingContext) -> bool:
         if context.worksheet:
-            # --- UPDATED: Force filtering by language ---
-            # Before: language=None
-            # Now: map context.lang ('english'/'slovak') to sheets_service expectation
-
-            lang_filter = "english" if context.lang == "english" else "slovak"
-
-            # Note: For European Art, if the sheet does NOT have a 'language' column,
-            # this might filter out everything if not handled carefully.
-            # Assuming European Art uses the same sheet for both EN/SK (metadata are universal),
-            # we might need exception or verify column existence.
-            # BUT: For Family Photos we definitely want filtering.
-
-            # Safe approach: If theme is 'european_art' (metadata only), maybe ignore language?
-            # No, better to standardise: Add 'language' column to ALL sheets, even Art.
+            # Filter by language to ensure correct content.
+            # context.lang comes from config prompts key (slovak, english, german)
+            if context.lang == "english":
+                lang_filter = "english"
+            elif context.lang == "german":
+                lang_filter = "german"
+            else:
+                lang_filter = "slovak"
 
             context.row_index, context.item_data = sheets_service.get_unused_item(
                 context.worksheet, language=lang_filter
@@ -148,12 +158,35 @@ class DataModelBuilder(ProcessingStep):
 
         try:
             context.data_model = model_class.from_dict(context.item_data)
+            # Try to get image from Sheet first (if column exists and is filled)
+            context.image_url = getattr(context.data_model, "image_url", "")
             return True
         except Exception as e:
             logging.error(
                 f"Failed to create data model for '{context.theme_name}': {e}"
             )
             return False
+
+
+class DynamicImageFetcher(ProcessingStep):
+    """
+    NEW: Fetches an image from Unsplash if the sheet didn't provide one.
+    """
+
+    def execute(self, context: ProcessingContext) -> bool:
+        # 1. If Sheet already has a valid URL, use it and skip Unsplash logic
+        if context.image_url and context.image_url.strip():
+            return True
+
+        # 2. If no URL in Sheet, check config for Unsplash query
+        image_config = context.theme_config.get("dynamic_image")
+        if image_config:
+            image_data = image_service.get_dynamic_image(image_config)
+            if image_data:
+                context.image_url = image_data.get("image_url")
+                context.image_attribution = image_data.get("attribution_html", "")
+
+        return True
 
 
 class TemplateLoader(ProcessingStep):
@@ -186,19 +219,13 @@ class FooterBuilder:
     def _get_ai_links_content(cls, lang: str) -> str:
         if lang not in cls._cache:
             try:
+                # Looks for e.g. src/resources/template/german/footer_ai_links.txt
                 path = Path(f"src/resources/template/{lang}/footer_ai_links.txt")
                 cls._cache[lang] = path.read_text(encoding="utf-8").strip()
             except FileNotFoundError:
                 logging.warning(f"AI links footer file not found for lang '{lang}'.")
                 cls._cache[lang] = ""
         return cls._cache[lang]
-
-    @classmethod
-    def build_placeholders(cls, theme_name: str, lang: str) -> Dict[str, str]:
-        placeholders = {"IMAGE_ATTRIBUTION": "", "AI_LINKS_FOOTER": ""}
-        if ThemeRegistry.needs_footer(theme_name):
-            placeholders["AI_LINKS_FOOTER"] = cls._get_ai_links_content(lang)
-        return placeholders
 
 
 class TextFormatter(ProcessingStep):
@@ -209,13 +236,34 @@ class TextFormatter(ProcessingStep):
             return False
 
         placeholders = asdict(context.data_model)
-        placeholders.update(
-            FooterBuilder.build_placeholders(context.theme_name, context.lang)
-        )
+
+        # --- Footer Assembly Logic ---
+        placeholders["AI_LINKS_FOOTER"] = ""
+
+        # 1. If attribution exists (from Unsplash), always prepare it
+        attribution = context.image_attribution
+
+        # 2. If theme requires AI Links footer, load it
+        if ThemeRegistry.needs_footer(context.theme_name):
+            ai_links = FooterBuilder._get_ai_links_content(context.lang)
+
+            # Combine Image Attribution + AI Links
+            footer_parts = []
+            if attribution:
+                footer_parts.append(attribution)
+            if ai_links:
+                footer_parts.append(ai_links)
+
+            placeholders["AI_LINKS_FOOTER"] = "\n".join(footer_parts)
+        else:
+            # Even if no footer is requested, we should probably show attribution if it exists
+            pass
+
+        # Fallback: Ensure IMAGE_ATTRIBUTION key exists for templates that might use it specifically
+        placeholders["IMAGE_ATTRIBUTION"] = attribution
 
         try:
             context.final_text = context.template_content.format_map(placeholders)
-            context.image_url = getattr(context.data_model, "image_url", None)
             return True
         except KeyError as e:
             logging.error(
@@ -259,19 +307,18 @@ class SimpleStaticHandler(BaseHandler):
     """
     Handles themes that fetch a single row from a Google Sheet and format it
     using a simple text template, without involving an LLM.
+    Now supports dynamic image fetching fallback.
     """
 
     def __init__(self, theme_config: Dict[str, Any], lang: str):
         super().__init__(theme_config, lang)
-        self._pipeline = self._build_pipeline()
-
-    def _build_pipeline(self) -> ProcessingPipeline:
-        return ProcessingPipeline(
+        self._pipeline = ProcessingPipeline(
             [
                 DataSourceValidator(),
                 WorksheetFetcher(),
                 UnusedItemFetcher(),
                 DataModelBuilder(),
+                DynamicImageFetcher(),
                 TemplateLoader(),
                 TextFormatter(),
                 ItemMarker(),
@@ -287,4 +334,4 @@ class SimpleStaticHandler(BaseHandler):
         return None, None
 
 
-# End of src/handlers/template/simple_static_handler.py (v. 0020)
+# End of src/handlers/template/simple_static_handler.py (v. 0022)

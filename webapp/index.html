@@ -1,6 +1,6 @@
 <!DOCTYPE HTML>
 <!--
-	Hyperspace by HTML5 UP (Adapted for YourDailyPulse - Landing Page v13)
+	Hyperspace by HTML5 UP (Adapted for YourDailyPulse - Landing Page v14)
 -->
 <html>
 	<head>
@@ -15,6 +15,7 @@
         <link rel="shortcut icon" href="images/favicon/favicon.ico">
 
 		<link rel="stylesheet" href="assets/css/main.css" />
+		<link rel="stylesheet" href="assets/css/app.css" /> <!-- Ensure app.css is loaded for submenu styles -->
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 	</head>
 	<body class="is-preload">
@@ -25,7 +26,23 @@
 					<nav>
 						<ul>
 							<li><a href="#intro" data-translate-key="navWelcome">Vitajte</a></li>
-							<li><a href="#one" data-translate-key="navShowcase">Ukážky Tém</a></li>
+							
+                            <!-- Main Item + Submenu -->
+							<li>
+                                <a href="#one" data-translate-key="navShowcase">Ukážky Tém</a>
+                                <ul class="submenu">
+                                    <li><a href="#theme-morning" data-translate-key="spotlight1_title">Ranný Prehľad</a></li>
+                                    <li><a href="#theme-philosophy" data-translate-key="spotlight2_title">Filozofia</a></li>
+                                    <li><a href="#theme-art" data-translate-key="spotlight3_title">Umenie</a></li>
+                                    <li><a href="#theme-literature" data-translate-key="spotlight_lit_title">Literatúra</a></li>
+                                    <li><a href="#theme-family" data-translate-key="spotlight4_title">Spomienky</a></li>
+                                    <li><a href="#theme-german" data-translate-key="spotlight5_title">Nemčina</a></li>
+                                    <li><a href="#theme-spiritual" data-translate-key="spotlight6_title">Duchovno</a></li>
+                                    <li><a href="#theme-bible-study" data-translate-key="spotlight7_title">Biblia</a></li>
+                                    <li><a href="#theme-reminder" data-translate-key="spotlight8_title">Pripomienka</a></li>
+                                </ul>
+                            </li>
+
 							<li><a href="#two" data-translate-key="navHowItWorks">Ako to funguje</a></li>
 							<li><a href="#three" data-translate-key="navTryIt">Vyskúšajte</a></li>
 						</ul>
@@ -58,7 +75,7 @@
 					<section id="one" class="wrapper style2 spotlights">
 						
 						<!-- 1. Ranný Prehľad -->
-						<section>
+						<section id="theme-morning">
 							<a data-destination="generic.html?theme=morning_briefing" class="image"><img src="images/themes/morning_briefing/main_sk.png" alt="Ukážka Ranného Prehľadu" data-position="center center" /></a>
 							<div class="content">
 								<div class="inner">
@@ -72,7 +89,7 @@
 						</section>
 
 						<!-- 2. Filozofická Jednohubka -->
-						<section>
+						<section id="theme-philosophy">
 							<a data-destination="generic.html?theme=philosophy" class="image"><img src="images/themes/philosophy/main_sk.png" alt="Ukážka Filozofie" data-position="top center" /></a>
 							<div class="content">
 								<div class="inner">
@@ -86,7 +103,7 @@
 						</section>
 
 						<!-- 3. Dnešné Európske Dielo -->
-						<section>
+						<section id="theme-art">
 							<a data-destination="generic.html?theme=art" class="image"><img src="images/themes/art/main_sk.png" alt="Ukážka Európskeho Diela" data-position="25% 25%" /></a>
 							<div class="content">
 								<div class="inner">
@@ -99,8 +116,22 @@
 							</div>
 						</section>
 
+                        <!-- 3b. Svetová Literatúra (Nová) -->
+						<section id="theme-literature">
+							<a data-destination="generic.html?theme=world_literature" class="image"><img src="images/themes/world_literature/main_sk.png" alt="Ukážka Literatúry" data-position="top center" /></a>
+							<div class="content">
+								<div class="inner">
+									<h2 data-translate-key="spotlight_lit_title">Svetová Literatúra</h2>
+									<p data-translate-key="spotlight_lit_desc">Ponorte sa do hlbín ľudskej duše. Každý deň jeden literárny skvost – od Dostojevského po Hemingwaya.</p>
+									<ul class="actions">
+										<li><a data-destination="generic.html?theme=world_literature" class="button" data-translate-key="spotlightButton_learnMore">Zistiť Viac</a></li>
+									</ul>
+								</div>
+							</div>
+						</section>
+
                         <!-- 4. Spomienka Dňa -->
-                        <section>
+                        <section id="theme-family">
 							<a data-destination="generic.html?theme=family_photo" class="image"><img src="images/themes/family_photo/main_sk.png" alt="Ukážka Rodinnej Fotky" data-position="center center" /></a>
 							<div class="content">
 								<div class="inner">
@@ -114,7 +145,7 @@
 						</section>
 
                         <!-- 5. Lekcia Nemčiny -->
-						<section>
+						<section id="theme-german">
 							<a data-destination="generic.html?theme=german_lesson" class="image"><img src="images/themes/german_lesson/main_sk.png" alt="Ukážka Lekcie Nemčiny" data-position="top center" /></a>
 							<div class="content">
 								<div class="inner">
@@ -128,7 +159,7 @@
 						</section>
 
                         <!-- 6. Duchovná Reflexia -->
-                        <section>
+                        <section id="theme-spiritual">
 							<a data-destination="generic.html?theme=spiritual_reflection" class="image"><img src="images/themes/spiritual_reflection/main_sk.png" alt="Ukážka Duchovnej Reflexie" data-position="25% 25%" /></a>
 							<div class="content">
 								<div class="inner">
@@ -142,7 +173,7 @@
 						</section>
 						
 						<!-- 7. Štúdium Biblie -->
-						<section>
+						<section id="theme-bible-study">
 							<a data-destination="generic.html?theme=bible_study" class="image"><img src="images/themes/bible_study/main_sk.png" alt="Ukážka Štúdia Biblie" data-position="center center" /></a>
 							<div class="content">
 								<div class="inner">
@@ -156,7 +187,7 @@
 						</section>
 
                         <!-- 8. Užívateľská Pripomienka -->
-                        <section>
+                        <section id="theme-reminder">
 							<a data-destination="generic.html?theme=user_reminder" class="image"><img src="images/themes/user_reminder/main_sk.png" alt="Ukážka Pripomienky" data-position="center center" /></a>
 							<div class="content">
 								<div class="inner">
@@ -252,3 +283,4 @@
 
 	</body>
 </html>
+<!-- End of webapp/index.html (v. 0014) -->

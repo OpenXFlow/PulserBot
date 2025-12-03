@@ -1,0 +1,2 @@
+Text kopieren & mit KI diskutieren:
+<a href="https://gemini.google.com/">Gemini</a> | <a href="https://chat.openai.com/">ChatGPT</a> | <a href="https://www.perplexity.ai/">Perplexity</a> | <a href="https://copilot.microsoft.com/">Copilot</a> | <a href="https://claude.ai/">Claude</a> | <a href="https://pi.ai/">Pi</a>

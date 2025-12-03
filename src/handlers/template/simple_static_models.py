@@ -103,4 +103,38 @@ class EuropeanArtData:
         )
 
 
-# End of src/handlers/template/simple_static_models.py (v. 0003)
+@dataclass
+class LiteratureData:
+    """
+    Represents a single row of data for the 'world_literature' theme.
+
+    Attributes:
+        lit_author (str): Name of the author.
+        lit_work (str): Name of the work (book/poem).
+        lit_excerpt (str): The selected text passage.
+        lit_gem_reason (str): Explanation why this work is a masterpiece.
+        image_url (str): Optional direct URL to an image (cover/author).
+    """
+
+    lit_author: str = ""
+    lit_work: str = ""
+    lit_excerpt: str = ""
+    lit_gem_reason: str = ""
+    image_url: str = ""
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, str]) -> "LiteratureData":
+        """
+        Creates a LiteratureData instance from a dictionary.
+        Expected Sheet Columns: author, work, excerpt, gem_reason, image_url
+        """
+        return cls(
+            lit_author=data.get("author", "Unknown Author"),
+            lit_work=data.get("work", "Unknown Work"),
+            lit_excerpt=data.get("excerpt", ""),
+            lit_gem_reason=data.get("gem_reason", ""),
+            image_url=data.get("image_url", ""),
+        )
+
+
+# End of src/handlers/template/simple_static_models.py (v. 0004)

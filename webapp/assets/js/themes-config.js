@@ -34,6 +34,16 @@ const APP_THEMES = [
         }
     },
     {
+        id: 'world_literature',
+        labelKey: 'spotlight_lit_title',
+        defaultTime: '20',
+        variants: {
+            sk: 'world_literature',
+            en: 'world_literature_en',
+            de: 'world_literature_de'
+        }
+    },
+    {
         id: 'art',
         labelKey: 'spotlight3_title',
         defaultTime: '10',
