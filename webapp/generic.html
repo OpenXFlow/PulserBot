@@ -1,6 +1,6 @@
 <!DOCTYPE HTML>
 <!--
-	Hyperspace by HTML5 UP (Adapted for YourDailyPulse - Theme Detail Template v5)
+	Hyperspace by HTML5 UP (Adapted for YourDailyPulse - Theme Detail Template v6)
 	html5up.net | @ajlkn
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 -->
@@ -10,6 +10,7 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
+        <link rel="stylesheet" href="assets/css/app.css" /> <!-- Ensure app.css is loaded for styling -->
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 		<!-- Favicons -->
         <link rel="apple-touch-icon" sizes="180x180" href="images/favicon/apple-touch-icon.png">
@@ -27,6 +28,13 @@
 						<li><a href="index.html" data-translate-key="headerHome">Domov</a></li>
 						<li><a href="index.html#one" data-translate-key="headerMoreThemes">Ďalšie Témy</a></li>
 						<li><a href="login.html" class="active" data-translate-key="headerEnterApp">Vstúpiť do Aplikácie</a></li>
+                        
+                        <!-- Desktop Language Switcher (Inside Nav) -->
+                        <li class="header-lang-switcher">
+                            <span class="lang-option active" data-lang="sk"></span>
+                            <span class="lang-separator">/</span>
+                            <span class="lang-option" data-lang="en"></span>
+                        </li>
 					</ul>
 				</nav>
 			</header>
@@ -81,7 +89,7 @@
 			<footer id="footer" class="wrapper alt">
 				<div class="inner">
 					<ul class="menu">
-						<li data-translate-key="footerRights">&copy; 2025 PulserBot (MIT License)</li>
+						<li data-translate-key="footerRights">&copy; 2025 PulserBot (MIT License) | Kontakt: <a href="mailto:yourpulserbot@gmail.com">yourpulserbot@gmail.com</a></li>
 						<li>Design: <a href="http://html5up.net">HTML5 UP</a> (CCA 3.0)</li>
 					</ul>
 				</div>
@@ -100,7 +108,15 @@
 			<script src="assets/js/translations.js"></script>
 			<script src="assets/js/theme-details.js"></script>
 			<script src="assets/js/generic-loader.js"></script>
+            <script src="assets/js/lang-switcher.js"></script>
+
+        <!-- Floating Language Switcher for Mobile -->
+        <div id="floating-lang-switcher">
+            <span class="lang-option active" data-lang="sk">SK</span>
+            <span class="lang-separator">/</span>
+            <span class="lang-option" data-lang="en">EN</span>
+        </div>
 
 	</body>
 </html>
-<!-- End of webapp/generic.html (v. 0004) -->
+<!-- End of webapp/generic.html (v. 0006) -->

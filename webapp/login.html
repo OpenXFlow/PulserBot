@@ -68,6 +68,11 @@
 								</ul>
 								<p class="auth-switch" data-translate-key="loginSwitch">Nemáte účet? <a href="#" id="show-signup">Zaregistrujte sa</a></p>
 								<p id="login-error" class="error-message"></p>
+
+                                <!-- Mobile only back link -->
+                                <div class="mobile-back-link">
+                                    <a href="index.html" data-translate-key="backToHome">« Späť na hlavnú stránku</a>
+                                </div>
 							</div>
 
 							<!-- Signup Form -->
@@ -86,6 +91,11 @@
 								</ul>
 								<p class="auth-switch" data-translate-key="signupSwitch">Už máte účet? <a href="#" id="show-login">Prihláste sa</a></p>
 								<p id="signup-error" class="error-message"></p>
+
+                                <!-- Mobile only back link -->
+                                <div class="mobile-back-link">
+                                    <a href="index.html" data-translate-key="backToHome">« Späť na hlavnú stránku</a>
+                                </div>
 							</div>
 
 							<!-- Reset Password Form -->
@@ -104,6 +114,11 @@
 									<a href="#" id="back-from-reset" data-translate-key="resetPasswordBack">Späť na prihlásenie</a>
 								</p>
 								<p id="reset-status" class="status-message"></p>
+
+                                <!-- Mobile only back link -->
+                                <div class="mobile-back-link">
+                                    <a href="index.html" data-translate-key="backToHome">« Späť na hlavnú stránku</a>
+                                </div>
 							</div>
 						</div>
 
@@ -136,6 +151,12 @@
 								<li><button id="save-settings-button" class="button primary" data-translate-key="dashboardSaveButton">Uložiť Zmeny</button></li>
 							</ul>
 							<p id="save-status" class="status-message"></p>
+
+                            <!-- Mobile Logout Link (NEW) -->
+                            <div class="mobile-back-link">
+                                <a href="#" id="mobile-logout-button" data-translate-key="navLogout">Odhlásiť sa</a>
+                            </div>
+
 						</div>
 					</div>
 				</section>
@@ -193,6 +214,13 @@
 			<script src="assets/js/themes-config.js"></script> <!-- Added: Themes Config -->
 			<script src="assets/js/firebase-config.js"></script>
 			<script src="assets/js/app.js"></script>
+
+		<!-- Floating Language Switcher for Mobile -->
+		<div id="floating-lang-switcher">
+			<span class="lang-option active" data-lang="sk">SK</span>
+			<span class="lang-separator">/</span>
+			<span class="lang-option" data-lang="en">EN</span>
+		</div>
 	</body>
 </html>
-<!-- End of webapp/login.html (v. 0012) -->
+<!-- End of webapp/login.html (v. 0014) -->
