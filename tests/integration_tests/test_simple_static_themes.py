@@ -34,7 +34,7 @@ from src.handlers.template.simple_static_models import EuropeanArtData, FamilyPh
 
 TEST_SCENARIOS = [
     (
-        "european_art",
+        "european_art_sk",  # Updated to match new config key
         EuropeanArtData,
         {"title": "Mona Lisa", "art_title": "Mona Lisa"},
         True,
@@ -55,7 +55,7 @@ class TestSimpleStaticPipelineSteps:
     various simple static themes.
 
     Attributes:
-        theme_name: The name of the theme being tested (e.g., 'european_art').
+        theme_name: The name of the theme being tested (e.g., 'european_art_sk').
         data_model_class: The Pydantic model class for the theme's data.
         mock_sheet_data: Mock data representing a row from the spreadsheet.
         expects_footer: A boolean indicating if a footer should be generated.
@@ -243,13 +243,13 @@ class TestSimpleStaticPipelineSteps:
         assert result is True
         assert context_instance.template_content == "Template content"
 
-    # Mocks the `build_placeholders` method of the `FooterBuilder`.
+    # UPDATED: Mocks the `_get_ai_links_content` method of the `FooterBuilder`
     @patch(
-        "src.handlers.template.simple_static_handler.FooterBuilder.build_placeholders"
+        "src.handlers.template.simple_static_handler.FooterBuilder._get_ai_links_content"
     )
     def test_step_text_formatter(
         self,
-        mock_build_footer: MagicMock,
+        mock_get_links: MagicMock,
         context_instance: ProcessingContext,
         data_model_class: Any,
         mock_sheet_data: Dict[str, Any],
@@ -262,19 +262,19 @@ class TestSimpleStaticPipelineSteps:
         the template, data model, and footer placeholders.
 
         Args:
-            mock_build_footer: A mock for the `FooterBuilder.build_placeholders` method.
+            mock_get_links: A mock for the `FooterBuilder._get_ai_links_content` method.
             context_instance: The `ProcessingContext` for the current test.
             data_model_class: The Pydantic model class for the theme's data.
             mock_sheet_data: The item data to build the model from.
             expects_footer: A boolean indicating if a footer should be generated.
             theme_name: The parametrized theme name (for context).
         """
-        mock_build_footer.return_value = {
-            "AI_LINKS_FOOTER": "AI_LINKS_CONTENT" if expects_footer else ""
-        }
+        # Mock what the footer builder returns if called
+        mock_get_links.return_value = "AI_LINKS_CONTENT"
+        
         context_instance.data_model = data_model_class.from_dict(mock_sheet_data)
 
-        if context_instance.theme_name == "european_art":
+        if "european_art" in context_instance.theme_name:
             context_instance.template_content = "Art: {art_title}{AI_LINKS_FOOTER}"
         else:
             context_instance.template_content = "Photo: {caption}{AI_LINKS_FOOTER}"
@@ -288,11 +288,15 @@ class TestSimpleStaticPipelineSteps:
 
         assert result is True
         assert context_instance.final_text is not None
+        
         if expects_footer:
             assert "AI_LINKS_CONTENT" in context_instance.final_text
+            # Verify the footer builder was actually called
+            mock_get_links.assert_called()
         else:
             assert "AI_LINKS_CONTENT" not in context_instance.final_text
-
+            # For family photo, get_links might not be called at all
+            
     # Mocks the `run` method of the `ProcessingPipeline`.
     @patch("src.handlers.template.simple_static_handler.ProcessingPipeline.run")
     def test_orchestration_process_method(
@@ -344,4 +348,4 @@ class TestSimpleStaticPipelineSteps:
         assert final_image_url == "https://success.url"
 
 
-# End of tests/integration_tests/test_simple_static_handler.py (v. 0007)
+# End of tests/integration_tests/test_simple_static_handler.py (v. 0008)
