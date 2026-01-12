@@ -5,10 +5,7 @@
 # src/handlers/llm/bible_study_handler.py
 """
 A specialized handler for Bible study themes.
-
-This module defines the BibleStudyHandler class, which inherits from
-LLMStaticBaseHandler and provides the specific logic for constructing
-the content payload for Bible study prompts (e.g., Old and New Testament).
+Updated to support explicit verse text payload.
 """
 
 from typing import Any, Dict
@@ -20,32 +17,30 @@ from .bible_models import BibleStudyData
 class BibleStudyHandler(LLMStaticBaseHandler):
     """
     Handles Bible study themes like 'novy_zakon_sk' and 'stary_zakon_sk'.
-
-    This class provides the concrete implementation for building the content
-    payload required by the Bible study prompt. It uses the BibleStudyData
-    model to structure the data.
     """
 
     def _build_content_payload(self, item_data: Dict[str, Any]) -> str:
         """
         Builds the specific part of the prompt payload from the Bible study sheet data.
 
-        This method converts the raw dictionary data into a structured
-        BibleStudyData object and then creates the formatted string for the LLM.
-
         Args:
             item_data (Dict[str, Any]): The dictionary of data fetched from
                 the Google Sheet row for a Bible study theme.
 
         Returns:
-            str: A formatted string containing the verse reference to be
-            injected into the main LLM prompt.
+            str: A formatted string for the LLM prompt.
         """
-        # Create a typed dataclass instance from the raw dictionary
         data_model = BibleStudyData.from_dict(item_data)
 
-        # Build the payload using the type-safe attributes of the model
+        # If explicit text is provided in the sheet, pass it to the prompt.
+        if data_model.verse_text:
+            return (
+                f"- Verse Reference: {data_model.verse_reference}\n"
+                f"- Text: {data_model.verse_text}"
+            )
+
+        # Fallback: Send only reference, let LLM find the text
         return f"- Verse Reference: {data_model.verse_reference}"
 
 
-# End of src/handlers/llm/bible_study_handler.py (v. 0003)
+# End of src/handlers/llm/bible_study_handler.py (v. 0004)

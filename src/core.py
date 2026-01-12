@@ -12,7 +12,7 @@ Updated to support:
 - Mixed data structure support (Legacy Strings vs New Objects)
 - DETAILED DEBUG LOGGING for troubleshooting
 - IGNORE TIME flag for testing
-- FIXED: Type annotations for inner async functions
+- FIXED: Language detection for Weather API (supports DE)
 """
 
 import asyncio
@@ -224,9 +224,7 @@ class PrepareContentGroups(ProcessingStep):
                             item_lang = "english"
                         elif theme_id.endswith("_sk") or theme_id.endswith("_slovak"):
                             item_lang = "slovak"
-                        elif theme_id.endswith("_de") or theme_id.endswith(
-                            "_german"
-                        ):  # <--- PRIDANÉ
+                        elif theme_id.endswith("_de") or theme_id.endswith("_german"):
                             item_lang = "german"
                         else:
                             item_lang = user.get("language", "slovak")
@@ -280,7 +278,14 @@ class ProcessAndDistributeGroups(ProcessingStep):
     ) -> str:
         """Replaces weather placeholders asynchronously."""
         final_text = text
-        lang_code = "en" if theme_lang == "english" else "sk"
+
+        # FIX: Correctly determine language code for Weather API
+        if theme_lang == "english":
+            lang_code = "en"
+        elif theme_lang == "german":
+            lang_code = "de"
+        else:
+            lang_code = "sk"
 
         weather_config = user.get("weather", {})
 
@@ -390,10 +395,10 @@ class ProcessAndDistributeGroups(ProcessingStep):
                 tasks = []
 
                 for user in users_in_group:
-                    # --- FIX: Added type annotations for inner function 'u' ---
+                    # Inner function to capture user variable in loop
                     async def process_single(u: Dict[str, Any]) -> None:
                         async with semaphore:
-                            # Run handler for specific user (synchronous part wrapped if needed)
+                            # Run handler for specific user
                             text, image_url = handler.execute(
                                 user=u, force_update=context.force_update
                             )
@@ -515,4 +520,4 @@ async def generate_and_send_async(
     await orchestrator.execute_async()
 
 
-# End of src/core.py (v. 0056)
+# End of src/core.py (v. 0057)

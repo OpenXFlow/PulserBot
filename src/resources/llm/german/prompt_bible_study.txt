@@ -11,30 +11,29 @@ Adhere strictly to the following format and rules.
 - **CRITICAL RULE 1: Every opening HTML tag (e.g., <b>) must have a corresponding closing tag (e.g., </b>).**
 - **CRITICAL RULE 2: The final output MUST end with the complete footer block provided in the placeholder.**
 
-<b>📖 Dnešný text ({TESTAMENT_NAME}):</b>
-<blockquote>[**Najprv napíš presnú 'Verse Reference' zo vstupu**, za ňou dvojbodku a nový riadok.
+<b>📖 Der heutige Text ({TESTAMENT_NAME}):</b>
+<blockquote>[**Schreibe zuerst die 'Verse Reference' exakt so, wie sie im Input steht**, gefolgt von einem Doppelpunkt und einer neuen Zeile.
 
-Potom vlož samotný text podľa týchto pravidiel:
+Füge dann den Text gemäß diesen Regeln ein:
 
-**SCENÁR A (Ak vstupné dáta obsahujú pole 'Text'):**
-Použi PRESNE ten text, ktorý si dostal. Nemeň v ňom ani čiarku. Len ho skopíruj.
+**SZENARIO A (Wenn die Eingabedaten das Feld 'Text' enthalten):**
+Verwende EXAKT den bereitgestellten Text. Ändere kein Wort und kein Satzzeichen. Kopiere ihn einfach.
 
-**SCENÁR B (Ak vstupné dáta neobsahujú 'Text', len 'Reference'):**
-Nájdi a cituj text podľa referencie.
-1. Použi oficiálny **Slovenský katolícky preklad (SSV)** alebo **Ekumenický preklad**.
-2. **NEPREKLADAJ Z ANGLIČTINY.**
-3. Nevkladaj prázdne riadky medzi verše.]</blockquote>
+**SZENARIO B (Wenn nur 'Verse Reference' vorhanden ist):**
+Finde und zitiere den Text basierend auf der Referenz.
+1. Benutze eine offizielle, hochwertige deutsche Übersetzung (Einheitsübersetzung, Lutherbibel). **Übersetze NICHT aus dem Englischen.**
+2. Füge keine Leerzeilen zwischen den einzelnen Versen ein.]</blockquote>
 
-<b>📖 Detailná informácia o texte</b>
-[Tu uveď 3-4 stručné body s historickými a kontextovými informáciami.
-**FORMÁTOVANIE (DÔLEŽITÉ):** Nepoužívaj formátovanie zoznamu (nezačínaj riadky pomlčkou '-' ani hviezdičkou '*').
-Každý riadok začni priamo znakom '•' nasledovaným medzerou.
-Príklad:
+<b>📖 Detaillierte Informationen</b>
+[Hier, stelle 3-4 Informationen mit prägnanten historischen und kontextuellen Details bereit.
+**FORMATIERUNG (WICHTIG):** Verwende KEINE Markdown-Listen (beginne Zeilen nicht mit '-' oder '*').
+Beginne jede Zeile direkt mit dem Zeichen '•' gefolgt von einem Leerzeichen.
+Beispiel:
 • Autor: ...
 • Kontext: ...]
 
-<b>🤲 Duchovné posolstvo:</b>
-[Tu v 1-2 jasných vetách zhrň hlavné teologické alebo duchovné posolstvo tohto úryvku.]
+<b>🤲 Spirituelle Botschaft:</b>
+[Fasse hier in 1-2 klaren Sätzen die spirituelle Kernaussage dieser Passage zusammen.]
 
 <blockquote>{IMAGE_ATTRIBUTION}{AI_LINKS_FOOTER}</blockquote>
 
@@ -50,3 +49,4 @@ The 'Testament Name' should be inserted into the main header.
 Data:
 - Testament Name: {TESTAMENT_NAME}
 {content_payload}
+

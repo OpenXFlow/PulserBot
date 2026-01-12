@@ -26,6 +26,7 @@ from .._base.base_handler import BaseHandler
 class UserDefinedHandler(BaseHandler):
     """
     Handles user-defined content with shared image caching.
+    Supports SK, EN, and DE localization.
     """
 
     TRANSLATIONS = {
@@ -34,12 +35,17 @@ class UserDefinedHandler(BaseHandler):
             "header_prefix": "Pripomienka",
         },
         "english": {"links_header": "<b>🔗 My Links:</b>", "header_prefix": "Reminder"},
+        "german": {
+            "links_header": "<b>🔗 Meine Links:</b>",
+            "header_prefix": "Erinnerung",
+        },
     }
 
     def _build_html_message(self, content_data: Dict[str, Any]) -> str:
         """
         Constructs the final HTML message from user data with dynamic date header.
         """
+        # Determine language key
         lang_key = self.lang if self.lang in self.TRANSLATIONS else "slovak"
         t = self.TRANSLATIONS[lang_key]
 
@@ -52,7 +58,14 @@ class UserDefinedHandler(BaseHandler):
         now = datetime.now(tz)
         date_str = now.strftime("%d.%m.%Y")
 
-        locale = "en_US" if lang_key == "english" else "sk_SK"
+        # Determine locale for day name
+        if lang_key == "english":
+            locale = "en_US"
+        elif lang_key == "german":
+            locale = "de_DE"
+        else:
+            locale = "sk_SK"
+
         day_name = format_date(now, "EEEE", locale=locale).capitalize()
 
         header = f"<b>🔔 {t['header_prefix']} {date_str}, {day_name}</b>"
@@ -94,7 +107,6 @@ class UserDefinedHandler(BaseHandler):
         today_str = datetime.now(tz).strftime("%Y-%m-%d")
 
         # We use a suffix to differentiate from full content cache
-        # e.g., 2025-11-23_user_reminder_SHARED_IMAGE
         theme_id = self.theme_config.get("theme_name", "user_reminder")
         cache_key = f"{theme_id}_SHARED_IMAGE"
 
@@ -162,4 +174,4 @@ class UserDefinedHandler(BaseHandler):
         return final_text, image_url
 
 
-# End of src/handlers/template/user_defined_handler.py (v. 0004)
+# End of src/handlers/template/user_defined_handler.py (v. 0005)

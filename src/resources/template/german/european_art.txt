@@ -1,0 +1,11 @@
+<b>🎨 Europäisches Meisterwerk des Tages:</b>
+<blockquote><i>{art_title}</i> von <i>{art_artist}</i> ({art_year})</blockquote>
+
+<b>Technik:</b> {art_medium}
+<b>Maße:</b> {art_dimensions}
+
+<b>Standort:</b> {art_owner}
+<i>{art_credit_line}</i>
+
+<blockquote><a href="{art_object_url}">Kunstwerk online ansehen</a>
+{AI_LINKS_FOOTER}</blockquote>

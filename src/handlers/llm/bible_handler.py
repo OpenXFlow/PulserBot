@@ -5,6 +5,7 @@
 # src/handlers/llm/bible_handler.py
 """
 A specialized handler for daily Bible reflection themes.
+Updated to support explicit verse text payload.
 """
 
 from typing import Any, Dict
@@ -30,9 +31,15 @@ class BibleHandler(LLMStaticBaseHandler):
         """
         data_model = BibleReflectionData.from_dict(item_data)
 
-        # --- REFACTORED: Send only the reference, not the full passage ---
-        # The LLM will find the text itself, giving us control over formatting.
+        # If we have the explicit text (e.g. from SK sheet), send it to the LLM.
+        # This prevents the LLM from hallucinating a bad translation.
+        if data_model.verse_text:
+            return (
+                f"- Reference: {data_model.reference}\n- Text: {data_model.verse_text}"
+            )
+
+        # Fallback for EN/DE where text might be missing in sheet -> LLM will look it up
         return f"- Reference: {data_model.reference}"
 
 
-# End of src/handlers/llm/bible_handler.py (v. 0007)
+# End of src/handlers/llm/bible_handler.py (v. 0008)

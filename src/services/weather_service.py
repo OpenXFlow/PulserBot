@@ -6,6 +6,7 @@
 """
 A dedicated service module for all interactions with the OpenWeatherMap API.
 Updated to support asynchronous I/O and In-Memory Caching to minimize API calls.
+Supports SK, EN, and DE localizations.
 """
 
 import logging
@@ -23,7 +24,7 @@ class WeatherService:
     """
 
     # Internal cache to store results during a single script execution
-    # Key: "location|lang", Value: Formatted string
+    # Key: "location|lang|units", Value: Formatted string
     _cache: Dict[str, str] = {}
 
     TRANSLATIONS = {
@@ -47,6 +48,16 @@ class WeatherService:
             "unavailable": "Weather forecast is currently unavailable.",
             "limit_reached": "Daily weather API limit reached.",
         },
+        "de": {
+            "morning": "Morgens",
+            "noon": "Mittags",
+            "evening": "Abends",
+            "missing_key": "Wettervorhersage nicht verfügbar (API-Schlüssel fehlt).",
+            "no_data": "Keine Daten für diesen Ort gefunden.",
+            "not_found": "Ort '{location}' nicht gefunden.",
+            "unavailable": "Wettervorhersage ist derzeit nicht verfügbar.",
+            "limit_reached": "Tägliches Wetter-API-Limit erreicht.",
+        },
     }
 
     async def get_weather_forecast(
@@ -59,7 +70,7 @@ class WeatherService:
         Args:
             location (str): The location string (e.g., "Bratislava,SK").
             units (str): The units for temperature ('metric' or 'imperial').
-            lang (str): The language code ('sk' or 'en').
+            lang (str): The language code ('sk', 'en', 'de').
 
         Returns:
             str: A formatted string with the weather forecast.
@@ -124,6 +135,7 @@ class WeatherService:
                 temp = period.get("main", {}).get("temp")
                 desc = period.get("weather", [{}])[0].get("description", "N/A")
 
+                # Small correction for Slovak language quirks in API
                 if valid_lang == "sk":
                     desc = desc.replace("pretežno", "prevažne")
 
@@ -158,6 +170,7 @@ class WeatherService:
         return result_str
 
 
+# Singleton Instance
 _weather_service_instance = WeatherService()
 
 
@@ -170,4 +183,4 @@ async def get_weather_forecast(
     return await _weather_service_instance.get_weather_forecast(location, units, lang)
 
 
-# End of src/services/weather_service.py (v. 0005)
+# End of src/services/weather_service.py (v. 0006)

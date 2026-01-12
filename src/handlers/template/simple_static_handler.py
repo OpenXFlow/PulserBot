@@ -30,17 +30,18 @@ class ThemeRegistry:
     _MODEL_MAP: Dict[str, Type[Any]] = {
         "family_photo": FamilyPhotoData,
         "family_photo_en": FamilyPhotoData,
-        "european_art": EuropeanArtData,
+        "european_art_sk": EuropeanArtData,
         "european_art_en": EuropeanArtData,
+        "european_art_de": EuropeanArtData,
         "world_literature": LiteratureData,
         "world_literature_en": LiteratureData,
-        # NEW: German Literature
         "world_literature_de": LiteratureData,
     }
 
     _FOOTER_THEMES: set[str] = {
-        "european_art",
+        "european_art_sk",
         "european_art_en",
+        "european_art_de",
         "world_literature",
         "world_literature_en",
         "world_literature_de",
