@@ -29,6 +29,28 @@ This repository is a ready-to-use template. Clone it to create a bot that delive
 -   ✨ **Extensible:** Easily connect to any API (e.g., Unsplash for images, OpenWeatherMap) or use Google Sheets as a simple content CMS.
 
 
+### 🛠️ Tech Stack & Powered By
+
+**Frontend:**
+-   **HTML5 / CSS3 / jQuery:** Lightweight, static web application hosted on GitHub Pages.
+-   **Firebase SDK:** Direct client-side communication with Authentication and Firestore.
+
+**Backend:**
+-   **Python 3.11:** Core logic.
+-   **GitHub Actions:** CRON-based scheduling and serverless execution.
+
+**Cloud & APIs:**
+-   **Google Firebase:** Auth & Firestore Database.
+-   **Google Sheets API:** CMS for static content management.
+-   **Telegram Bot API:** Message delivery channel.
+-   **Groq API (LLM):** AI text generation (Llama 3, Mixtral).
+-   **OpenWeatherMap API:** Real-time weather data.
+-   **Unsplash API:** High-quality dynamic images.
+-   **Cloudinary API:** Secure hosting for personal/family photos.
+-   **Sentry:** Error monitoring and performance tracking.
+
+---
+
 ### PulserBot delivery :
 -   **A moment for yourself, every day.**  PulserBot delivers a daily, thought-provoking message combining art, philosophy, and knowledge to inspire a mindful pause in your routine.
 - The content of the message is automated but is fully under your control.
@@ -53,13 +75,16 @@ This repository is a ready-to-use template. Clone it to create a bot that delive
 
 3.  **Configure the Services (The "Brain"):**
     *   **Firebase Setup (Crucial):** Create a Firebase project, enable **Authentication** (Email/Password) and **Firestore Database**.
+    *   **Security Rules:** Apply the rules from `firestore.rules` in your Firebase Console to protect user data.
     *   **Backend Credentials:** Generate a service account key in Firebase settings, rename it to `credentials.json` and place it in the root directory.
     *   **Frontend Config:** Copy your Firebase Web Config into `webapp/assets/js/firebase-config.js`.
     *   **Environment Variables:** Rename `.env.example` to `.env` and fill in all API keys (Telegram, Groq, Sentry, OpenWeatherMap, Unsplash).
 
-4.  **Configure Content & Logic:**
-    *   **Google Sheets:** Create your content spreadsheets (e.g., `BibleEN`, `Rotation`) and share them with the client email found in `credentials.json`.
-    *   **System Config:** Rename `config.json.example` to `config.json`. Update the `spreadsheet_url` for your data sources. *Note: Users are no longer defined here; they are managed via the Web App/Firestore.*
+4.  **Configure & Populate Content:**
+    *   **Google Sheets:** Create your content spreadsheets (e.g., `BibleEN`, `Rotation`, `FunFacts`).
+    *   **Populate Data:** The bot needs data to work! Use the CSV templates provided in **`docs/Google_sheets_exemples/`** to ensure you have the correct columns.
+    *   **Important:** Ensure the `used` column is set to `FALSE` for all new rows.
+    *   **System Config:** Rename `config.json.example` to `config.json`. Update the `spreadsheet_url` to point to your own Google Sheets.
 
 5.  **Run a Test Job:**
     *   Execute a job for a specific time key defined in your `config.json`:

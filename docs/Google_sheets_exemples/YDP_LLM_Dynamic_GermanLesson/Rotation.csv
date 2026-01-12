@@ -1,8 +1,8 @@
-content,used,date_used
-01_nouns_de,FALSE,
-02_verbs_irregular_de,FALSE,
-02_verbs_regular_de,FALSE,
-03_adjectives_de,FALSE,
-04_pronouns_de,FALSE,
-05_adverbs_de,FALSE,
-06_prepositions_de,FALSE,
+content,used,date_used,,
+01_nouns_de,TRUE,2026-01-11 12:13:16,,TRUE
+02_verbs_irregular_de,TRUE,2026-01-12 12:15:36,,
+02_verbs_regular_de,TRUE,2026-01-10 12:12:59,,
+03_adjectives_de,TRUE,2026-01-09 12:15:07,,
+04_pronouns_de,FALSE,2026-01-02 12:14:27,,
+05_adverbs_de,FALSE,2026-01-04 12:13:05,,FALSE
+06_prepositions_de,FALSE,2026-01-05 12:14:46,,
