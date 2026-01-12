@@ -1,13 +1,3 @@
-Rozumiem. Máš pravdu, v príkladovom súbore (`.example`) by nemali byť žiadne špecifické identifikátory, ani vo forme "INSERT_HERE", ale len neutrálne zástupné znaky, aby to bolo čisté.
-
-Tu je upravený **`config.json.example`** (v. 0003).
-
-Zmeny:
-1.  Všetky `spreadsheet_url` sú zmenené na `https://docs.google.com/spreadsheets/d/..../edit`.
-2.  Všetky Cloudinary URL (v nemeckej lekcii) sú zmenené na neutrálne `https://res.cloudinary.com/..../imageX.png`.
-
---- START OF FILE config.json.example ---
-
 {
   "default_language": "slovak",
   "schedule": {
@@ -36,12 +26,7 @@ Zmeny:
     "time22": "22:00",
     "time23": "23:00"
   },
-  "users": [
-    {
-      "comment": "THIS SECTION IS DEPRECATED IN V3.0. USERS ARE NOW MANAGED VIA FIRESTORE DB.",
-      "comment2": "This example is kept only for reference of the data structure expected by the internal logic if loaded manually."
-    }
-  ],
+  "users": [],
   "themes": {
     "user_reminder": {
       "handler_class": "UserDefinedHandler",
@@ -63,11 +48,21 @@ Zmeny:
       },
       "prompts": {}
     },
+    "user_reminder_de": {
+      "handler_class": "UserDefinedHandler",
+      "processing_strategy": "per_user",
+      "use_cache": false,
+      "dynamic_image": {
+        "provider": "unsplash",
+        "query": "coffee,notebook,planning,desk,morning,notes,minimalist"
+      },
+      "prompts": {}
+    },
     "bible_sk": {
       "handler_class": "BibleHandler",
       "data_source": {
         "spreadsheet_key": "YDP_LLM_Static_Spiritual",
-        "worksheet_key": "bible_sk"
+        "worksheet_key": "bible_mix_sk"
       },
       "dynamic_image": {
         "provider": "unsplash",
@@ -81,7 +76,7 @@ Zmeny:
       "handler_class": "BibleHandler",
       "data_source": {
         "spreadsheet_key": "YDP_LLM_Static_Spiritual",
-        "worksheet_key": "bible_en"
+        "worksheet_key": "bible_mix_en"
       },
       "dynamic_image": {
         "provider": "unsplash",
@@ -89,6 +84,20 @@ Zmeny:
       },
       "prompts": {
         "english": "src/resources/llm/english/prompt_bible.txt"
+      }
+    },
+    "bible_de": {
+      "handler_class": "BibleHandler",
+      "data_source": {
+        "spreadsheet_key": "YDP_LLM_Static_Spiritual",
+        "worksheet_key": "bible_mix_de"
+      },
+      "dynamic_image": {
+        "provider": "unsplash",
+        "query": "nature,light,hope,spiritual,calm,faith"
+      },
+      "prompts": {
+        "german": "src/resources/llm/german/prompt_bible.txt"
       }
     },
     "philosophy_mix": {
@@ -109,7 +118,7 @@ Zmeny:
       "handler_class": "PhilosophyHandler",
       "data_source": {
         "spreadsheet_key": "YDP_LLM_Static_Spiritual",
-        "worksheet_key": "philosophy_sk"
+        "worksheet_key": "philosophy_en"
       },
       "dynamic_image": {
         "provider": "unsplash",
@@ -119,11 +128,25 @@ Zmeny:
         "english": "src/resources/llm/english/prompt_philosophy_mix.txt"
       }
     },
+    "philosophy_mix_de": {
+      "handler_class": "PhilosophyHandler",
+      "data_source": {
+        "spreadsheet_key": "YDP_LLM_Static_Spiritual",
+        "worksheet_key": "philosophy_de"
+      },
+      "dynamic_image": {
+        "provider": "unsplash",
+        "query": "minimalist,black and white,architecture,shadow,thinking,abstract,solitude"
+      },
+      "prompts": {
+        "german": "src/resources/llm/german/prompt_philosophy_mix.txt"
+      }
+    },
     "stary_zakon_sk": {
       "handler_class": "BibleStudyHandler",
       "data_source": {
         "spreadsheet_key": "YDP_LLM_Static_Spiritual",
-        "worksheet_key": "stary_zakon_sk"
+        "worksheet_key": "bible_ot_sk"
       },
       "testament_name": "Starý zákon",
       "dynamic_image": {
@@ -138,7 +161,7 @@ Zmeny:
       "handler_class": "BibleStudyHandler",
       "data_source": {
         "spreadsheet_key": "YDP_LLM_Static_Spiritual",
-        "worksheet_key": "stary_zakon_sk"
+        "worksheet_key": "bible_ot_en"
       },
       "testament_name": "Old Testament",
       "dynamic_image": {
@@ -149,11 +172,26 @@ Zmeny:
         "english": "src/resources/llm/english/prompt_bible_study.txt"
       }
     },
+    "stary_zakon_de": {
+      "handler_class": "BibleStudyHandler",
+      "data_source": {
+        "spreadsheet_key": "YDP_LLM_Static_Spiritual",
+        "worksheet_key": "bible_ot_de"
+      },
+      "testament_name": "Altes Testament",
+      "dynamic_image": {
+        "provider": "unsplash",
+        "query": "ancient,scroll,history,manuscript,stone,israel"
+      },
+      "prompts": {
+        "german": "src/resources/llm/german/prompt_bible_study.txt"
+      }
+    },
     "novy_zakon_sk": {
       "handler_class": "BibleStudyHandler",
       "data_source": {
         "spreadsheet_key": "YDP_LLM_Static_Spiritual",
-        "worksheet_key": "novy_zakon_sk"
+        "worksheet_key": "bible_nt_sk"
       },
       "testament_name": "Nový zákon",
       "dynamic_image": {
@@ -168,7 +206,7 @@ Zmeny:
       "handler_class": "BibleStudyHandler",
       "data_source": {
         "spreadsheet_key": "YDP_LLM_Static_Spiritual",
-        "worksheet_key": "novy_zakon_sk"
+        "worksheet_key": "bible_nt_en"
       },
       "testament_name": "New Testament",
       "dynamic_image": {
@@ -177,6 +215,21 @@ Zmeny:
       },
       "prompts": {
         "english": "src/resources/llm/english/prompt_bible_study.txt"
+      }
+    },
+    "novy_zakon_de": {
+      "handler_class": "BibleStudyHandler",
+      "data_source": {
+        "spreadsheet_key": "YDP_LLM_Static_Spiritual",
+        "worksheet_key": "bible_nt_de"
+      },
+      "testament_name": "Neues Testament",
+      "dynamic_image": {
+        "provider": "unsplash",
+        "query": "hope,light,scroll,ancient,history,spiritual"
+      },
+      "prompts": {
+        "german": "src/resources/llm/german/prompt_bible_study.txt"
       }
     },
     "family_photo": {
@@ -199,11 +252,11 @@ Zmeny:
         "english": "src/resources/template/english/family_photo.txt"
       }
     },
-    "european_art": {
+    "european_art_sk": {
       "handler_class": "SimpleStaticHandler",
       "data_source": {
         "spreadsheet_key": "YDP_Simple_Static_Art",
-        "worksheet_key": "european_art"
+        "worksheet_key": "european_art_sk"
       },
       "prompts": {
         "slovak": "src/resources/template/slovak/european_art.txt"
@@ -213,10 +266,20 @@ Zmeny:
       "handler_class": "SimpleStaticHandler",
       "data_source": {
         "spreadsheet_key": "YDP_Simple_Static_Art",
-        "worksheet_key": "european_art"
+        "worksheet_key": "european_art_en"
       },
       "prompts": {
         "english": "src/resources/template/english/european_art.txt"
+      }
+    },
+    "european_art_de": {
+      "handler_class": "SimpleStaticHandler",
+      "data_source": {
+        "spreadsheet_key": "YDP_Simple_Static_Art",
+        "worksheet_key": "european_art_de"
+      },
+      "prompts": {
+        "german": "src/resources/template/german/european_art.txt"
       }
     },
     "world_literature": {
@@ -266,7 +329,7 @@ Zmeny:
       "processing_strategy": "per_user",
       "content_rotation_source": {
         "spreadsheet_key": "YDP_LLM_Dynamic_MorningBriefing",
-        "worksheet_key": "rotation"
+        "worksheet_key": "rotation_sk"
       },
       "dynamic_image": {
         "provider": "unsplash",
@@ -285,18 +348,37 @@ Zmeny:
       "processing_strategy": "per_user",
       "content_rotation_source": {
         "spreadsheet_key": "YDP_LLM_Dynamic_MorningBriefing",
-        "worksheet_key": "rotation"
+        "worksheet_key": "rotation_en"
       },
       "dynamic_image": {
         "provider": "unsplash",
         "query": "nature,wallpaper,calm,minimalist,landscape"
       },
       "components": {
-        "name_day": true,
+        "name_day": false,
         "daily_greeting": true
       },
       "prompts": {
         "english": "src/resources/llm/english/prompt_morning_briefing.txt"
+      }
+    },
+    "morning_briefing_de": {
+      "handler_class": "LLMDynamicHandler",
+      "processing_strategy": "per_user",
+      "content_rotation_source": {
+        "spreadsheet_key": "YDP_LLM_Dynamic_MorningBriefing",
+        "worksheet_key": "rotation_de"
+      },
+      "dynamic_image": {
+        "provider": "unsplash",
+        "query": "nature,wallpaper,calm,minimalist,landscape"
+      },
+      "components": {
+        "name_day": false,
+        "daily_greeting": true
+      },
+      "prompts": {
+        "german": "src/resources/llm/german/prompt_morning_briefing.txt"
       }
     },
     "german_lesson": {
@@ -350,11 +432,18 @@ Zmeny:
     "YDP_LLM_Static_Spiritual": {
       "spreadsheet_url": "https://docs.google.com/spreadsheets/d/..../edit",
       "worksheets": {
-        "bible_sk": "BibleSk",
-        "bible_en": "BibleEng",
-        "philosophy_sk": "PhilosophySk",
-        "novy_zakon_sk": "NovyZakonSk",
-        "stary_zakon_sk": "StaryZakonSk"
+        "bible_mix_sk": "BibleMixSK",
+        "bible_mix_en": "BibleMixEN",
+        "bible_mix_de": "BibleMixDE",
+        "philosophy_sk": "PhilosophySK",
+        "philosophy_en": "PhilosophyEN",
+        "philosophy_de": "PhilosophyDE",
+        "bible_nt_sk": "BibleNtSK",
+        "bible_nt_en": "BibleNtEN",
+        "bible_nt_de": "BibleNtDE",
+        "bible_ot_sk": "BibleOtSK",
+        "bible_ot_en": "BibleOtEN",
+        "bible_ot_de": "BibleOtDE"
       }
     },
     "YDP_Simple_Static_Family": {
@@ -366,7 +455,10 @@ Zmeny:
     "YDP_Simple_Static_Art": {
       "spreadsheet_url": "https://docs.google.com/spreadsheets/d/..../edit",
       "worksheets": {
-        "european_art": "EuArt"
+      "worksheets": {
+        "european_art_sk": "EuArtSK",
+        "european_art_en": "EuArtEN",
+        "european_art_de": "EuArtDE"
       }
     },
     "YDP_Simple_Static_Literature": {
@@ -380,41 +472,103 @@ Zmeny:
     "YDP_LLM_Dynamic_MorningBriefing": {
       "spreadsheet_url": "https://docs.google.com/spreadsheets/d/..../edit",
       "worksheets": {
-        "rotation": "Rotation",
+        "rotation_sk": "RotationSK",
+        "rotation_en": "RotationEN",
+        "rotation_de": "RotationDE",
         "meniny_sk": "meninySk",
-        "daily_greetings": "DailyGreetings",
-        "historical_events": {
-          "name": "HistoricalEvents",
-          "header": "<b>🏛️ Today in history:</b>"
+        "special_days_en": "DaysEN",
+        "special_days_de": "DaysDE",
+        "daily_greetings_sk": "GreetingsSK",
+        "daily_greetings_en": "GreetingsEN",
+        "daily_greetings_de": "GreetingsDE",
+        "historical_events_sk": {
+          "name": "HistEventsSK",
+          "header": "<b>🏛️ Dnes v histórii:</b>"
         },
-        "fun_facts": {
-          "name": "FunFacts",
-          "header": "<b>💡 Interestingness:</b>"
+        "historical_events_en": {
+          "name": "HistEventsEN",
+          "header": "<b>🏛️ Today in History:</b>"
         },
-        "quotes": {
-          "name": "Quotes",
-          "header": "<b>✒️ Quote of the day:</b>"
+        "historical_events_de": {
+          "name": "HistEventsDE",
+          "header": "<b>🏛️ Heute in der Geschichte:</b>"
         },
-        "reflections": {
-          "name": "Reflections",
-          "header": "<b>🤔 Food for thought:</b>"
+        "fun_facts_sk": {
+          "name": "FunFactsSK",
+          "header": "<b>💡 Zaujímavosť:</b>"
         },
-        "challenges": {
-          "name": "Challenges",
-          "header": "<b>🎯 Today's micro-challenge:</b>"
+        "fun_facts_en": {
+          "name": "FunFactsEN",
+          "header": "<b>💡 Fun Fact:</b>"
         },
-        "perspectives": {
-          "name": "Perspectives",
-          "header": "<b>✨ Perspective of the day:</b>"
+        "fun_facts_de": {
+          "name": "FunFactsDE",
+          "header": "<b>💡 Wissenswertes:</b>"
         },
-        "word_of_the_day": {
+        "quotes_sk": {
+          "name": "QuotesSK",
+          "header": "<b>✒️ Citát dňa:</b>"
+        },
+        "quotes_en": {
+          "name": "QuotesEN",
+          "header": "<b>✒️ Quote of the Day:</b>"
+        },
+        "quotes_de": {
+          "name": "QuotesDE",
+          "header": "<b>✒️ Zitat des Tages:</b>"
+        },
+        "reflections_sk": {
+          "name": "ReflectionsSK",
+          "header": "<b>🤔 Podnet na zamyslenie:</b>"
+        },
+        "reflections_en": {
+          "name": "ReflectionsEN",
+          "header": "<b>🤔 Food for Thought:</b>"
+        },
+        "reflections_de": {
+          "name": "ReflectionsDE",
+          "header": "<b>🤔 Nachdenklichkeit:</b>"
+        },
+        "challenges_sk": {
+          "name": "ChallengesSK",
+          "header": "<b>🎯 Dnešná mikro-výzva:</b>"
+        },
+        "challenges_en": {
+          "name": "ChallengesEN",
+          "header": "<b>🎯 Today's Challenge:</b>"
+        },
+        "challenges_de": {
+          "name": "ChallengesDE",
+          "header": "<b>🎯 Heutige Herausforderung:</b>"
+        },
+        "perspectives_sk": {
+          "name": "PerspectivesSK",
+          "header": "<b>✨ Perspektíva dňa:</b>"
+        },
+        "perspectives_en": {
+          "name": "PerspectivesEN",
+          "header": "<b>✨ Perspective:</b>"
+        },
+        "perspectives_de": {
+          "name": "PerspectivesDE",
+          "header": "<b>✨ Perspektive:</b>"
+        },
+        "word_of_the_day_sk": {
+          "name": "WordOfTheDaySK",
+          "header": "<b>📖 Slovo dňa:</b>"
+        },
+        "word_of_the_day_en": {
           "name": "WordOfTheDay",
-          "header": "<b>📖 Word of the day:</b>"
+          "header": "<b>📖 Word of the Day:</b>"
+        },
+        "word_of_the_day_de": {
+          "name": "WordOfTheDayDE",
+          "header": "<b>📖 Wort des Tages:</b>"
         }
       }
     },
     "YDP_LLM_Dynamic_GermanLesson": {
-      "spreadsheet_url": "https://docs.google.com/spreadsheets/d/..../edit",
+      "spreadsheet_url": "https://docs.google.com/spreadsheets/d/../edit",
       "worksheets": {
         "rotation": "Rotation",
         "slow_german_links": "SlowGermanLinks",
@@ -429,5 +583,5 @@ Zmeny:
     }
   }
 }
-
-# End of config.json.example (v. 0003)
+	
+# End of config.json.example (v. 0004)

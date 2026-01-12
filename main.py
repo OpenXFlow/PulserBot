@@ -1,31 +1,52 @@
 # The MIT License (MIT)
 # Copyright (c) 2025 Jozef Darida  (LinkedIn/Xing)
-# For full license text, see the LICENSE file in the project root.
+# For full license text, see the project root.
 
 # main.py
 """
 The main entry point for the YourDailyPulse application when running as a
-long-running web service (e.g., on Render).
+long-running web service (e.g., on Render/Heroku).
 
-This script is responsible for:
-1.  Initializing external monitoring services like Sentry.
-2.  Starting a lightweight Flask web server in a background thread to serve
-    health checks and prevent the service from sleeping on free hosting tiers.
-3.  Initializing and starting the APScheduler, which triggers the core
-    application logic at the times defined in `config.json`.
+Updated Architecture (World-Ready):
+1.  Web Server: Runs Flask in a background thread for health checks.
+2.  Scheduler: Triggers a job EVERY HOUR (at minute 0).
+3.  Execution: Calls the async core logic via `asyncio.run()`.
+
+Core logic now handles per-user timezones dynamically.
+
+run_once vs main
+In short: the first script is stateless, while the second is a daemon.
+
+run_once.py is designed for serverless environments (like GitHub Actions),
+where the script is triggered by an external trigger (CRON),
+performs a one-time user check, and then exits immediately, saving resources.
+
+main.py is designed for persistent deployments (like Render),
+where the application runs 24/7, has its own internal scheduler,
+and a web server to keep it alive.
+
+While run_once.py lets GitHub handle the timing,
+main.py handles the timing itself in an infinite loop, waiting for an hour.
+
+
+How main works now:
+Flask runs in the background (so you can ping the service).
+The scheduler waits for a full hour (e.g. 14:00, 15:00).
+When the full hour strikes, it runs job_wrapper_hourly_tick.
+The wrapper runs asyncio.run(generate_and_send_async(...)).
+core.py (which we already modified) fetches the users, calculates their local time for each, and if it matches the full hour, sends a message.
+
 """
+
+import asyncio
+import logging
+import os
+from threading import Thread
 
 from dotenv import load_dotenv
 
 # --- CRITICAL: Load .env file BEFORE importing any local modules ---
 load_dotenv()
-
-import logging  # noqa: E402
-import os  # noqa: E402
-from collections import defaultdict  # noqa: E402
-from threading import Thread  # noqa: E402
-from typing import Any, Dict, List  # noqa: E402
-from zoneinfo import ZoneInfo  # noqa: E402
 
 import sentry_sdk  # noqa: E402
 from apscheduler.schedulers.blocking import BlockingScheduler  # noqa: E402
@@ -34,134 +55,90 @@ from flask import Flask  # noqa: E402
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: E402
 
 from src.config import load_app_config, setup_logging  # noqa: E402
-from src.core import generate_and_send  # noqa: E402
+from src.core import generate_and_send_async  # noqa: E402 -- Updated async import
 
-# --- Web Server (for Render "keep-alive") ---
+# --- Web Server (for Render/Heroku "keep-alive") ---
 app = Flask(__name__)
 
 
 @app.route("/")
 def home() -> str:
     """A simple web endpoint to confirm that the application is running."""
-    return "OK: The scheduler is active."
+    return "OK: YourDailyPulse Service is Active (Hourly World-Ready Mode)."
 
 
 def run_web_server() -> None:
     """Runs the Flask web server in a separate thread."""
     port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    # Disable reloader to prevent main thread duplication
+    app.run(host="0.0.0.0", port=port, use_reloader=False)
 
 
-def log_configuration_summary(config: Dict[str, Any], tz: ZoneInfo) -> None:
+def job_wrapper_hourly_tick() -> None:
     """
-    Logs a detailed summary of the loaded configuration at DEBUG level.
+    Synchronous wrapper to run the async core logic.
+    This function is called by the BlockingScheduler.
     """
-    logging.debug("--- 🚀 Configuration & Schedule Summary ---")
-    logging.debug(f"Timezone: {tz}")
-    themes = config.get("themes", {})
-    if themes:
-        logging.debug("Detected Themes:")
-        for name, details in themes.items():
-            theme_type = details.get("type", "static")
-            logging.debug(f"  - '{name}' (type: {theme_type})")
-    else:
-        logging.warning("No themes found in configuration.")
-
-    users = config.get("users", [])
-    schedule_times = config.get("schedule", {})
-    if users and schedule_times:
-        logging.debug("User Subscription Plan:")
-        plan: defaultdict[str, defaultdict[str, List[str]]] = defaultdict(
-            lambda: defaultdict(list)
-        )
-        for user in users:
-            user_desc = user.get("description", "Unknown User")
-            subscriptions = user.get("subscriptions", {})
-            for time_key, themes_list in subscriptions.items():
-                for theme in themes_list:
-                    plan[time_key][theme].append(user_desc)
-
-        for time_key, time_str in schedule_times.items():
-            logging.debug(f"  Schedule for {time_key} ({time_str}):")
-            if time_key in plan:
-                for theme, subscribed_users in plan[time_key].items():
-                    logging.debug(
-                        f"    - Theme: '{theme}' -> Users: [{', '.join(subscribed_users)}]"
-                    )
-            else:
-                logging.debug("    - No subscriptions for this time slot.")
-    else:
-        logging.warning("No users or schedules found to create a subscription plan.")
-
-    logging.debug("------------------------------------------")
+    logging.info("⏰ SCHEDULER: Triggering global hourly check...")
+    try:
+        # Create a new event loop for this run to ensure clean state
+        asyncio.run(generate_and_send_async(time_key="hourly_service_tick"))
+    except Exception as e:
+        logging.exception(f"Critical error in hourly job wrapper: {e}")
 
 
 def main() -> None:
     """
     The main function that sets up and starts the application.
     """
-    # --- STEP 1: Initialize Sentry SDK (before logging setup) ---
+    # --- STEP 1: Initialize Sentry SDK ---
     SENTRY_DSN = os.environ.get("SENTRY_DSN")
     if SENTRY_DSN:
         try:
             sentry_sdk.init(
                 dsn=SENTRY_DSN,
-                # Use the official Flask integration for rich web context
                 integrations=[FlaskIntegration()],
-                # Also explicitly enable the modern Logs feature
                 enable_logs=True,
-                # Keep tracing enabled for performance monitoring
                 traces_sample_rate=1.0,
                 profiles_sample_rate=1.0,
             )
-            # This uses print() because logging is not yet configured
-            print("Sentry SDK initialized with FlaskIntegration and Logs enabled.")
+            print("Sentry SDK initialized with FlaskIntegration.")
         except Exception as e:
             print(f"Failed to initialize Sentry: {e}")
     else:
         print("SENTRY_DSN not found. Sentry is not initialized.")
 
-    # --- STEP 2: Configure logging (now that Sentry is ready) ---
+    # --- STEP 2: Configure logging ---
     setup_logging()
 
-    logging.info(f"SENTRY_DSN found: {SENTRY_DSN is not None}")
+    # --- STEP 3: Load Config (Just for Timezone context) ---
+    # We don't need the schedule from config anymore, but we need the server timezone.
+    _, tz = load_app_config()
 
-    # --- STEP 3: Continue with the rest of the application setup ---
+    logging.info(f"Application starting in timezone: {tz}")
+
+    # --- STEP 4: Start Web Server ---
     flask_thread = Thread(target=run_web_server)
     flask_thread.daemon = True
     flask_thread.start()
     logging.info("Flask web server started in a background thread.")
 
-    config, tz = load_app_config()
-    if not config:
-        logging.critical("Application cannot start due to missing or invalid config.")
-        return
-
-    log_configuration_summary(config, tz)
-
-    schedule_times = config.get("schedule", {})
-    if not schedule_times:
-        logging.warning("No schedules found in 'config.json'. Scheduler not started.")
-        flask_thread.join()
-        return
-
+    # --- STEP 5: Start Scheduler (World-Ready Mode) ---
+    # We use BlockingScheduler because it keeps the main thread alive
     scheduler = BlockingScheduler(timezone=tz)
-    for time_key, time_str in schedule_times.items():
-        try:
-            hour, minute = map(int, time_str.split(":"))
-            scheduler.add_job(
-                func=generate_and_send,
-                args=[time_key],
-                trigger=CronTrigger(hour=hour, minute=minute, timezone=tz),
-                id=f"job_{time_key}",
-                name=f"Task for {time_key} at {time_str}",
-            )
-        except (ValueError, AttributeError) as e:
-            logging.error(
-                f"Invalid time format '{time_str}' for key '{time_key}'. Error: {e}"
-            )
 
-    logging.info("APScheduler initialized. Final job list from scheduler:")
+    # Add single job: Run every hour at minute 0
+    scheduler.add_job(
+        func=job_wrapper_hourly_tick,
+        trigger=CronTrigger(minute=0, timezone=tz),
+        id="global_hourly_job",
+        name="Global Hourly User Check",
+        misfire_grace_time=300,  # Allow 5 minutes delay if server is busy
+    )
+
+    logging.info("APScheduler initialized. Running in GLOBAL HOURLY MODE.")
+    logging.info("Next run will check all users and their respective timezones.")
+
     scheduler.print_jobs()
 
     try:
@@ -174,4 +151,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-# End of main.py (v. 0019)
+# End of main.py (v. 0020)

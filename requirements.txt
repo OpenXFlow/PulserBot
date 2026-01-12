@@ -9,6 +9,10 @@ groq>=0.9.0
 httpx>=0.23.0
 tzdata>=2024.1
 
+# --- Database & Auth ---
+# Required for interacting with Firestore and Firebase Authentication
+firebase-admin>=6.2.0
+
 # --- Web Service Model Dependencies ---
 # The libraries below are required ONLY when running the application as a long-running
 # web service using main.py (e.g., on Render). For the current serverless model

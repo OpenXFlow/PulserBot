@@ -9,16 +9,22 @@ The main entry point for single, one-shot executions of the YourDailyPulse bot.
 This script is responsible for running a scheduled job for a specific time key
 (e.g., 'time1') and an optional user filter.
 
-All other maintenance and utility tasks (e.g., data export, photo import)
-must be executed via the dedicated 'tools.py' script.
-
 Usage:
-    - To run a scheduled job for all subscribed users:
-      python run_once.py <time_key>
+    - Standard run (uses real time):
+      python run_once.py
 
-    - To run a job for specific users only:
-      python run_once.py <time_key> users <user_desc_1> <user_desc_2> ...
+    - Manual run with filters:
+      python run_once.py time6 users <email>
+
+    - Flags:
+      force        -> Ignores Content Cache (regenerates text).
+      ignore_time  -> Ignores Real Time (forces the time specified in argument).
+
+    Examples:
+      python run_once.py time6 users me@test.com force ignore_time
 """
+
+import asyncio
 
 from dotenv import load_dotenv
 
@@ -33,12 +39,12 @@ from typing import List, Optional  # noqa: E402
 import sentry_sdk  # noqa: E402
 
 from src.config import setup_logging  # noqa: E402
-from src.core import generate_and_send  # noqa: E402
+from src.core import generate_and_send_async  # noqa: E402
 
 
-def main() -> None:
+async def main() -> None:
     """
-    The main entry point for the script. Parses arguments and runs a job.
+    The main async entry point for the script. Parses arguments and runs a job.
     """
     SENTRY_DSN = os.environ.get("SENTRY_DSN")
     if SENTRY_DSN:
@@ -59,69 +65,83 @@ def main() -> None:
     logging.info(f"SENTRY_DSN found: {SENTRY_DSN is not None}")
 
     try:
-        # Initialize variables before the match block
-        time_key: Optional[str] = None
+        # --- Argument Parsing ---
+        args = sys.argv[1:]
+
+        # 1. Parse Flags
+        force_update = False
+        ignore_time = False
+
+        if "force" in args:
+            args.remove("force")
+            force_update = True
+            logging.warning("⚠️ FORCE MODE: Content Cache will be ignored/overwritten.")
+        elif "clean_cache" in args:
+            args.remove("clean_cache")
+            force_update = True
+            logging.warning("⚠️ FORCE MODE: Content Cache will be ignored/overwritten.")
+
+        if "ignore_time" in args:
+            args.remove("ignore_time")
+            ignore_time = True
+            logging.warning(
+                "⏰ IGNORE TIME: Forcing execution regardless of user's local time."
+            )
+
+        # 2. Parse Users Filter
         user_filter: Optional[List[str]] = None
-
-        # Use structural pattern matching to parse command-line arguments
-        match sys.argv:
-            # Case 1: No arguments provided (only script name)
-            case [_]:
-                logging.error(
-                    "Execution failed: A time_key is required.\n"
-                    "Usage: python run_once.py <time_key> [users ...]\n"
-                    "For utility tools, please use 'python tools.py'."
-                )
-                sys.exit(1)
-
-            # Case 2: Only a time_key is provided
-            case [_, tk]:
-                time_key = tk
-                user_filter = None
-
-            # Case 3: A time_key and 'users' keyword with at least one user
-            case [_, tk, "users", *users] if users:
-                time_key = tk
-                user_filter = users
-
-            # Case 4: A time_key and 'users' keyword but no users listed
-            case [_, _, "users"]:
-                logging.error(
-                    "The 'users' keyword requires at least one user description."
-                )
-                sys.exit(1)
-
-            # Default case for any other invalid argument structure
-            case _:
-                logging.error(
-                    f"Invalid arguments: {' '.join(sys.argv[1:])}\n"
-                    "Did you mean to use 'tools.py'?"
-                )
-                sys.exit(1)
-
-        # The rest of the logic remains the same
-        with sentry_sdk.start_transaction(op="task", name=f"run_once:{time_key}"):
-            if user_filter is not None:
-                logging.info(
-                    f"Starting job for '{time_key}' with filter: {user_filter}"
-                )
+        if "users" in args:
+            idx = args.index("users")
+            if idx + 1 < len(args):
+                user_filter = args[idx + 1 :]
+                # Keep only args before 'users' for time_key detection
+                args = args[:idx]
             else:
-                logging.info(f"Starting job for '{time_key}' for all users.")
+                logging.error(
+                    "The 'users' keyword requires at least one email address."
+                )
+                sys.exit(1)
 
-            generate_and_send(time_key, user_filter=user_filter)
-            logging.info(f"Job for '{time_key}' completed successfully.")
+        # 3. Parse Time Key
+        time_key_label = "auto"
+        if args:
+            time_key_label = args[0]
+
+        # --- Execution ---
+        with sentry_sdk.start_transaction(op="task", name=f"run_once:{time_key_label}"):
+            if user_filter:
+                logging.info(f"Starting manual run for users: {user_filter}")
+            else:
+                logging.info(f"Starting global run (Label: {time_key_label}).")
+
+            await generate_and_send_async(
+                time_key=time_key_label,
+                user_filter=user_filter,
+                force_update=force_update,
+                ignore_time_checks=ignore_time,
+            )
+
+            logging.info("Job execution completed.")
 
     except Exception as e:
         logging.exception("A critical error occurred during the script run: %s", e)
-        sys.exit(1)
+        try:
+            if SENTRY_DSN:
+                sentry_sdk.flush(timeout=2.0)
+        except Exception:
+            pass
+        os._exit(1)
 
     finally:
         if SENTRY_DSN:
             logging.info("Flushing Sentry events before exit...")
-            sentry_sdk.flush()
+            sentry_sdk.flush(timeout=2.0)
+
+        logging.info("Forcing process termination.")
+        os._exit(0)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
 
-# End of run_once.py (v. 0018)
+# End of run_once.py (v. 0024)
