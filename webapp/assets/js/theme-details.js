@@ -344,7 +344,32 @@ const themeDetails = {
             ctaSubtitle: "Add Spiritual Reflection to your daily plan and find encouragement every day.",
             ctaButton: "Try It Now",
             backButton: "Back to All Themes"
-        }
+        },
+        de: {
+            title: "Thema: Spirituelle Reflexion",
+            pageTitle: "Spirituelle Reflexion - YourDailyPulse",
+            description1: "Finden Sie jeden Tag einen Moment der Stille und spirituellen Ermutigung. Dieses Thema bringt Ihnen einen kurzen Auszug aus der Bibel, ergänzt durch eine Reflexion, die Ihnen hilft, alte Weisheiten mit Ihrem täglichen Leben zu verbinden.",
+            description2: "Es geht nicht nur um das Lesen eines Verses. Unsere künstliche Intelligenz (LLM) bereitet eine umfassende Reflexion für Sie vor: Sie fasst die spirituelle Botschaft zusammen, schlägt einen konkreten Gedanken 'für Ihr Leben heute' vor und formuliert ein kurzes Gebet. Die Atmosphäre wird durch ein sorgfältig ausgewähltes Foto von Unsplash abgerundet.",
+            listTitle: "Was enthält jede Reflexion?",
+            listItems: [
+                "<strong>Bibeltext des Tages:</strong> Ein kurzer, leicht lesbarer Auszug aus der Heiligen Schrift.",
+                "<strong>Tieferer Sinn:</strong> Eine Zusammenfassung der Hauptidee des Textes in 2-3 Sätzen.",
+                "<strong>Impuls für heute:</strong> Eine konkrete, umsetzbare Handlung oder ein Gedanke für Ihren Tag.",
+                "<strong>Gebet der Besinnung:</strong> Ein kurzes Gebet oder eine innere Einstellung, inspiriert vom Text.",
+                "<strong>Interaktion mit KI:</strong> Nutzen Sie die KI-Links für tieferes Studium. Kopieren Sie den Text und beginnen Sie ein persönliches Gespräch über Glauben oder die Anwendung des Textes.",
+                "<strong>Beispiel-Prompts:</strong><ul><li>'Was ist der historische Kontext dieses Abschnitts?'</li><li>'Welche anderen Stellen in der Bibel sprechen von Hoffnung in schweren Zeiten?'</li><li>'Hilf mir, ein eigenes Gebet basierend auf diesem Gedanken zu formulieren.'</li></ul>"
+            ],
+            galleryTitle: "Beispiele",
+            galleryImages: [
+                "images/themes/spiritual_reflection/bible_en_01.png", // Použijeme EN obrázky ako placeholder, ak nemáš nemecké
+                "images/themes/spiritual_reflection/bible_en_02.png", 
+                "images/themes/spiritual_reflection/bible_en_03.png"
+            ],
+            ctaTitle: "Finden Sie Zeit für spirituelles Wachstum",
+            ctaSubtitle: "Fügen Sie die Spirituelle Reflexion zu Ihrem Tagesplan hinzu.",
+            ctaButton: "Jetzt ausprobieren",
+            backButton: "Zurück zu allen Themen"
+        },
     },
     bible_study: {
         sk: {

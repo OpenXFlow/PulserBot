@@ -33,6 +33,9 @@ const translations = {
 
         spotlight3_title: "Dnešné Európske Dielo",
         spotlight3_desc: "Objavte poklady európskeho umenia. Každý deň vám predstavíme jedno významné dielo z Metropolitného múzea umenia, vrátane detailov o autorovi a technike.",
+        
+        spotlight_lit_title: "Svetová Literatúra",
+        spotlight_lit_desc: "Ponorte sa do hlbín ľudskej duše. Každý deň jeden literárny skvost – od Dostojevského po Hemingwaya. Dlhší úryvok na čítanie a krátka analýza geniality diela.",
 
         spotlight4_title: "Spomienka Dňa",
         spotlight4_desc: "Pripomeňte si vzácne chvíle. Každý deň jedna fotografia z vášho rodinného archívu spolu s myšlienkou o rodine.",
@@ -45,9 +48,6 @@ const translations = {
 
         spotlight7_title: "Štúdium Biblie",
         spotlight7_desc: "Ponorte sa hlbšie do textov Starého a Nového zákona. Každá lekcia prináša detailný historický a duchovný kontext k vybranému veršu.",
-
-        spotlight_lit_title: "Svetová Literatúra",
-        spotlight_lit_desc: "Ponorte sa do hlbín ľudskej duše. Každý deň jeden literárny skvost – od Dostojevského po Hemingwaya. Dlhší úryvok na čítanie a krátka analýza geniality diela.",
 
         // --- NEW SPOTLIGHT ---
         spotlight8_title: "Užívateľská Pripomienka",
@@ -156,6 +156,10 @@ const translations = {
         themeUserReminder: "Užívateľská Pripomienka",
         btnEditContent: "Upraviť Obsah",
         
+        // Theme Labels for Dashboard
+        bible_study_nt: "Štúdium Biblie (Nový Zákon)",
+        bible_study_ot: "Štúdium Biblie (Starý Zákon)",
+        
         // Days of Week Shortcuts
         daysShort: ["Po", "Ut", "St", "Št", "Pi", "So", "Ne"],
 
@@ -218,6 +222,9 @@ const translations = {
 
         spotlight3_title: "European Masterpiece of the Day",
         spotlight3_desc: "Discover the treasures of European art. Each day, we'll introduce one significant work from The Metropolitan Museum of Art, including details about the artist and technique.",
+        
+        spotlight_lit_title: "World Literature",
+        spotlight_lit_desc: "Dive into the depths of the human soul. Every day a literary gem – from Dostoevsky to Hemingway. A longer excerpt for reading and a brief analysis of the work's genius.",
 
         spotlight4_title: "Memory of the Day",
         spotlight4_desc: "Reminisce about precious moments. Every day, a photo from your family archive is paired with a thought about family.",
@@ -230,9 +237,6 @@ const translations = {
 
         spotlight7_title: "Bible Study",
         spotlight7_desc: "Dive deeper into the texts of the Old and New Testaments. Each lesson provides detailed historical and spiritual context to a selected verse.",
-
-        spotlight_lit_title: "World Literature",
-        spotlight_lit_desc: "Dive into the depths of the human soul. Every day a literary gem – from Dostoevsky to Hemingway. A longer excerpt for reading and a brief analysis of the work's genius.",
 
         // --- NEW SPOTLIGHT ---
         spotlight8_title: "User Reminder",
@@ -324,6 +328,10 @@ const translations = {
         themeUserReminder: "User Reminder",
         btnEditContent: "Edit Content",
         
+        // Theme Labels for Dashboard
+        bible_study_nt: "Bible Study (New Testament)", // <--- Changed here
+        bible_study_ot: "Bible Study (Old Testament)", // <--- Changed here
+        
         // Days of Week Shortcuts
         daysShort: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
 
@@ -355,4 +363,4 @@ const translations = {
     }
 };
 
-// End of webapp/assets/js/translations.js (v. 0023)
+// End of webapp/assets/js/translations.js (v. 0024)

@@ -140,17 +140,12 @@ $(function() {
                     <div class="themes-list">
             `;
 
-            let timeOptions = '';
-            for (let i = 1; i <= 23; i++) {
-                const hour = i.toString().padStart(2, '0');
-                timeOptions += `<option value="time${i}">${hour}:00</option>`;
-            }
-
             APP_THEMES.forEach(theme => {
                 if (theme.adminOnly && !isAdmin) return; 
 
                 const variants = theme.variants || {};
-                // Pre-calculate defaults
+                
+                // --- INITIALIZATION (Fix applied here) ---
                 let isActive = false;
                 let selectedTime = `time${parseInt(theme.defaultTime)}`;
                 
@@ -161,8 +156,8 @@ $(function() {
                 else if (variants.de) selectedLang = 'de';
 
                 let activeDays = []; 
+                // ---------------------------------------
 
-                // Check subscriptions to set current state
                 if (data.subscriptions) {
                     for (const [timeKey, subList] of Object.entries(data.subscriptions)) {
                         if (!Array.isArray(subList)) continue;
@@ -244,6 +239,14 @@ $(function() {
                 dayPickerHtml += `</div>`;
 
 
+                // Time Options
+                let timeOptions = '';
+                for (let i = 1; i <= 23; i++) {
+                    const hour = i.toString().padStart(2, '0');
+                    const selected = `time${i}` === selectedTime ? 'selected' : '';
+                    timeOptions += `<option value="time${i}" ${selected}>${hour}:00</option>`;
+                }
+
                 html += `
                     <div class="theme-row box" data-theme-base-id="${theme.id}">
                         <div class="theme-header">
@@ -292,7 +295,6 @@ $(function() {
                 
                 const variants = theme.variants || {};
                 
-                // Determine default
                 let selectedTime = `time${parseInt(theme.defaultTime)}`;
                 let selectedLang = 'sk';
                 if (variants.sk) selectedLang = 'sk';
@@ -303,9 +305,13 @@ $(function() {
                     for (const [timeKey, subList] of Object.entries(data.subscriptions)) {
                         if (!Array.isArray(subList)) continue;
                          for (const item of subList) {
-                             const themeId = (typeof item === 'string') ? item : item.theme;
+                             let themeId = "";
+                             if (typeof item === 'string') {
+                                 themeId = item;
+                             } else {
+                                 themeId = item.theme;
+                             }
                              
-                             // Check variants to find matching language
                              if (variants.sk && themeId === variants.sk) {
                                  selectedTime = timeKey; selectedLang = 'sk'; break;
                              }
@@ -320,7 +326,6 @@ $(function() {
                 }
                 const $row = $(`[data-theme-base-id="${theme.id}"]`);
                 $row.find('.theme-time-select').val(selectedTime);
-                // Set language dropdown if it exists
                 if ($row.find('.theme-lang-select').is('select')) {
                     $row.find('.theme-lang-select').val(selectedLang);
                 }
@@ -598,15 +603,7 @@ $(function() {
                 return;
             }
 
-            // --- VALIDATION: Check Unique Telegram ID ---
-            // NOTE: Logic commented out for security reasons (requires 'list' permissions)
-            try {
-                const channelQuery = { platform: "telegram", identifier: telegramId };
-                // const snapshot = await db.collection('users').where('channels', 'array-contains', channelQuery).get();
-            } catch (error) {
-                console.error("Validation error:", error);
-            }
-            // --------------------------------------------
+            // Note: Validation of unique ID omitted for security (requires list permissions)
             
             const timezone = $('#timezone-select').val();
             const weatherLocations = [];
@@ -622,7 +619,13 @@ $(function() {
                 const baseId = $(this).data('theme-base-id');
                 const isActive = $(this).find('.theme-active-cb').is(':checked');
                 const timeKey = $(this).find('.theme-time-select').val();
-                const selectedLang = $(this).find('.theme-lang-select').val();
+                
+                // Get selected language from dropdown OR hidden input
+                let selectedLang = 'sk';
+                const langSelect = $(this).find('.theme-lang-select');
+                if (langSelect.length) {
+                    selectedLang = langSelect.val();
+                }
                 
                 const selectedDays = [];
                 $(this).find('.day-cb:checked').each(function() {
@@ -710,7 +713,13 @@ $(function() {
 
         $('#signup-button').on('click', AuthManager.signUp);
         $('#login-button').on('click', AuthManager.logIn);
-        $(document.body).on('click', '#sidebar-logout-button', function(e) { e.preventDefault(); AuthManager.logOut(); });
+        
+        // Update: Bind click event to BOTH logout buttons (Sidebar AND Mobile)
+        $(document.body).on('click', '#sidebar-logout-button, #mobile-logout-button', function(e) { 
+            e.preventDefault(); 
+            AuthManager.logOut(); 
+        });
+        
         $('#resend-verification-button').on('click', AuthManager.resendVerification);
         
         // Verification Logout
@@ -731,4 +740,4 @@ $(function() {
     bindEvents();
 });
 
-// End of webapp/assets/js/app.js (v. 0040)
+// End of webapp/assets/js/app.js (v. 0042)

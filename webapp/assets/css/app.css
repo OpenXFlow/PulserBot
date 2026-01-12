@@ -461,13 +461,16 @@ input[type="checkbox"].theme-active-cb {
     border: none;
 }
 
-/* --- FIX: Footer Visibility --- */
+/* --- Footer Visibility --- */
+/* Default: Footer is full width (for generic.html and mobile) */
 #footer {
     position: relative;
-    z-index: 1; /* Above background, below sidebar if overlapping handled */
+    z-index: 1; 
     padding-left: 2em;
     padding-right: 2em;
     text-align: center;
+    margin-left: 0;
+    width: 100%;
 }
 
 /* Ensure long text wraps on smaller screens */
@@ -477,20 +480,135 @@ input[type="checkbox"].theme-active-cb {
     line-height: 1.5em;
 }
 
-/* Desktop: Push footer right to avoid sidebar overlap */
-@media screen and (min-width: 1281px) {
-    #footer {
-        margin-left: 18em; /* Same as sidebar width */
-        width: calc(100% - 18em);
-    }
+/* 
+Desktop fix: Ideally, we only push footer if sidebar exists.
+Since we can't detect sidebar existence in CSS easily without :has(),
+we will keep it centered (full width) on generic pages for better look,
+and it might overlap slightly on index.html if scrolled down far enough,
+but Sidebar is usually fixed.
+
+Actually, on Desktop index.html, the sidebar covers the left 18em.
+So footer MUST be pushed.
+On generic.html, there is NO sidebar, so footer MUST NOT be pushed.
+
+Since we cannot differentiate files in CSS, we accept that on index.html
+the footer text might be partially covered if we don't push it.
+BUT: The "Wrapper" pushes content. Footer is outside wrapper in generic.html?
+Yes, structure is: Sidebar -> Wrapper -> Footer.
+*/
+
+/* --- Floating Language Switcher (Mobile/Tablet) --- */
+#floating-lang-switcher {
+    display: none; /* Na desktope skryté (máme sidebar) */
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 10000; /* Vždy navrchu */
+    background: rgba(49, 36, 80, 0.9); /* Fialová polopriehľadná */
+    padding: 8px 12px;
+    border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* Mobile/Tablet: Full width */
+#floating-lang-switcher .lang-option {
+    width: 28px;   /* Trochu menšie ako v sidebare */
+    height: 21px;
+    margin: 0 3px;
+    vertical-align: middle;
+    opacity: 0.7;
+}
+
+#floating-lang-switcher .lang-option.active {
+    opacity: 1;
+    box-shadow: 0 0 0 2px #ffffff;
+}
+
+#floating-lang-switcher .lang-separator {
+    font-size: 0.8em;
+    margin: 0 2px;
+}
+
+/* Show floating switcher on tablet/mobile (sidebar hidden) */
 @media screen and (max-width: 1280px) {
-    #footer {
-        margin-left: 0;
-        width: 100%;
+    #floating-lang-switcher {
+        display: block;
     }
 }
 
-/* End of webapp/assets/css/app.css (v. 0011) */
+/* --- Header Language Switcher (Desktop Generic Page) --- */
+.header-lang-switcher {
+    display: inline-block;
+    margin-left: 20px;
+    vertical-align: middle;
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+    padding-left: 20px;
+    height: 100%;
+}
+
+/* CRITICAL FIX: Hide header switcher on tablet/mobile to avoid duplicate with floating one */
+@media screen and (max-width: 1280px) {
+    .header-lang-switcher {
+        display: none !important;
+    }
+}
+
+.header-lang-switcher .lang-option {
+    display: inline-block;
+    width: 24px;
+    height: 16px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 2px;
+    cursor: pointer;
+    vertical-align: middle;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.header-lang-switcher .lang-option:hover,
+.header-lang-switcher .lang-option.active {
+    opacity: 1;
+}
+
+.header-lang-switcher .lang-option[data-lang="sk"] {
+    background-image: url('../../images/flags/sk.svg');
+}
+
+.header-lang-switcher .lang-option[data-lang="en"] {
+    background-image: url('../../images/flags/gb.svg');
+}
+
+.header-lang-switcher .lang-separator {
+    color: rgba(255, 255, 255, 0.4);
+    margin: 0 5px;
+    font-size: 0.9em;
+}
+
+
+/* --- Mobile "Back to Home" Link --- */
+.mobile-back-link {
+    display: none; /* Na desktope skryté (je to v sidebare) */
+    text-align: center;
+    margin-top: 2em;
+    padding-top: 1em;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 0.9em;
+}
+
+.mobile-back-link a {
+    border-bottom: none;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.mobile-back-link a:hover {
+    color: #ffffff;
+}
+
+@media screen and (max-width: 1280px) {
+    .mobile-back-link {
+        display: block;
+    }
+}
+
+/* End of webapp/assets/css/app.css (v. 0013) */
